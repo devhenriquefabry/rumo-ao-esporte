@@ -1,0 +1,27 @@
+# Regras do Projeto - Cadastro UBA 2026
+
+## Diálogos e Alertas
+- **NÃO use `window.alert()` ou `window.confirm()`**.
+- Utilize sempre o hook `useDialog` do context `CustomDialogContext`.
+- **Exemplo de uso**:
+  ```tsx
+  const { showAlert, showConfirm } = useDialog();
+
+  // Para alertas
+  showAlert("Mensagem de sucesso", "success");
+  showAlert("Mensagem de erro", "error");
+
+  // Para confirmações
+  showConfirm("Tem certeza?", () => {
+      // ação ao confirmar
+  });
+  ```
+- **Severidades disponíveis**: `info`, `success`, `warning`, `error`.
+
+## Internacionalização
+- Todas as mensagens voltadas ao usuário devem ser em **Português do Brasil (pt-BR)**.
+
+## Frameworks e Estilos
+- React + Vite + Firestore.
+- Estilização em Vanilla CSS (evitar Tailwind a menos que solicitado).
+- Design Premium: Use gradientes, micro-animações e sombras suaves.

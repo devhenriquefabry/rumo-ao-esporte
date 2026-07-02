@@ -1,0 +1,14 @@
+name = "arenasimonesia-whatsapp-proxy"
+main = "src/index.js"
+compatibility_date = "2024-03-20"
+
+[[kv_namespaces]]
+binding = "UBA_STORAGE"
+id = "796436dfd42a43849ef856fdf28518b0"
+
+[vars]
+FIREBASE_PROJECT_ID = "arenasimonesia"
+FIREBASE_API_KEY = "AIzaSyBy1Qyf-v0swTbrrBhSYRTRUPD-M45KUIA"
+
+[triggers]
+crons = ["* * * * *"]

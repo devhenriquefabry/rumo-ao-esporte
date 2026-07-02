@@ -1,0 +1,819 @@
+import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import '../App.css';
+import {
+    Settings,
+    MessageCircle,
+    LogOut,
+    Menu,
+    X,
+    User,
+    Users,
+    History,
+    Lock,
+    Instagram,
+    Radio,
+    Home,
+    ChevronRight,
+    DollarSign,
+    QrCode,
+    Clock,
+    Store
+} from 'lucide-react';
+
+const MAIN_ADMIN_EMAIL = 'arenasimonesia@admin.com';
+
+export default function StudentLayout() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [collapsed, setCollapsed] = useState(false);
+    const [studentName, setStudentName] = useState('Aluno / Responsável');
+    const [allStudents, setAllStudents] = useState<any[]>([]);
+    const [selectedStudentIndex, setSelectedStudentIndex] = useState(0);
+    const [qrCodeUrl, setQrCodeUrl] = useState('');
+
+    const [storeEnabled, setStoreEnabled] = useState(false);
+
+    useEffect(() => {
+        const fetchSystemStatus = async () => {
+            try {
+
+
+                const snapStore = await getDoc(doc(db, 'system_settings', 'store'));
+                if (snapStore.exists()) setStoreEnabled(snapStore.data().enabled);
+            } catch (err) {
+                console.error("Error fetching system status", err);
+            }
+        };
+        fetchSystemStatus();
+    }, []);
+
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Security Check
+    useEffect(() => {
+        const checkAuth = async () => {
+            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            if (impersonatedEmail) {
+                // Skip normal security redirects while impersonating
+                return;
+            }
+
+            const localAuth = localStorage.getItem('uba_student_auth');
+            const currentEmail = auth.currentUser?.email?.toLowerCase().trim();
+
+            if (currentEmail === MAIN_ADMIN_EMAIL) {
+                localStorage.removeItem('uba_student_auth');
+                localStorage.removeItem('uba_teacher_auth');
+                localStorage.setItem('uba_admin_auth', 'true');
+                navigate('/admin/dashboard');
+                return;
+            }
+
+            if (!localAuth) {
+                if (auth.currentUser) {
+                    localStorage.setItem('uba_student_auth', 'true');
+                } else {
+                    navigate('/aluno/login');
+                }
+            }
+
+            // Also ensure we DO NOT have admin auth
+            if (localStorage.getItem('uba_admin_auth')) {
+                localStorage.removeItem('uba_admin_auth');
+                localStorage.removeItem('uba_student_auth');
+                await signOut(auth);
+                navigate('/aluno/login');
+            }
+        };
+        checkAuth();
+    }, [navigate]);
+
+    // Fetch basic info
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            if (impersonatedEmail || (user && user.email)) {
+                try {
+                    const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
+                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                    const snap = await getDocs(q);
+
+                    const studentsAggregated: any[] = [];
+                    let firstName = 'Aluno';
+
+                    if (!snap.empty) {
+                        snap.forEach((doc) => {
+                            const data = doc.data();
+                            if (data.responsavel && data.responsavel.nome) {
+                                firstName = data.responsavel.nome.split(' ')[0];
+                            }
+
+                            if (data.alunos && Array.isArray(data.alunos)) {
+                                data.alunos.forEach((aluno: any) => {
+                                    studentsAggregated.push({
+                                        ...aluno,
+                                        parentCota: data.numeroCota,
+                                        contractGenerated: data.contractGenerated !== false // Default to true for legacy data
+                                    });
+                                });
+                            }
+                        });
+                    }
+
+                    setStudentName(firstName);
+                    setAllStudents(studentsAggregated);
+
+                    // SIGNATURE CHECK: Only check for students who HAVE a generated contract but haven't signed yet
+                    const hasPendingSignature = studentsAggregated.some(s => s.contractGenerated && !s.signatureData);
+                    if (hasPendingSignature && !impersonatedEmail) {
+                        navigate('/aluno/contrato-obrigatorio');
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching info:", error);
+                }
+            }
+        });
+        return () => unsubscribe();
+    }, [navigate]);
+
+    // Generate QR Code
+    useEffect(() => {
+        const generateQR = async () => {
+            const student = allStudents[selectedStudentIndex];
+            if (student) {
+                try {
+                    const cpfToUse = student.cpf || student.parentResponsavel?.cpf || '000.000.000-00';
+                    const data = `${cpfToUse}|${student.dataNascimento || ''}|${student.nome}`;
+                    const url = await QRCode.toDataURL(data, { margin: 1, width: 256 });
+                    setQrCodeUrl(url);
+                } catch (err) {
+                    console.error("Error generating QR code:", err);
+                }
+            }
+        };
+        generateQR();
+    }, [allStudents, selectedStudentIndex]);
+
+
+
+
+    const handleLogout = async () => {
+        await signOut(auth);
+        localStorage.removeItem('uba_student_auth');
+        localStorage.removeItem('uba_impersonated_student_email');
+        localStorage.removeItem('uba_impersonated_student_back_id');
+        navigate('/aluno/login');
+    };
+
+    const NavItem = ({ to, label, icon, badge, subItems }: any) => {
+        const normalizePath = (p: string) => p.endsWith('/') ? p.slice(0, -1) : p;
+        const currentPath = normalizePath(location.pathname);
+        const targetPath = normalizePath(to);
+
+        const isPathActive = currentPath === targetPath || (targetPath !== '/aluno/dashboard' && currentPath.startsWith(`${targetPath}/`)) || (targetPath !== '/aluno/dashboard' && currentPath === targetPath);
+
+        const isSubItemActive = subItems?.some((sub: any) => {
+            const subTo = normalizePath(sub.to);
+            return currentPath === subTo || currentPath.startsWith(`${subTo}/`);
+        });
+
+        const isActive = isPathActive || isSubItemActive;
+
+        const [isOpen, setIsOpen] = useState(isActive);
+
+        useEffect(() => {
+            if (isActive) setIsOpen(true);
+        }, [isActive]);
+
+        if (subItems) {
+            return (
+                <>
+                    <div style={{ marginBottom: '4px', padding: collapsed ? '0 5px' : '0 10px' }}>
+                        <button
+                            className="touch-feedback"
+                            onClick={() => {
+                                if (collapsed) {
+                                    navigate(to);
+                                } else {
+                                    setIsOpen(!isOpen);
+                                }
+                            }}
+                            title={collapsed ? label : ''}
+                            style={{
+                                width: '100%',
+                                padding: collapsed ? '12px 0' : '8px 16px',
+                                border: 'none',
+                                background: isActive ? '#fcf2f2' : 'transparent',
+                                color: isActive ? '#007d2f' : '#00237f',
+                                textAlign: collapsed ? 'center' : 'left',
+                                cursor: 'pointer',
+                                fontSize: '0.82rem',
+                                fontWeight: '700',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: collapsed ? 'center' : 'flex-start',
+                                gap: collapsed ? '0' : '10px',
+                                borderRadius: '6px'
+                            }}
+                        >
+                            <span style={{ color: isActive ? '#007d2f' : '#00237f', display: 'flex' }}>{icon}</span>
+                            {!collapsed && <span style={{ flex: 1, textTransform: 'uppercase' }}>{label}</span>}
+                            {!collapsed && <ChevronRight size={16} style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />}
+                        </button>
+                        {isOpen && !collapsed && (
+                            <div style={{ paddingLeft: '20px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                {subItems.map((sub: any) => {
+                                    const isSubActive = location.pathname === sub.to;
+                                    return (
+                                        <button
+                                            key={sub.to}
+                                            onClick={() => {
+                                                navigate(sub.to);
+                                                if (isMobile) setSidebarOpen(false);
+                                            }}
+                                            style={{
+                                                padding: '6px 15px',
+                                                border: 'none',
+                                                background: isSubActive ? '#007d2f' : 'transparent',
+                                                color: isSubActive ? '#fff' : '#00237f',
+                                                borderRadius: '6px',
+                                                textAlign: 'left',
+                                                cursor: 'pointer',
+                                                fontSize: '0.78rem',
+                                                fontWeight: isSubActive ? '700' : '500',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}
+                                        >
+                                            <div style={{ width: '6px', height: '6px', background: isSubActive ? '#fff' : '#00237f', borderRadius: '50%', opacity: isSubActive ? 1 : 0.4 }} />
+                                            <span style={{ textTransform: 'uppercase' }}>{sub.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                    {!collapsed && <div style={{ height: '1px', background: 'rgba(0, 35, 127, 0.08)', margin: '4px -10px' }} />}
+                </>
+            );
+        }
+
+        return (
+            <div style={{ marginBottom: '4px', padding: collapsed ? '0 5px' : '0 10px' }}>
+                <button
+                    className="touch-feedback"
+                    onClick={() => {
+                        navigate(to);
+                        if (isMobile) setSidebarOpen(false);
+                    }}
+                    title={collapsed ? label : ''}
+                    style={{
+                        width: '100%',
+                        padding: collapsed ? '12px 0' : '8px 16px',
+                        border: 'none',
+                        background: isActive ? '#007d2f' : 'transparent',
+                        color: isActive ? '#fff' : '#00237f',
+                        textAlign: collapsed ? 'center' : 'left',
+                        cursor: 'pointer',
+                        fontSize: '0.82rem',
+                        fontWeight: isActive ? '700' : '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        gap: collapsed ? '0' : '10px',
+                        minHeight: '36px',
+                        borderRadius: '6px'
+                    }}
+                    onMouseOver={e => !isActive && (e.currentTarget.style.background = '#f0f4ff')}
+                    onMouseOut={e => !isActive && (e.currentTarget.style.background = 'transparent')}
+                >
+                    <span style={{ color: isActive ? '#fff' : '#00237f', display: 'flex' }}>{icon}</span>
+                    {!collapsed && <span style={{ flex: 1, textTransform: 'uppercase' }}>{label}</span>}
+                    {badge > 0 && !collapsed && (
+                        <span style={{
+                            background: isActive ? '#fff' : '#00237f',
+                            color: isActive ? '#007d2f' : '#fff',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            padding: '2px 8px',
+                            borderRadius: '10px'
+                        }}>
+                            {badge}
+                        </span>
+                    )}
+                </button>
+                {!collapsed && <div style={{ height: '1px', background: 'rgba(0, 35, 127, 0.08)', margin: '4px -10px' }} />}
+            </div>
+        );
+    };
+
+    // Bottom Sheet State
+    const [activeSheet, setActiveSheet] = useState<'menu' | 'gate' | null>(null);
+
+    // Close sheet when navigating
+    useEffect(() => {
+        setActiveSheet(null);
+    }, [location.pathname]);
+
+    // Responsive Panel (Drawer on Desktop, Bottom Sheet on Mobile)
+    const ResponsivePanel = ({ title, children, onClose }: any) => (
+        <>
+            <div
+                onClick={onClose}
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0,0,0,0.4)',
+                    zIndex: 400,
+                    backdropFilter: 'blur(3px)'
+                }}
+            />
+            <div className={isMobile ? "animate-slide-up" : "animate-slide-left"} style={{
+                position: 'fixed',
+                bottom: isMobile ? 0 : 'auto',
+                top: isMobile ? 'auto' : 0,
+                right: 0,
+                left: isMobile ? 0 : 'auto',
+                width: isMobile ? '100%' : '400px',
+                height: isMobile ? 'auto' : '100vh',
+                background: '#f8f9fa',
+                borderTopLeftRadius: isMobile ? '20px' : '0',
+                borderTopRightRadius: isMobile ? '20px' : '0',
+                padding: '20px',
+                paddingBottom: isMobile ? '80px' : '20px',
+                zIndex: 401,
+                maxHeight: isMobile ? '85vh' : '100vh',
+                overflowY: 'auto',
+                boxShadow: isMobile ? '0 -4px 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3 style={{ margin: 0, color: '#00237f', fontSize: '1.2rem', textTransform: 'uppercase' }}>{title}</h3>
+                    <button onClick={onClose} style={{ background: '#eee', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer' }}>
+                        <X size={20} color="#555" />
+                    </button>
+                </div>
+                {children}
+            </div>
+        </>
+    );
+
+    const MenuGridItem = ({ icon: Icon, label, onClick, link }: any) => (
+        <div
+            onClick={() => {
+                if (link) navigate(link);
+                if (onClick) onClick();
+            }}
+            className="touch-feedback"
+            style={{
+                background: '#fff',
+                borderRadius: '16px',
+                padding: '16px 8px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+                border: '1px solid rgba(238, 242, 255, 0.8)',
+                cursor: 'pointer',
+                textAlign: 'center',
+                aspectRatio: '1/1',
+                transition: 'all 0.2s ease'
+            }}
+        >
+            <div style={{ color: '#007d2f', background: '#fcf2f2', padding: '12px', borderRadius: '14px', display: 'flex' }}>
+                <Icon size={22} strokeWidth={2.5} />
+            </div>
+            <span style={{
+                fontSize: '0.68rem',
+                fontWeight: '800',
+                color: '#334155',
+                lineHeight: '1.2',
+                textTransform: 'uppercase',
+                maxWidth: '100%'
+            }}>
+                {label}
+            </span>
+        </div>
+    );
+
+    return (
+        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f7fa', flexDirection: 'column' }}>
+            {localStorage.getItem('uba_impersonated_student_email') && (
+                <div style={{
+                    background: '#1e293b',
+                    color: '#fff',
+                    padding: '10px 20px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 9999,
+                    borderBottom: '2px solid #ef4444'
+                }}>
+                    <span>👁️ MODO VISUALIZAÇÃO: Simulando acesso do atleta ({studentName})</span>
+                    <button
+                        onClick={async () => {
+                            localStorage.removeItem('uba_impersonated_student_email');
+                            const backId = localStorage.getItem('uba_impersonated_student_back_id');
+                            if (backId) {
+                                localStorage.removeItem('uba_impersonated_student_back_id');
+                                window.location.href = `/admin/details/${backId}`;
+                            } else {
+                                window.location.href = '/admin/dashboard';
+                            }
+                        }}
+                        style={{
+                            background: '#ef4444',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#dc2626'}
+                        onMouseOut={(e) => e.currentTarget.style.background = '#ef4444'}
+                    >
+                        Voltar ao Painel
+                    </button>
+                </div>
+            )}
+
+            {/* Mobile Header (Only visible on mobile) */}
+            {isMobile && (
+                <div style={{
+                    padding: '15px 20px',
+                    background: '#fff',
+                    borderBottom: '1px solid #eee',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 90
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ height: '30px' }} />
+                        <span style={{ fontWeight: 'bold', color: '#00237f' }}>ÁREA DO ALUNO</span>
+                    </div>
+                    {/* User Avatar Placeholder */}
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#00237f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px' }}>
+                        {studentName.charAt(0)}
+                    </div>
+                </div>
+            )}
+
+            <div style={{ display: 'flex', flex: 1, position: 'relative', paddingBottom: '70px' }}>
+                {/* Sidebar Overlay (Desktop Mobile behavior kept for compatibility, though hidden normally by Nav) */}
+                {isMobile && sidebarOpen && (
+                    <div
+                        onClick={() => setSidebarOpen(false)}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
+                    />
+                )}
+
+                {/* Sidebar (Desktop Only) */}
+                {!isMobile && (
+                    <aside style={{
+                        width: collapsed ? '80px' : '260px',
+                        background: '#fff',
+                        borderRight: '1px solid #eee',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'sticky',
+                        top: 0,
+                        height: '100vh',
+                        zIndex: 100,
+                        transition: 'all 0.3s ease'
+                    }}>
+                        {/* Sidebar Header */}
+                        <div style={{ width: '100%', borderBottom: '1px solid #f0f0f0', overflow: 'hidden', padding: collapsed ? '10px' : '0' }}>
+                            <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ width: '100%', display: 'block', objectFit: 'contain', height: collapsed ? '40px' : 'auto' }} />
+                        </div>
+
+                        {/* Nav */}
+                        <nav style={{ flex: 1, padding: '10px 0', overflowY: 'auto' }}>
+                            <NavItem to="/aluno/dashboard" label="Meu Atleta" icon={<Home size={20} />} />
+                            <NavItem to="/aluno/perfil" label="Meus Dados" icon={<User size={20} />} />
+                            <NavItem to="/aluno/financeiro" label="Pagamentos" icon={<DollarSign size={20} />} />
+                            {storeEnabled && <NavItem to="/aluno/loja" label="Loja do Clube" icon={<Store size={20} />} />}
+                            <NavItem to="/aluno/horarios" label="Horários" icon={<Clock size={20} />} />
+                            <NavItem to="/aluno/configuracoes" label="Configurações" icon={<Settings size={20} />} />
+                            <NavItem to="/aluno/whatsapp" label="Fale Conosco" icon={<MessageCircle size={20} />} />
+
+
+                        </nav>
+
+                        {/* Sidebar Footer */}
+                        <div style={{ padding: collapsed ? '20px 5px' : '20px', borderTop: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button
+                                onClick={() => setCollapsed(!collapsed)}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    background: '#f5f7fa',
+                                    border: 'none',
+                                    color: '#555',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {collapsed ? <ChevronRight size={20} /> : "RECOLHER"}
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    background: '#fff',
+                                    border: '1px solid #ddd',
+                                    color: '#666',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: '700',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <LogOut size={18} />
+                                {!collapsed && "Sair"}
+                            </button>
+                        </div>
+                    </aside>
+                )}
+
+                {/* Main Content */}
+                <main style={{ flex: 1, padding: isMobile ? '15px' : '20px', overflowX: 'hidden' }}>
+                    <Outlet />
+                </main>
+            </div>
+
+            {/* Bottom Navigation (Always Visible) */}
+            <div style={{
+                position: 'fixed',
+                bottom: 0,
+                left: isMobile ? 0 : (collapsed ? '80px' : '260px'),
+                right: 0,
+                background: '#fff',
+                borderTop: '1px solid #eee',
+                display: 'flex',
+                height: '70px',
+                zIndex: 300,
+                boxShadow: '0 -2px 10px rgba(0,0,0,0.05)',
+                transition: 'left 0.3s ease'
+            }}>
+                <button
+                    onClick={() => setActiveSheet('menu')}
+                    className="touch-feedback"
+                    style={{
+                        flex: 1,
+                        border: 'none',
+                        background: activeSheet === 'menu' ? '#fff5f5' : 'transparent',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        color: activeSheet === 'menu' ? '#007d2f' : '#888',
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <Menu size={22} />
+                    MENU
+                </button>
+                <div style={{ width: '1px', background: '#eee', height: '30px', alignSelf: 'center' }} />
+
+                {storeEnabled && (
+                    <>
+                        <button
+                            onClick={() => navigate('/aluno/loja')}
+                            className="touch-feedback"
+                            style={{
+                                flex: 1,
+                                border: 'none',
+                                background: location.pathname === '/aluno/loja' ? '#fff5f5' : 'transparent',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                color: location.pathname === '/aluno/loja' ? '#007d2f' : '#888',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <Store size={22} />
+                            LOJA
+                        </button>
+                        <div style={{ width: '1px', background: '#eee', height: '30px', alignSelf: 'center' }} />
+                    </>
+                )}
+
+                <button
+                    onClick={() => setActiveSheet('gate')}
+                    className="touch-feedback"
+                    style={{
+                        flex: 1,
+                        border: 'none',
+                        background: activeSheet === 'gate' ? '#fff5f5' : 'transparent',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        color: activeSheet === 'gate' ? '#007d2f' : '#888',
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <div style={{
+                        background: '#007d2f',
+                        borderRadius: '50%',
+                        width: '30px',
+                        height: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <QrCode size={16} color="#fff" />
+                    </div>
+                    ACESSO
+                </button>
+            </div>
+
+            {/* Bottom Sheet: Menu */}
+            {activeSheet === 'menu' && (
+                <ResponsivePanel title="Menu Principal" onClose={() => setActiveSheet(null)}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', paddingBottom: '30px' }}>
+
+                        {/* Section 1: Gestão */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                            <MenuGridItem icon={User} label="Meus Dados" link="/aluno/perfil" />
+                            <MenuGridItem icon={Users} label="Dependentes" link="/aluno/dashboard" />
+                            <MenuGridItem icon={History} label="Meus Acessos" link="/aluno/acessos" />
+                            <MenuGridItem icon={DollarSign} label="Meus Débitos" link="/aluno/financeiro" />
+                            {storeEnabled && <MenuGridItem icon={Store} label="Loja" link="/aluno/loja" />}
+                            <MenuGridItem icon={Lock} label="Trocar Senha" link="/aluno/configuracoes" />
+                            <MenuGridItem icon={Clock} label="Horários" link="/aluno/horarios" />
+                        </div>
+
+                        <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)', margin: '0 10px' }} />
+
+                        {/* Section 2: Comunicação */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                            <MenuGridItem icon={MessageCircle} label="Whats Portaria" link="/aluno/whats-portaria" />
+                            <MenuGridItem icon={Users} label="Grupo Whats" link="/aluno/whats-grupo" />
+                        </div>
+
+                        <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)', margin: '0 10px' }} />
+
+                        {/* Section 3: Institucional */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                            <MenuGridItem icon={Instagram} label="Instagram" onClick={() => window.open('https://www.instagram.com/clubeuba/', '_blank')} />
+                            <MenuGridItem icon={Radio} label="Rádio Arena Simonésia" link="/aluno/radio" />
+                        </div>
+
+                        <div style={{ marginTop: '10px' }}>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    width: '100%',
+                                    padding: '14px',
+                                    background: '#fff',
+                                    border: '1px solid #ffcfcf',
+                                    color: '#007d2f',
+                                    borderRadius: '12px',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px'
+                                }}
+                            >
+                                <LogOut size={20} />
+                                ENCERRAR SESSÃO
+                            </button>
+                        </div>
+                    </div>
+                </ResponsivePanel>
+            )}
+
+            {/* Bottom Sheet: Gate Access */}
+            {activeSheet === 'gate' && (
+                <ResponsivePanel title="Acesso Portaria" onClose={() => setActiveSheet(null)}>
+                    <div style={{ textAlign: 'center', padding: '10px 0 30px 0' }}>
+
+                        {allStudents.length > 1 && (
+                            <div style={{
+                                display: 'flex',
+                                gap: '8px',
+                                overflowX: 'auto',
+                                paddingBottom: '15px',
+                                marginBottom: '15px',
+                                justifyContent: 'center'
+                            }}>
+                                {allStudents.map((student, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedStudentIndex(idx)}
+                                        style={{
+                                            padding: '6px 12px',
+                                            borderRadius: '20px',
+                                            border: 'none',
+                                            background: selectedStudentIndex === idx ? '#007d2f' : '#eee',
+                                            color: selectedStudentIndex === idx ? '#fff' : '#666',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {student.nome.split(' ')[0]}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        <div style={{ marginBottom: '15px' }}>
+                            <h4 style={{ margin: 0, color: '#00237f', textTransform: 'uppercase', fontSize: '1rem' }}>
+                                {allStudents[selectedStudentIndex]?.nome || studentName}
+                            </h4>
+                        </div>
+
+                        <p style={{ color: '#666', marginBottom: '25px', fontSize: '0.9rem' }}>Aproxime o QR Code do leitor da portaria.</p>
+
+                        <div style={{
+                            background: '#fff',
+                            padding: '15px',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                            display: 'inline-block',
+                            marginBottom: '20px',
+                            lineHeight: 0
+                        }}>
+                            {qrCodeUrl ? (
+                                <img
+                                    src={qrCodeUrl}
+                                    alt="Gate Access QR"
+                                    style={{ width: '200px', height: '200px', display: 'block' }}
+                                />
+                            ) : (
+                                <div style={{ width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
+                                    Gerando...
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{
+                            background: '#fcf2f2',
+                            padding: '12px',
+                            borderRadius: '10px',
+                            border: '1px dashed #ffcfcf',
+                            margin: '0 20px'
+                        }}>
+                            <p style={{ fontSize: '0.75rem', color: '#007d2f', margin: 0, fontWeight: 'bold' }}>
+                                CÓDIGO DE ACESSO INDIVIDUAL
+                            </p>
+                        </div>
+                    </div>
+                </ResponsivePanel>
+            )}
+
+        </div>
+    );
+}
