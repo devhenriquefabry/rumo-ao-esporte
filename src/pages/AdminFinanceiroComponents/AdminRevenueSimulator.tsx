@@ -83,7 +83,7 @@ export default function AdminRevenueSimulator({ plans, registrations }: Simulato
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
     const modalityColors: Record<string, string> = {
-        futebol: '#007d2f',
+        futebol: '#00a63a',
         natacao: '#0891b2',
         'natação': '#0891b2',
         voleibol: '#d97706',

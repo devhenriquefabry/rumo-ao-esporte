@@ -38,7 +38,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                     }
 
                     const normalizedEmail = user.email.toLowerCase().trim();
-                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
                     const snap = await getDocs(q);
 
                     if (!snap.empty) {
@@ -405,13 +405,13 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                     <X size={20} color="#666" />
                 </button>
 
-                <h2 style={{ marginTop: 0, color: '#00237f', fontSize: '1.5rem' }}>{location.name}</h2>
+                <h2 style={{ marginTop: 0, color: '#17428f', fontSize: '1.5rem' }}>{location.name}</h2>
                 <p style={{ color: '#666', marginBottom: '20px' }}>Nova Reserva</p>
 
                 {/* STEPS PROGRESS */}
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px', gap: '10px' }}>
                     {[1, 2, 3].map(s => (
-                        <div key={s} style={{ flex: 1, height: '4px', background: s <= step ? '#007d2f' : '#eee', borderRadius: '2px' }} />
+                        <div key={s} style={{ flex: 1, height: '4px', background: s <= step ? '#00a63a' : '#eee', borderRadius: '2px' }} />
                     ))}
                 </div>
 
@@ -444,9 +444,9 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                                         style={{
                                             padding: '12px',
                                             borderRadius: '8px',
-                                            border: selectedSlot === slot ? '2px solid #007d2f' : '1px solid #eee',
-                                            background: !slot.available ? '#f5f5f5' : (selectedSlot === slot ? '#fff5f5' : '#fff'),
-                                            color: selectedSlot === slot ? '#007d2f' : (slot.available ? '#333' : '#999'),
+                                            border: selectedSlot === slot ? '2px solid #00a63a' : '1px solid #eee',
+                                            background: !slot.available ? '#f5f5f5' : (selectedSlot === slot ? '#eef8ff' : '#fff'),
+                                            color: selectedSlot === slot ? '#00a63a' : (slot.available ? '#333' : '#999'),
                                             cursor: slot.available ? 'pointer' : 'not-allowed',
                                             display: 'flex',
                                             flexDirection: 'column',
@@ -458,7 +458,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                                         <span style={{ fontWeight: 'bold' }}>{slot.start}</span>
                                         <span style={{ fontSize: '0.8rem', color: slot.available ? '#666' : '#999' }}>R$ {slot.price}</span>
                                         {!slot.available && (
-                                            <span style={{ fontSize: '0.7rem', color: '#007d2f', fontWeight: 'bold', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#00a63a', fontWeight: 'bold', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '2px' }}>
                                                 <X size={10} /> Reservado
                                             </span>
                                         )}
@@ -474,7 +474,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                                 disabled={!selectedSlot}
                                 onClick={() => setStep(2)}
                                 style={{
-                                    background: selectedSlot ? '#007d2f' : '#ccc',
+                                    background: selectedSlot ? '#00a63a' : '#ccc',
                                     color: '#fff',
                                     border: 'none',
                                     padding: '12px 24px',
@@ -504,7 +504,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                                 <span style={{ color: '#666' }}>Horário:</span>
                                 <span style={{ fontWeight: 'bold' }}>{selectedSlot.start} - {selectedSlot.end}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', color: '#007d2f', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #ddd' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', color: '#00a63a', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #ddd' }}>
                                 <span style={{ fontWeight: 'bold' }}>Total:</span>
                                 <span style={{ fontWeight: 'bold' }}>R$ {selectedSlot.price.toFixed(2)}</span>
                             </div>
@@ -645,7 +645,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                             </div>
                         </div>
 
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: pixTimeLeft < 60 ? '#007d2f' : '#333', marginBottom: '20px' }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: pixTimeLeft < 60 ? '#00a63a' : '#333', marginBottom: '20px' }}>
                             Tempo restante: {formatTime(pixTimeLeft)}
                         </div>
 
@@ -721,7 +721,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                                 style={{
                                     width: '100%',
                                     padding: '12px',
-                                    background: '#007d2f',
+                                    background: '#00a63a',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '8px',
@@ -768,7 +768,7 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                                 onClick={onClose}
                                 style={{
                                     padding: '12px 30px',
-                                    background: '#00237f',
+                                    background: '#17428f',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '8px',

@@ -25,8 +25,8 @@ export default function Sidebar({
     return (
         <aside style={{
             width: collapsed ? '80px' : '260px',
-            background: '#fff',
-            borderRight: '1px solid #eee',
+            background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)',
+            borderRight: '1px solid #dce7f3',
             display: 'flex',
             flexDirection: 'column',
             position: isMobile ? 'fixed' : 'sticky',
@@ -36,12 +36,18 @@ export default function Sidebar({
             zIndex: 100,
             transition: 'all 0.3s ease',
             transform: isMobile && !isOpen ? 'translateX(-100%)' : 'translateX(0)',
-            boxShadow: isMobile && isOpen ? '4px 0 15px rgba(0,0,0,0.1)' : 'none'
+            boxShadow: isMobile && isOpen ? '4px 0 24px rgba(6, 26, 64, 0.18)' : 'none'
         }}>
             {/* Sidebar Header */}
-            <div style={{ width: '100%', borderBottom: '1px solid #f0f0f0', overflow: 'hidden', padding: '0' }}>
+            <div style={{
+                width: '100%',
+                borderBottom: '1px solid #dce7f3',
+                overflow: 'hidden',
+                padding: collapsed ? '8px' : '14px',
+                background: 'radial-gradient(circle at 22% 8%, rgba(244, 194, 13, 0.24), transparent 34%), linear-gradient(135deg, #17428f 0%, #09245c 100%)'
+            }}>
                 {headerContent || (
-                    <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ width: '100%', display: 'block', objectFit: 'cover', height: collapsed ? '80px' : 'auto' }} />
+                    <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ width: '100%', display: 'block', objectFit: 'contain', height: collapsed ? '56px' : 'auto', borderRadius: '8px', boxShadow: collapsed ? 'none' : '0 14px 28px rgba(6, 26, 64, 0.28)' }} />
                 )}
             </div>
 
@@ -51,16 +57,16 @@ export default function Sidebar({
             </nav>
 
             {/* Sidebar Footer */}
-            <div style={{ padding: collapsed ? '15px 5px' : '15px', borderTop: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ padding: collapsed ? '15px 5px' : '15px', borderTop: '1px solid #dce7f3', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {!isMobile && (
                     <button
                         onClick={() => setCollapsed(!collapsed)}
                         style={{
                             width: '100%',
                             padding: '8px',
-                            background: '#f8fafc',
+                            background: '#eef8ff',
                             border: 'none',
-                            color: '#64748b',
+                            color: '#17428f',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             display: 'flex',
@@ -75,7 +81,7 @@ export default function Sidebar({
                         {collapsed ? <ChevronRight size={18} /> : (
                             <>
                                 <div style={{ display: 'flex', gap: '2px' }}>
-                                    {[1, 2].map(i => <div key={i} style={{ width: '3px', height: '12px', background: '#cbd5e1', borderRadius: '10px' }} />)}
+                                    {[1, 2].map(i => <div key={i} style={{ width: '3px', height: '12px', background: '#59c8df', borderRadius: '10px' }} />)}
                                 </div>
                                 <span>RECOLHER</span>
                             </>
@@ -88,8 +94,8 @@ export default function Sidebar({
                         width: '100%',
                         padding: '12px',
                         background: '#fff',
-                        border: '1px solid #e2e8f0',
-                        color: '#444',
+                        border: '1px solid #dce7f3',
+                        color: '#17428f',
                         borderRadius: '8px',
                         cursor: 'pointer',
                         fontWeight: '700',
@@ -101,12 +107,12 @@ export default function Sidebar({
                         transition: 'all 0.2s'
                     }}
                     onMouseOver={e => {
-                        e.currentTarget.style.borderColor = '#007d2f';
-                        e.currentTarget.style.color = '#007d2f';
+                        e.currentTarget.style.borderColor = '#00a63a';
+                        e.currentTarget.style.color = '#00a63a';
                     }}
                     onMouseOut={e => {
-                        e.currentTarget.style.borderColor = '#e2e8f0';
-                        e.currentTarget.style.color = '#444';
+                        e.currentTarget.style.borderColor = '#dce7f3';
+                        e.currentTarget.style.color = '#17428f';
                     }}
                 >
                     <LogOut size={18} />
@@ -133,8 +139,8 @@ export function MobileHeader({ title, toggleSidebar, isOpen }: { title: string, 
     return (
         <div style={{
             padding: '15px 20px',
-            background: '#fff',
-            borderBottom: '1px solid #eee',
+            background: 'linear-gradient(135deg, #17428f 0%, #09245c 100%)',
+            borderBottom: '1px solid rgba(255,255,255,0.14)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -143,12 +149,12 @@ export function MobileHeader({ title, toggleSidebar, isOpen }: { title: string, 
             zIndex: 90
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ height: '30px' }} />
-                <span style={{ fontWeight: 'bold', color: '#007d2f', fontSize: '0.9rem' }}>{title}</span>
+                <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ height: '34px', borderRadius: '6px' }} />
+                <span style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>{title}</span>
             </div>
             <button
                 onClick={toggleSidebar}
-                style={{ border: 'none', background: '#f5f5f5', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#333' }}
+                style={{ border: 'none', background: 'rgba(255,255,255,0.14)', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
             >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

@@ -13,7 +13,7 @@ export interface AccessLog {
     photoUrl?: string;
 }
 
-const COLLECTION_NAME = 'arena_simonesia_2026_access_logs';
+const COLLECTION_NAME = 'rumo_ao_esporte_2026_access_logs';
 
 /**
  * Logs a new access event to Firestore

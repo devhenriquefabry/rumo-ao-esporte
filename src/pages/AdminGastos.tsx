@@ -80,7 +80,7 @@ export default function AdminGastos() {
             const compressedBlob = await compressImage(file);
             const formData = new FormData();
             formData.append('file', compressedBlob, file.name);
-            formData.append('folder', 'arena_simonesia_2026_expenses');
+            formData.append('folder', 'rumo_ao_esporte_2026_expenses');
 
             const workerUrl = import.meta.env.VITE_WORKER_URL;
             const res = await fetch(`${workerUrl}/images/upload`, {
@@ -176,13 +176,13 @@ export default function AdminGastos() {
         <div className="animate-fade-in" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <style>{`
                 .btn-primary:active { transform: scale(0.98); }
-                .native-input:focus { border-color: #007d2f; outline: none; box-shadow: 0 0 0 2px rgba(0, 125, 47, 0.1); }
+                .native-input:focus { border-color: #00a63a; outline: none; box-shadow: 0 0 0 2px rgba(23, 66, 143, 0.14); }
             `}</style>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
                 <div>
                     <h1 style={{ fontSize: '1.8rem', color: '#111827', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <DollarSign size={28} color="#007d2f" />
+                        <DollarSign size={28} color="#00a63a" />
                         Despesas (Contas a Pagar)
                     </h1>
                     <p style={{ color: '#6b7280', marginTop: '5px' }}>Gestão de gastos registrados no Asaas.</p>
@@ -216,21 +216,21 @@ export default function AdminGastos() {
                             printWindow.document.write(`
                                 <html>
                                 <head>
-                                    <title>Relatório de Despesas - Arena Simonésia 2026</title>
+                                    <title>Relatório de Despesas - Rumo ao Esporte 2026</title>
                                     <style>
                                         body { font-family: sans-serif; padding: 20px; }
-                                        h1 { color: #007d2f; text-align: center; }
+                                        h1 { color: #00a63a; text-align: center; }
                                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                                         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
                                         th { background-color: #f8fafc; color: #334155; }
                                         tr:nth-child(even) { background-color: #f1f5f9; }
-                                        .total { margin-top: 30px; text-align: right; font-size: 1.2rem; font-weight: bold; color: #007d2f; border-top: 2px solid #007d2f; padding-top: 10px; }
+                                        .total { margin-top: 30px; text-align: right; font-size: 1.2rem; font-weight: bold; color: #00a63a; border-top: 2px solid #00a63a; padding-top: 10px; }
                                         .footer { margin-top: 50px; text-align: center; color: #64748b; font-size: 0.8rem; }
                                         @media print { .no-print { display: none; } }
                                     </style>
                                 </head>
                                 <body>
-                                    <h1>RELATÓRIO DE DESPESAS - Arena Simonésia 2026</h1>
+                                    <h1>RELATÓRIO DE DESPESAS - Rumo ao Esporte 2026</h1>
                                     <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
                                     
                                     <table>
@@ -257,7 +257,7 @@ export default function AdminGastos() {
                                     <div class="total">TOTAL: ${formatCurrency(total)}</div>
                                     
                                     <div class="footer">
-                                        Sisteminha de Contrato - Arena Simonésia 2026
+                                        Sisteminha de Contrato - Rumo ao Esporte 2026
                                     </div>
 
                                     <script>
@@ -293,7 +293,7 @@ export default function AdminGastos() {
                         onClick={() => setShowAddModal(true)}
 
                         style={{
-                            background: '#007d2f',
+                            background: '#00a63a',
                             color: '#fff',
                             border: 'none',
                             padding: '10px 20px',
@@ -314,7 +314,7 @@ export default function AdminGastos() {
 
             {loading && expenses.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '50px', color: '#6b7280' }}>
-                    <Loader2 className="spin" size={32} style={{ margin: '0 auto 15px', color: '#007d2f' }} />
+                    <Loader2 className="spin" size={32} style={{ margin: '0 auto 15px', color: '#00a63a' }} />
                     <p>Carregando despesas...</p>
                 </div>
             ) : (
@@ -353,7 +353,7 @@ export default function AdminGastos() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td style={{ padding: '16px', fontSize: '0.95rem', fontWeight: 700, color: '#007d2f' }}>
+                                        <td style={{ padding: '16px', fontSize: '0.95rem', fontWeight: 700, color: '#00a63a' }}>
                                             {formatCurrency(expense.value)}
                                         </td>
                                         <td style={{ padding: '16px', textAlign: 'center' }}>
@@ -415,7 +415,7 @@ export default function AdminGastos() {
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                                         <label style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                                             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                                                {uploading ? <Loader2 size={18} className="animate-spin" color="#007d2f" /> : <Camera size={18} color="#007d2f" />}
+                                                {uploading ? <Loader2 size={18} className="animate-spin" color="#00a63a" /> : <Camera size={18} color="#00a63a" />}
                                             </div>
                                             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>ANEXAR COMPROVANTE (OPCIONAL)</span>
                                             <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={uploading} />
@@ -514,7 +514,7 @@ export default function AdminGastos() {
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: 700, cursor: isSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: 700, cursor: isSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 >
                                     {isSaving ? <Loader2 className="spin" size={18} /> : <CheckCircle size={18} />}
                                     {isSaving ? 'Salvando...' : 'Salvar Gasto'}

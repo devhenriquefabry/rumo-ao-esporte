@@ -68,7 +68,7 @@ export const AsaasBalance = ({ workerUrl }: AsaasBalanceProps) => {
             className="asaas-balance-float"
         >
             <div style={{
-                background: '#007d2f',
+                background: '#00a63a',
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
@@ -94,7 +94,7 @@ export const AsaasBalance = ({ workerUrl }: AsaasBalanceProps) => {
                     {loading && !balance ? (
                         <div className="skeleton-text" style={{ width: '80px', height: '20px', background: '#eee', borderRadius: '4px' }} />
                     ) : error ? (
-                        <span style={{ fontSize: '1rem', fontWeight: '800', color: '#007d2f', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: '800', color: '#00a63a', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <AlertCircle size={16} /> Erro
                         </span>
                     ) : (

@@ -44,7 +44,7 @@ export default function ManualChargeModal({
             }}>
                 {/* Header */}
                 <div style={{ padding: '20px 25px', borderBottom: '1px solid #eee' }}>
-                    <div style={{ color: '#007d2f', fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    <div style={{ color: '#00a63a', fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase', marginBottom: '4px' }}>
                         LANÇAMENTO MANUAL
                     </div>
                     <div style={{ color: '#666', fontSize: '0.9rem' }}>{alunoNome}</div>
@@ -109,9 +109,9 @@ export default function ManualChargeModal({
                                     onClick={() => setBillingType('PIX')}
                                     style={{
                                         flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid',
-                                        borderColor: billingType === 'PIX' ? '#007d2f' : '#ddd',
+                                        borderColor: billingType === 'PIX' ? '#00a63a' : '#ddd',
                                         background: billingType === 'PIX' ? '#fff0f0' : '#fff',
-                                        color: billingType === 'PIX' ? '#007d2f' : '#666',
+                                        color: billingType === 'PIX' ? '#00a63a' : '#666',
                                         fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                                     }}
                                 >
@@ -121,9 +121,9 @@ export default function ManualChargeModal({
                                     onClick={() => setBillingType('BOLETO')}
                                     style={{
                                         flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid',
-                                        borderColor: billingType === 'BOLETO' ? '#007d2f' : '#ddd',
+                                        borderColor: billingType === 'BOLETO' ? '#00a63a' : '#ddd',
                                         background: billingType === 'BOLETO' ? '#fff0f0' : '#fff',
-                                        color: billingType === 'BOLETO' ? '#007d2f' : '#666',
+                                        color: billingType === 'BOLETO' ? '#00a63a' : '#666',
                                         fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                                     }}
                                 >
@@ -136,7 +136,7 @@ export default function ManualChargeModal({
                             onClick={handleConfirm}
                             disabled={!description || !value || isSubmitting}
                             style={{
-                                width: '100%', padding: '15px', background: '#007d2f', color: '#fff',
+                                width: '100%', padding: '15px', background: '#00a63a', color: '#fff',
                                 border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem',
                                 cursor: 'pointer', marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                                 opacity: (!description || !value) ? 0.6 : 1, transition: 'all 0.2s'

@@ -15,7 +15,7 @@ export default function PageTitle({ title, subtitle, count, children, style, cla
         <div className={className} style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', ...style }}>
             <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <h1 style={{ color: '#007d2f', fontSize: '1.8rem', fontWeight: '900', margin: 0, textTransform: 'uppercase' }}>
+                    <h1 style={{ color: '#00a63a', fontSize: '1.8rem', fontWeight: '900', margin: 0, textTransform: 'uppercase' }}>
                         {title}
                     </h1>
                     {(count !== undefined && count !== null) && (

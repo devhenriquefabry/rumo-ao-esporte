@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 export default function AdminPaymentTest() {
     const [amount, setAmount] = useState('5.00');
-    const [description, setDescription] = useState('Teste Admin Arena Simonésia');
+    const [description, setDescription] = useState('Teste Admin Rumo ao Esporte');
     const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX');
 
     // Credit Card State
@@ -144,7 +144,7 @@ export default function AdminPaymentTest() {
 
                 {/* Form Section */}
                 <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                    <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', color: '#007d2f' }}>Gerar Nova Cobrança</h2>
+                    <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', color: '#00a63a' }}>Gerar Nova Cobrança</h2>
 
                     {/* Method Selector */}
                     <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
@@ -152,9 +152,9 @@ export default function AdminPaymentTest() {
                             type="button"
                             onClick={() => setPaymentMethod('PIX')}
                             style={{
-                                flex: 1, padding: '12px', border: paymentMethod === 'PIX' ? '2px solid #007d2f' : '1px solid #ddd',
+                                flex: 1, padding: '12px', border: paymentMethod === 'PIX' ? '2px solid #00a63a' : '1px solid #ddd',
                                 borderRadius: '8px', background: paymentMethod === 'PIX' ? '#fff0f0' : '#fff',
-                                fontWeight: 'bold', color: paymentMethod === 'PIX' ? '#007d2f' : '#666', cursor: 'pointer'
+                                fontWeight: 'bold', color: paymentMethod === 'PIX' ? '#00a63a' : '#666', cursor: 'pointer'
                             }}
                         >
                             💠 PIX
@@ -163,9 +163,9 @@ export default function AdminPaymentTest() {
                             type="button"
                             onClick={() => setPaymentMethod('CREDIT_CARD')}
                             style={{
-                                flex: 1, padding: '12px', border: paymentMethod === 'CREDIT_CARD' ? '2px solid #007d2f' : '1px solid #ddd',
+                                flex: 1, padding: '12px', border: paymentMethod === 'CREDIT_CARD' ? '2px solid #00a63a' : '1px solid #ddd',
                                 borderRadius: '8px', background: paymentMethod === 'CREDIT_CARD' ? '#fff0f0' : '#fff',
-                                fontWeight: 'bold', color: paymentMethod === 'CREDIT_CARD' ? '#007d2f' : '#666', cursor: 'pointer'
+                                fontWeight: 'bold', color: paymentMethod === 'CREDIT_CARD' ? '#00a63a' : '#666', cursor: 'pointer'
                             }}
                         >
                             💳 Cartão de Crédito
@@ -267,7 +267,7 @@ export default function AdminPaymentTest() {
                         <button
                             type="submit" disabled={loading}
                             style={{
-                                width: '100%', padding: '12px', background: '#007d2f', color: '#fff',
+                                width: '100%', padding: '12px', background: '#00a63a', color: '#fff',
                                 border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer',
                                 opacity: loading ? 0.7 : 1
                             }}

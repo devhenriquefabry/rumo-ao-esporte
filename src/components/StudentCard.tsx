@@ -65,15 +65,18 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
     };
 
     return (
-        <div style={{ width: width, maxWidth: '100%', perspective: '1000px' }}>
+        <div style={{ width: width, maxWidth: '100%', perspective: '1200px', perspectiveOrigin: 'center center' }}>
             <div
                 className="flip-card-inner"
                 style={{
                     position: 'relative',
                     paddingBottom: '63.7%',
-                    transition: 'transform 0.5s',
+                    transition: 'transform 0.65s ease-in-out',
                     transformStyle: 'preserve-3d',
-                    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    WebkitTransformStyle: 'preserve-3d',
+                    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                    transformOrigin: 'center center',
+                    willChange: 'transform'
                 }}
             >
                 {/* FRONT SIDE */}
@@ -88,7 +91,10 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     userSelect: 'none',
                     fontFamily: '"Segoe UI", Roboto, Arial, sans-serif',
                     border: '1px solid #ddd',
-                    backfaceVisibility: 'hidden'
+                    boxSizing: 'border-box',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(0deg) translateZ(0.5px)'
                 }}>
                     {/* PHOTO */}
                     <div style={{
@@ -132,7 +138,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                         left: '46.0%',
                         right: '5%',
                         fontWeight: '900',
-                        color: '#007d2f',
+                        color: '#00a63a',
                         textTransform: 'uppercase',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -178,9 +184,9 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     {qrCodeUrl && (
                         <div className="card-qr" style={{
                             position: 'absolute',
-                            top: '3%',
-                            right: '2%',
-                            width: '8%',
+                            top: '6.8%',
+                            right: '5.4%',
+                            width: '14.5%',
                             background: '#fff',
                             padding: '1px',
                             borderRadius: '2px',
@@ -200,15 +206,19 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                 <div style={{
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    background: '#000',
+                    backgroundImage: 'url(/verso-carteirinha.png)',
+                    backgroundSize: '100% 100%',
+                    backgroundPosition: 'center',
                     borderRadius: '12px',
                     boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
                     overflow: 'hidden',
                     userSelect: 'none',
                     fontFamily: '"Segoe UI", Roboto, Arial, sans-serif',
-                    border: '1px solid #000',
+                    border: '1px solid #0b58ba',
+                    boxSizing: 'border-box',
                     backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg) translateZ(0.5px)',
                     color: '#fff',
                     padding: '3% 4%',
                     display: 'flex',
@@ -216,9 +226,9 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     gap: '2%'
                 }}>
                     {/* Header: Logo + Title */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <img src="/arena-logo-transparent.png" alt="Logo" style={{ height: 'clamp(16px, 5vw, 24px)', borderRadius: '2px' }} />
-                        <span style={{ fontWeight: 'bold', fontSize: 'clamp(8px, 2.5vw, 12px)' }}>Arena Simonésia 2026</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative', zIndex: 1 }}>
+                        <img src="/real-logo-transparente.svg" alt="Logo" style={{ height: 'clamp(16px, 5vw, 24px)', borderRadius: '2px' }} />
+                        <span style={{ fontWeight: 'bold', fontSize: 'clamp(8px, 2.5vw, 12px)' }}>Rumo ao Esporte 2026</span>
                         <span style={{ marginLeft: 'auto', fontSize: 'clamp(6px, 1.8vw, 9px)', opacity: 0.7, textTransform: 'uppercase' }}>Responsável Financeiro</span>
                     </div>
 
@@ -227,13 +237,15 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                         fontSize: 'clamp(10px, 3.5vw, 16px)',
                         fontWeight: 'bold',
                         lineHeight: '1.2',
-                        wordBreak: 'break-word'
+                        wordBreak: 'break-word',
+                        position: 'relative',
+                        zIndex: 1
                     }}>
                         {responsavel?.nome || '-'}
                     </div>
 
                     {/* Row: CPF + Phone */}
-                    <div style={{ display: 'flex', gap: '10%' }}>
+                    <div style={{ display: 'flex', gap: '10%', position: 'relative', zIndex: 1 }}>
                         <div style={{ flex: 1 }}>
                             <div style={{ fontSize: 'clamp(5px, 1.5vw, 8px)', opacity: 0.7 }}>CPF</div>
                             <div style={{ fontSize: 'clamp(7px, 2vw, 11px)', fontWeight: '600' }}>{responsavel?.cpf || '-'}</div>
@@ -245,7 +257,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     </div>
 
                     {/* Email */}
-                    <div>
+                    <div style={{ position: 'relative', zIndex: 1 }}>
                         <div style={{ fontSize: 'clamp(5px, 1.5vw, 8px)', opacity: 0.7 }}>Email</div>
                         <div style={{ fontSize: 'clamp(7px, 2vw, 11px)', fontWeight: '600', wordBreak: 'break-all' }}>
                             {responsavel?.email || '-'}
@@ -253,7 +265,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     </div>
 
                     {/* Address */}
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
                         <div style={{ fontSize: 'clamp(5px, 1.5vw, 8px)', opacity: 0.7 }}>Endereço</div>
                         <div style={{
                             fontSize: 'clamp(6px, 1.8vw, 10px)',
@@ -264,17 +276,33 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                             {formatAddress()}
                         </div>
                     </div>
+                    <img
+                        src="/real-logo-transparente.svg"
+                        alt="Logo Real"
+                        style={{
+                            position: 'absolute',
+                            right: '6.5%',
+                            bottom: '11%',
+                            width: '17%',
+                            height: 'auto',
+                            objectFit: 'contain',
+                            zIndex: 1
+                        }}
+                    />
                 </div>
             </div>
 
             {/* FLIP BUTTON */}
             <button
+                type="button"
+                aria-pressed={isFlipped}
+                aria-label={isFlipped ? 'Ver frente da carteirinha' : 'Ver verso da carteirinha'}
                 onClick={() => setIsFlipped(!isFlipped)}
                 style={{
                     marginTop: '10px',
                     width: '100%',
                     padding: '8px 12px',
-                    background: isFlipped ? '#007d2f' : '#f5f5f5',
+                    background: isFlipped ? '#00a63a' : '#f5f5f5',
                     color: isFlipped ? '#fff' : '#555',
                     border: isFlipped ? 'none' : '1px solid #ddd',
                     borderRadius: '6px',
@@ -297,11 +325,19 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
 
             {/* Responsive CSS */}
             <style>{`
+                .flip-card-inner {
+                    transform-box: border-box;
+                }
                 .student-card-container .card-name {
                     font-size: clamp(7px, 3.5cqw, 14px);
                 }
                 .student-card-container .card-field {
                     font-size: clamp(6px, 3cqw, 12px);
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .flip-card-inner {
+                        transition-duration: 0.01ms !important;
+                    }
                 }
                 @media (max-width: 480px) {
                     .student-card-container .card-name {

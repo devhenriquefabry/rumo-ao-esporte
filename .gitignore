@@ -13,12 +13,17 @@ dist-ssr
 *.local
 .env
 .firebase/
+.codex/
 .wrangler/
 whatsapp-proxy/.wrangler/
 whatsapp-proxy/tmp-deploy-info/
 whatsapp-proxy/dist-dry-run/
 whatsapp-proxy/*.txt
 whatsapp-proxy/*.log
+whatsapp-proxy/secrets.json
+cert_key_cora_*/
+*.pem
+*.key
 admin_novo_errors.txt
 build_log.txt
 error_log.txt

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as xlsx from 'xlsx';
 import { collection, getDocs, doc, writeBatch, query, orderBy } from 'firebase/firestore';
@@ -160,9 +160,9 @@ export default function AdminWhatsApp() {
 
 
         const message = `Olá, ${name}!
-Atualizamos nosso sistema da Escola de Esportes Arena Simonésia 2026.
+Atualizamos nosso sistema da Escola de Esportes Rumo ao Esporte 2026.
 É de muita importância que você realize o cadastro do aluno *${student}* pelo novo link.
-Acesse: https://arenasimonesia.web.app/ para regularizar.
+Acesse: https://rumo-ao-esporte.web.app/ para regularizar.
 
 Caso o aluno não vá participar da temporada 2026, é necessário entrar em contato.
 
@@ -284,8 +284,8 @@ Dúvidas? Entre em contato: +55 33 8414-4053`;
                                     style={{
                                         padding: '12px 20px',
                                         background: '#fff',
-                                        border: '1px solid #007d2f',
-                                        color: '#007d2f',
+                                        border: '1px solid #00a63a',
+                                        color: '#00a63a',
                                         borderRadius: '8px',
                                         cursor: 'pointer'
                                     }}
@@ -362,7 +362,7 @@ Dúvidas? Entre em contato: +55 33 8414-4053`;
                                     disabled={sending || selectedIds.size === 0}
                                     style={{
                                         padding: '12px 24px',
-                                        background: selectedIds.size === 0 ? '#ccc' : '#007d2f',
+                                        background: selectedIds.size === 0 ? '#ccc' : '#00a63a',
                                         border: 'none',
                                         color: '#fff',
                                         borderRadius: '8px',
@@ -397,7 +397,7 @@ Dúvidas? Entre em contato: +55 33 8414-4053`;
                             </div>
                             {sending && (
                                 <div style={{ flex: 1, marginLeft: '20px', background: '#eee', height: '10px', borderRadius: '5px', overflow: 'hidden' }}>
-                                    <div style={{ width: `${(progress.current / progress.total) * 100}%`, background: '#007d2f', height: '100%', transition: 'width 0.3s' }}></div>
+                                    <div style={{ width: `${(progress.current / progress.total) * 100}%`, background: '#00a63a', height: '100%', transition: 'width 0.3s' }}></div>
                                 </div>
                             )}
                         </div>

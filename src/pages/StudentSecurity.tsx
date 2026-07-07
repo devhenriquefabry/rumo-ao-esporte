@@ -50,7 +50,7 @@ export default function StudentSecurity() {
 
             <div className="native-card animate-scale-in" style={{ padding: '0', overflow: 'hidden', maxWidth: '600px', margin: '0 auto' }}>
                 <div style={{ padding: '20px 25px', background: '#f5f7fa', borderBottom: '1px solid #eee' }}>
-                    <h3 style={{ margin: 0, color: '#00237f', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h3 style={{ margin: 0, color: '#17428f', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Lock size={20} />
                         Alterar Senha
                     </h3>

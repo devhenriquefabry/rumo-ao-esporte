@@ -19,12 +19,12 @@ export default function StudentPayments() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail || (user && user.email)) {
                 try {
                     // 1. Get ALL Registrations for this parent (normalized to lowercase)
                     const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
-                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
                     const snap = await getDocs(q);
 
                     if (!snap.empty) {
@@ -104,7 +104,7 @@ export default function StudentPayments() {
     if (allRegistrations.length === 0) return (
         <PageContainer>
             <div style={{ textAlign: 'center', padding: '50px' }}>
-                <h2 style={{ color: '#007d2f' }}>Cadastro não encontrado.</h2>
+                <h2 style={{ color: '#00a63a' }}>Cadastro não encontrado.</h2>
             </div>
         </PageContainer>
     );
@@ -178,7 +178,7 @@ export default function StudentPayments() {
                             borderRadius: '12px 12px 0 0',
                             fontSize: '1rem',
                             fontWeight: '900',
-                            borderLeft: '5px solid #007d2f',
+                            borderLeft: '5px solid #00a63a',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center'
@@ -224,7 +224,7 @@ export default function StudentPayments() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 {openPlanPayment && (
                                     <>
-                                        <div style={{ padding: '4px 0', fontWeight: '900', color: '#007d2f', fontSize: '0.75rem', borderBottom: '1px solid #fee2e2', textTransform: 'uppercase' }}>
+                                        <div style={{ padding: '4px 0', fontWeight: '900', color: '#00a63a', fontSize: '0.75rem', borderBottom: '1px solid #fee2e2', textTransform: 'uppercase' }}>
                                             Mensalidade Atual
                                         </div>
                                         <PaymentCard
@@ -239,7 +239,7 @@ export default function StudentPayments() {
 
                                 {manualPayments.length > 0 && (
                                     <div style={{ marginTop: '5px' }}>
-                                        <div style={{ padding: '4px 0', fontWeight: '900', color: '#007d2f', fontSize: '0.75rem', borderBottom: '1px solid #fee2e2', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                        <div style={{ padding: '4px 0', fontWeight: '900', color: '#00a63a', fontSize: '0.75rem', borderBottom: '1px solid #fee2e2', textTransform: 'uppercase', marginBottom: '10px' }}>
                                             Cobranças Extras
                                         </div>
                                         {manualPayments.map(p => (

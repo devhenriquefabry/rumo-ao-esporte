@@ -19,7 +19,7 @@ export default function StudentProfile() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
-            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail || user) {
                 fetchData(impersonatedEmail || user!.email!);
             } else {
@@ -32,7 +32,7 @@ export default function StudentProfile() {
     const fetchData = async (email: string) => {
         try {
             const normalizedEmail = email.toLowerCase().trim();
-            const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+            const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
             const snap = await getDocs(q);
             const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
             setRegistrations(docs);
@@ -102,7 +102,7 @@ export default function StudentProfile() {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
             }}>
                 <div>
-                    <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#00237f' }}>Meus Dados</h2>
+                    <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#17428f' }}>Meus Dados</h2>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#999' }}>
                         Visualize seus dados cadastrais
                     </p>
@@ -115,7 +115,7 @@ export default function StudentProfile() {
                 {/* SECTION: RESPONSÁVEL */}
                 <div className="native-card animate-scale-in" style={{ padding: 0, overflow: 'hidden' }}>
                     <div style={{ padding: '15px 20px', background: '#f8f9fa', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <User size={20} color="#007d2f" />
+                        <User size={20} color="#00a63a" />
                         <h3 style={{ margin: 0, fontSize: '1rem', color: '#333' }}>Dados do Responsável</h3>
                     </div>
 
@@ -156,7 +156,7 @@ export default function StudentProfile() {
                 {/* SECTION: DEPENDENTES */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 5px' }}>
-                        <Users size={20} color="#007d2f" />
+                        <Users size={20} color="#00a63a" />
                         <h3 style={{ margin: 0, fontSize: '1rem', color: '#333' }}>Dependentes / Alunos</h3>
                     </div>
 
@@ -173,7 +173,7 @@ export default function StudentProfile() {
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <div style={{
-                                            width: '32px', height: '32px', borderRadius: '50%', background: '#007d2f',
+                                            width: '32px', height: '32px', borderRadius: '50%', background: '#00a63a',
                                             color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             fontSize: '0.8rem', fontWeight: 'bold'
                                         }}>
@@ -232,8 +232,8 @@ export default function StudentProfile() {
             </div>
 
             <style>{`
-                .loading-container { display: flex; align-items: center; justifyContent: center; height: 100vh; font-weight: bold; color: #00237f; }
-                .error-container { text-align: center; padding: 50px; color: #007d2f; }
+                .loading-container { display: flex; align-items: center; justifyContent: center; height: 100vh; font-weight: bold; color: #17428f; }
+                .error-container { text-align: center; padding: 50px; color: #00a63a; }
                 
                 @media (max-width: 600px) {
                     .student-edit-grid { grid-template-columns: 1fr !important; }

@@ -1,14 +1,14 @@
-﻿import { doc, getDoc, collection, addDoc, query, orderBy, limit, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, orderBy, limit, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export const WHATSAPP_SERVICE_URL =
     (import.meta.env.VITE_WHATSAPP_URL as string) || 'https://evolution-api-im3d.onrender.com';
 
 export const WORKER_URL = 
-    (import.meta.env.VITE_WORKER_URL as string) || 'https://arenasimonesia-whatsapp-proxy.thayrufino2.workers.dev';
+    (import.meta.env.VITE_WORKER_URL as string) || 'https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev';
 
 const GLOBAL_API_KEY = (import.meta.env.VITE_WHATSAPP_API_KEY as string) || '';
-const INSTANCE_NAME = 'uba_instance';
+const INSTANCE_NAME = 'rae_instance';
 
 export const TEST_PHONE = '5533998200546';
 

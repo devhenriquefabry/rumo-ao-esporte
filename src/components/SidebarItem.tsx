@@ -54,8 +54,8 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                             width: '100%',
                             padding: collapsed ? '12px 0' : '8px 16px',
                             border: 'none',
-                            background: isActive ? '#fcf2f2' : 'transparent',
-                            color: isActive ? '#007d2f' : '#00237f',
+                            background: isActive ? 'linear-gradient(135deg, rgba(23,66,143,0.10), rgba(0,166,58,0.10))' : 'transparent',
+                            color: isActive ? '#09245c' : '#17428f',
                             textAlign: collapsed ? 'center' : 'left',
                             cursor: 'pointer',
                             fontSize: '0.82rem',
@@ -64,11 +64,12 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                             alignItems: 'center',
                             justifyContent: collapsed ? 'center' : 'flex-start',
                             gap: collapsed ? '0' : '10px',
-                            borderRadius: '6px',
-                            transition: 'all 0.2s'
+                            borderRadius: '8px',
+                            transition: 'all 0.2s',
+                            borderLeft: isActive && !collapsed ? '3px solid #f4c20d' : '3px solid transparent'
                         }}
                     >
-                        <span style={{ color: isActive ? '#007d2f' : '#00237f', display: 'flex' }}>{icon}</span>
+                        <span style={{ color: isActive ? '#00a63a' : '#17428f', display: 'flex' }}>{icon}</span>
                         {!collapsed && <span style={{ flex: 1, textTransform: 'uppercase' }}>{label}</span>}
                         {!collapsed && <ChevronRight size={16} style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />}
                     </button>
@@ -86,9 +87,9 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                                         style={{
                                             padding: '6px 15px',
                                             border: 'none',
-                                            background: isSubActive ? '#007d2f' : 'transparent',
-                                            color: isSubActive ? '#fff' : '#00237f',
-                                            borderRadius: '6px',
+                                            background: isSubActive ? 'linear-gradient(135deg, #00a63a 0%, #17428f 100%)' : 'transparent',
+                                            color: isSubActive ? '#fff' : '#17428f',
+                                            borderRadius: '8px',
                                             textAlign: 'left',
                                             cursor: 'pointer',
                                             fontSize: '0.78rem',
@@ -99,13 +100,13 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                                         }}
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                                            <div style={{ width: '6px', height: '6px', background: isSubActive ? '#fff' : '#00237f', borderRadius: '50%', opacity: isSubActive ? 1 : 0.4 }} />
+                                            <div style={{ width: '6px', height: '6px', background: isSubActive ? '#fff' : '#17428f', borderRadius: '50%', opacity: isSubActive ? 1 : 0.4 }} />
                                             <span style={{ textTransform: 'uppercase', flex: 1 }}>{sub.label}</span>
                                         </div>
                                         {sub.badge !== undefined && sub.badge > 0 && (
                                             <span style={{
-                                                background: isSubActive ? '#fff' : '#007d2f',
-                                                color: isSubActive ? '#007d2f' : '#fff',
+                                                background: isSubActive ? '#f4c20d' : '#00a63a',
+                                                color: isSubActive ? '#09245c' : '#fff',
                                                 fontSize: '0.65rem',
                                                 fontWeight: 'bold',
                                                 padding: '1px 6px',
@@ -122,7 +123,7 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                         </div>
                     )}
                 </div>
-                {!collapsed && <div style={{ height: '1px', background: 'rgba(0, 35, 127, 0.08)', margin: '4px -10px' }} />}
+                {!collapsed && <div style={{ height: '1px', background: 'rgba(23, 66, 143, 0.10)', margin: '4px -10px' }} />}
             </>
         );
     }
@@ -140,8 +141,8 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                     width: '100%',
                     padding: collapsed ? '12px 0' : '8px 16px',
                     border: 'none',
-                    background: isActive ? '#007d2f' : 'transparent',
-                    color: isActive ? '#fff' : '#00237f',
+                    background: isActive ? 'linear-gradient(135deg, #00a63a 0%, #17428f 100%)' : 'transparent',
+                    color: isActive ? '#fff' : '#17428f',
                     textAlign: collapsed ? 'center' : 'left',
                     cursor: 'pointer',
                     fontSize: '0.82rem',
@@ -151,18 +152,18 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                     justifyContent: collapsed ? 'center' : 'flex-start',
                     gap: collapsed ? '0' : '10px',
                     minHeight: '36px',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     transition: 'all 0.2s'
                 }}
-                onMouseOver={e => !isActive && (e.currentTarget.style.background = '#f0f4ff')}
+                onMouseOver={e => !isActive && (e.currentTarget.style.background = '#eef8ff')}
                 onMouseOut={e => !isActive && (e.currentTarget.style.background = 'transparent')}
             >
-                <span style={{ color: isActive ? '#fff' : '#00237f', display: 'flex' }}>{icon}</span>
+                <span style={{ color: isActive ? '#fff' : '#17428f', display: 'flex' }}>{icon}</span>
                 {!collapsed && <span style={{ flex: 1, textTransform: 'uppercase' }}>{label}</span>}
                 {badge !== undefined && badge > 0 && !collapsed && (
                     <span style={{
-                        background: isActive ? '#fff' : '#00237f',
-                        color: isActive ? '#007d2f' : '#fff',
+                        background: isActive ? '#f4c20d' : '#17428f',
+                        color: isActive ? '#09245c' : '#fff',
                         fontSize: '0.7rem',
                         fontWeight: 'bold',
                         padding: '2px 8px',
@@ -172,7 +173,7 @@ export default function SidebarItem({ to, label, icon, badge, subItems, collapse
                     </span>
                 )}
             </button>
-            {!collapsed && <div style={{ height: '1px', background: 'rgba(0, 35, 127, 0.08)', margin: '4px -10px' }} />}
+            {!collapsed && <div style={{ height: '1px', background: 'rgba(23, 66, 143, 0.10)', margin: '4px -10px' }} />}
         </div>
     );
 }

@@ -78,7 +78,7 @@ export default function AdminAutoAllocation() {
 
         try {
             // 1. Fetch all registrations for this modality
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'), where('modalidade', '==', normalizedBase));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'), where('modalidade', '==', normalizedBase));
             const snap = await getDocs(q);
             const totalDocs = snap.size;
 
@@ -145,7 +145,7 @@ export default function AdminAutoAllocation() {
                 }
 
                 if (hasChanges) {
-                    await updateDoc(doc(db, 'arena_simonesia_2026_registrations', docSnap.id), {
+                    await updateDoc(doc(db, 'rumo_ao_esporte_2026_registrations', docSnap.id), {
                         alunos: newAlunos
                     });
                     updatedCount++;
@@ -169,7 +169,7 @@ export default function AdminAutoAllocation() {
     if (loading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: '15px' }}>
-                <RefreshCw size={40} className="spin" color="#007d2f" />
+                <RefreshCw size={40} className="spin" color="#00a63a" />
                 <p style={{ color: '#666' }}>Carregando configurações...</p>
                 <style>{`
                     .spin { animation: spin 1s linear infinite; }
@@ -186,13 +186,13 @@ export default function AdminAutoAllocation() {
 
         return (
             <div style={{ marginBottom: '40px' }}>
-                <h2 style={{ fontSize: '1.2rem', color: '#007d2f', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '10px', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '1.2rem', color: '#00a63a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '10px', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>{label}</div>
                     <button
                         onClick={() => handleAutoDistribute(modKey)}
                         style={{
-                            fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px', border: '1px solid #007d2f',
-                            background: '#fff', color: '#007d2f', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px'
+                            fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px', border: '1px solid #00a63a',
+                            background: '#fff', color: '#00a63a', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px'
                         }}
                     >
                         <RefreshCw size={14} /> Auto-Distribuir
@@ -267,13 +267,13 @@ export default function AdminAutoAllocation() {
 
         return (
             <div style={{ marginBottom: '40px' }}>
-                <h2 style={{ fontSize: '1.2rem', color: '#007d2f', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '10px', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '1.2rem', color: '#00a63a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '10px', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><User size={20} /> Futebol (Por Idade)</div>
                     <button
                         onClick={() => handleAutoDistribute('futebol')}
                         style={{
-                            fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px', border: '1px solid #007d2f',
-                            background: '#fff', color: '#007d2f', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px'
+                            fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px', border: '1px solid #00a63a',
+                            background: '#fff', color: '#00a63a', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px'
                         }}
                     >
                         <RefreshCw size={14} /> Auto-Distribuir
@@ -345,12 +345,12 @@ export default function AdminAutoAllocation() {
                 >
                     <ArrowLeft size={18} /> Voltar
                 </button>
-                <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#007d2f', fontWeight: '900' }}>ALOCAÇÃO AUTOMÁTICA</h1>
+                <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#00a63a', fontWeight: '900' }}>ALOCAÇÃO AUTOMÁTICA</h1>
                 <button
                     onClick={handleSave}
                     disabled={saving}
                     style={{
-                        background: '#007d2f', color: '#fff', border: 'none', padding: '10px 24px',
+                        background: '#00a63a', color: '#fff', border: 'none', padding: '10px 24px',
                         borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
                         fontWeight: 'bold', boxShadow: '0 4px 12px rgba(195,34,40,0.2)',
                         opacity: saving ? 0.7 : 1

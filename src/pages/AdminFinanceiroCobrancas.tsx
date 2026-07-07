@@ -19,7 +19,7 @@ interface Devedor {
 }
 
 const DEFAULT_TEMPLATE = `Olá, {responsavel}! 👋
-Gostaríamos de lembrá-lo(a) de que existe um débito pendente referente à Arena Simonésia:
+Gostaríamos de lembrá-lo(a) de que existe um débito pendente referente à Rumo ao Esporte:
 
 Aluno(a): *{nome}*
 Cobrança: *{descricao}*
@@ -145,7 +145,7 @@ export default function AdminFinanceiroCobrancas() {
 
             // 2. Fetch approved registrations
             const q = query(
-                collection(db, 'arena_simonesia_2026_registrations'),
+                collection(db, 'rumo_ao_esporte_2026_registrations'),
                 where('contractStatus', '==', 'aprovado')
             );
             const snap = await getDocs(q);
@@ -433,7 +433,7 @@ export default function AdminFinanceiroCobrancas() {
                         <button onClick={toggleAll} style={btnStyle('#fff', '#555', 'pointer', '1px solid #ddd')}>
                             {devedores.length > 0 && devedores.every(d => selectedIds.has(d.id)) ? 'Desmarcar Todos' : 'Selecionar Todos'}
                         </button>
-                        <button onClick={() => setShowTemplate(!showTemplate)} style={btnStyle('#fff5f5', '#007d2f', 'pointer', '1px solid #f0c0c0')}>
+                        <button onClick={() => setShowTemplate(!showTemplate)} style={btnStyle('#eef8ff', '#00a63a', 'pointer', '1px solid #f0c0c0')}>
                             ✏️ {showTemplate ? 'Fechar Template' : 'Editar Mensagem'}
                         </button>
                     </div>
@@ -441,7 +441,7 @@ export default function AdminFinanceiroCobrancas() {
                         <button
                             onClick={handleSend}
                             disabled={sending || selectedIds.size === 0 || connState !== 'open'}
-                            style={btnStyle(sending || selectedIds.size === 0 || connState !== 'open' ? '#e0e0e0' : '#007d2f', '#fff', sending || selectedIds.size === 0 || connState !== 'open' ? 'not-allowed' : 'pointer')}
+                            style={btnStyle(sending || selectedIds.size === 0 || connState !== 'open' ? '#e0e0e0' : '#00a63a', '#fff', sending || selectedIds.size === 0 || connState !== 'open' ? 'not-allowed' : 'pointer')}
                         >
                             <Send size={15} />
                             {sending ? 'Enviando...' : `Disparar Cobranças (${selectedIds.size})`}
@@ -452,7 +452,7 @@ export default function AdminFinanceiroCobrancas() {
 
             {/* Template editor */}
             {showTemplate && (
-                <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', padding: '24px', marginBottom: '20px', borderLeft: '4px solid #007d2f' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', padding: '24px', marginBottom: '20px', borderLeft: '4px solid #00a63a' }}>
                     <h3 style={{ margin: '0 0 6px', fontSize: '1rem', color: '#333' }}>📝 Template da Cobrança</h3>
                     <p style={{ fontSize: '0.82rem', color: '#888', marginBottom: '12px' }}>
                         Variáveis: <code>{'{responsavel}'}</code>, <code>{'{nome}'}</code>, <code>{'{valor}'}</code>, <code>{'{vencimento}'}</code>, <code>{'{link}'}</code>, <code>{'{descricao}'}</code>
@@ -479,7 +479,7 @@ export default function AdminFinanceiroCobrancas() {
             ) : (
                 <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong style={{ color: '#007d2f' }}>{devedores.length} inadimplente(s) encontrado(s)</strong>
+                        <strong style={{ color: '#00a63a' }}>{devedores.length} inadimplente(s) encontrado(s)</strong>
                         {selectedIds.size > 0 && <span style={{ fontSize: '0.85rem', color: '#666' }}>{selectedIds.size} selecionado(s)</span>}
                     </div>
                     <div style={{ overflowX: 'auto' }}>
@@ -491,7 +491,7 @@ export default function AdminFinanceiroCobrancas() {
                                             type="checkbox" 
                                             checked={devedores.length > 0 && selectedIds.size === devedores.length}
                                             onChange={toggleAll}
-                                            style={{ cursor: 'pointer', accentColor: '#007d2f', transform: 'scale(1.2)', appearance: 'checkbox', display: 'block', margin: '0 auto' }} 
+                                            style={{ cursor: 'pointer', accentColor: '#00a63a', transform: 'scale(1.2)', appearance: 'checkbox', display: 'block', margin: '0 auto' }} 
                                         />
                                     </th>
                                     {['Aluno', 'Modalidade', 'Responsável', 'Telefone', 'Valor Pendente', 'Vencimento'].map(h => (
@@ -510,10 +510,10 @@ export default function AdminFinanceiroCobrancas() {
                                                 sel ? next.delete(d.id) : next.add(d.id);
                                                 setSelectedIds(next);
                                             }}
-                                            style={{ borderBottom: '1px solid #f5f5f5', cursor: 'pointer', background: sel ? '#fff5f5' : 'transparent' }}
+                                            style={{ borderBottom: '1px solid #f5f5f5', cursor: 'pointer', background: sel ? '#eef8ff' : 'transparent' }}
                                         >
                                             <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                <input type="checkbox" checked={sel} readOnly style={{ pointerEvents: 'none', accentColor: '#007d2f', transform: 'scale(1.2)', appearance: 'checkbox', display: 'block' }} />
+                                                <input type="checkbox" checked={sel} readOnly style={{ pointerEvents: 'none', accentColor: '#00a63a', transform: 'scale(1.2)', appearance: 'checkbox', display: 'block' }} />
                                             </td>
                                             <td style={{ padding: '12px 16px', fontWeight: 500 }}>{d.nome}</td>
                                             <td style={{ padding: '12px 16px' }}>
@@ -523,7 +523,7 @@ export default function AdminFinanceiroCobrancas() {
                                             </td>
                                             <td style={{ padding: '12px 16px', color: '#555' }}>{d.responsavel || '—'}</td>
                                             <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#555' }}>{d.telefone || '—'}</td>
-                                            <td style={{ padding: '12px 16px', color: '#007d2f', fontWeight: 600 }}>{d.valorDevido}</td>
+                                            <td style={{ padding: '12px 16px', color: '#00a63a', fontWeight: 600 }}>{d.valorDevido}</td>
                                             <td style={{ padding: '12px 16px', color: '#555' }}>{d.vencimento}</td>
                                         </tr>
                                     );

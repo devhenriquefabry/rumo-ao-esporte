@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { doc, updateDoc, collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../../firebase';
 import type { StudentData } from '../../utils/financialTypes';
@@ -9,6 +9,13 @@ import { useLoading } from '../../components/LoadingService';
 import { SyncService } from '../../utils/SyncService';
 import { syncStudentFinancialData } from '../../utils/financialSync';
 import { validateCPF } from '../../utils/cpfUtils';
+import {
+    DEFAULT_PAYMENT_PROVIDER_CONFIG,
+    getPaymentProviderConfig,
+    withPaymentProviderPayload,
+    withPaymentProviderQuery,
+    type PaymentProviderConfig
+} from '../../utils/paymentProviderConfig';
 
 interface UseFinancialOperationsProps {
     workerUrl: string;
@@ -35,6 +42,14 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
     const [isMigrating, setIsMigrating] = useState(false);
     const [isCreatingCharge, setIsCreatingCharge] = useState(false);
     const [editingPayment, setEditingPayment] = useState<any | null>(null);
+    const [paymentConfig, setPaymentConfig] = useState<PaymentProviderConfig>(DEFAULT_PAYMENT_PROVIDER_CONFIG);
+
+    useEffect(() => {
+        getPaymentProviderConfig().then(setPaymentConfig);
+    }, []);
+
+    const workerPath = useCallback((path: string) => withPaymentProviderQuery(path, paymentConfig), [paymentConfig]);
+    const workerPayload = useCallback((payload: Record<string, any>) => withPaymentProviderPayload(payload, paymentConfig), [paymentConfig]);
 
     const sortPayments = (payments: any[]) => {
         return payments.sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
@@ -49,7 +64,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
     };
 
     const deletePaymentAfterReplacement = async (oldPaymentId: string) => {
-        const deleteRes = await fetch(`${workerUrl}/payments/${oldPaymentId}`, { method: 'DELETE' });
+        const deleteRes = await fetch(`${workerUrl}${workerPath(`/payments/${oldPaymentId}`)}`, { method: 'DELETE' });
         const deleteData = await deleteRes.json().catch(() => ({}));
         if (!deleteRes.ok || deleteData.success === false) {
             throw new Error(deleteData.error || deleteData.message || 'Pagamento recebido, mas falhou ao remover a fatura antiga.');
@@ -71,7 +86,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
     }) => {
         const resCreate = await fetch(`${workerUrl}/create-payment`, {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: JSON.stringify(workerPayload(payload)),
             headers: { 'Content-Type': 'application/json' }
         });
         const dataCreate = await readPaymentResponse(resCreate, 'Erro ao criar fatura ajustada.');
@@ -83,13 +98,14 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
         const newId = dataCreate.payment.id;
         await SyncService.savePaymentToFirestore(dataCreate.payment, registrationId);
 
-        const resPay = await fetch(`${workerUrl}/payments/${newId}/receive-in-cash`, {
+        const resPay = await fetch(`${workerUrl}${workerPath(`/payments/${newId}/receive-in-cash`)}`, {
             method: 'POST',
-            body: JSON.stringify({
+            body: JSON.stringify(workerPayload({
                 paymentDate: new Date().toISOString().split('T')[0],
                 value: value,
-                notify: false
-            }),
+                notify: false,
+                stagePay: paymentConfig.provider === 'cora' && paymentConfig.environment === 'stage'
+            })),
             headers: { 'Content-Type': 'application/json' }
         });
         const dataPay = await readPaymentResponse(resPay, 'Erro ao registrar recebimento na fatura ajustada.');
@@ -127,7 +143,8 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
                 reg.responsavel.cpf,
                 reg.alunos[0]?.nome || '',
                 reg.modalidade || '',
-                workerUrl
+                workerUrl,
+                paymentConfig
             );
 
             if (statusData) {
@@ -154,7 +171,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
         } finally {
             pendingSyncs.current.delete(reg.id);
         }
-    }, [workerUrl, setRegistrations]);
+    }, [workerUrl, setRegistrations, paymentConfig]);
 
     /**
      * Busca histórico E faz sync (Wrapper)
@@ -208,7 +225,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
 
         try {
             // Fetch ALL registrations to ensure we process everyone, not just what's visible on screen (Pagination)
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const snap = await getDocs(q);
             const allRegistrations = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudentData));
 
@@ -272,7 +289,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
         setLoadingOverlay(true, `Buscando alunos com parcelas em aberto...`);
 
         try {
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const snap = await getDocs(q);
             const all = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudentData));
 
@@ -327,7 +344,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
     const handleDeletePayment = async (id: string, selectedRegistration: StudentData | null) => {
         if (!window.confirm('Tem certeza que deseja apagar esta cobrança?')) return;
         try {
-            const res = await fetch(`${workerUrl}/payments/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${workerUrl}${workerPath(`/payments/${id}`)}`, { method: 'DELETE' });
             const data = await res.json();
             if (data.success) {
                 await SyncService.deletePaymentFromFirestore(id);
@@ -348,7 +365,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
             let count = 0;
             for (const p of pending) {
                 try {
-                    await fetch(`${workerUrl}/payments/${p.id}`, { method: 'DELETE' });
+                    await fetch(`${workerUrl}${workerPath(`/payments/${p.id}`)}`, { method: 'DELETE' });
                     count++;
                 } catch (err) {
                     console.error(`Erro ao apagar fatura ${p.id}:`, err);
@@ -360,7 +377,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
                 await SyncService.clearStudentPayments(selectedRegistration.id);
 
                 // Immediately update master registration status to 'vazio' to avoid sync lag
-                const regRef = doc(db, 'arena_simonesia_2026_registrations', selectedRegistration.id);
+                const regRef = doc(db, 'rumo_ao_esporte_2026_registrations', selectedRegistration.id);
                 await updateDoc(regRef, {
                     status: 'vazio',
                     financialPendingAmount: 0,
@@ -396,7 +413,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
 
     const handleUpdateDueDate = async (id: string, date: string, reg: StudentData | null, cb: () => void) => {
         try {
-            const res = await fetch(`${workerUrl}/payments/${id}`, { method: 'PUT', body: JSON.stringify({ dueDate: date }), headers: { 'Content-Type': 'application/json' } });
+            const res = await fetch(`${workerUrl}${workerPath(`/payments/${id}`)}`, { method: 'PUT', body: JSON.stringify(workerPayload({ dueDate: date })), headers: { 'Content-Type': 'application/json' } });
             if (res.ok) {
                 showAlert('Vencimento atualizado.', 'success');
                 cb();
@@ -461,9 +478,9 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
                 payload.discount = { value: 0 };
             }
 
-            const res = await fetch(`${workerUrl}/payments/${id}`, {
+            const res = await fetch(`${workerUrl}${workerPath(`/payments/${id}`)}`, {
                 method: 'PUT',
-                body: JSON.stringify(payload),
+                body: JSON.stringify(workerPayload(payload)),
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -488,7 +505,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
         if (!window.confirm('Restaurar desconto?')) return;
         const d = new Date(); d.setDate(d.getDate() + 2);
         try {
-            const res = await fetch(`${workerUrl}/payments/${id}`, { method: 'PUT', body: JSON.stringify({ dueDate: d.toISOString().split('T')[0], fine: { value: 0 }, interest: { value: 0 } }), headers: { 'Content-Type': 'application/json' } });
+            const res = await fetch(`${workerUrl}${workerPath(`/payments/${id}`)}`, { method: 'PUT', body: JSON.stringify(workerPayload({ dueDate: d.toISOString().split('T')[0], fine: { value: 0 }, interest: { value: 0 } })), headers: { 'Content-Type': 'application/json' } });
             if (res.ok) {
                 showAlert('Restaurado.', 'success');
                 fetchHistory(reg, true);
@@ -532,7 +549,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
                 multa: plan.multa || 0
             };
             console.log("[DEBUG] generateBatchCarnet: Payload:", payload);
-            const res = await fetch(`${workerUrl}/generate-carnet`, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } });
+            const res = await fetch(`${workerUrl}/generate-carnet`, { method: 'POST', body: JSON.stringify(workerPayload(payload)), headers: { 'Content-Type': 'application/json' } });
             console.log("[DEBUG] generateBatchCarnet: Status:", res.status);
             const data = await res.json();
             console.log("[DEBUG] generateBatchCarnet: Result Data:", data);
@@ -564,7 +581,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
         setIsMigrating(true);
         try {
             const plan = plans.find(p => p.id === pid);
-            await updateDoc(doc(db, 'arena_simonesia_2026_registrations', reg.id), { modalidade: mod, planId: pid });
+            await updateDoc(doc(db, 'rumo_ao_esporte_2026_registrations', reg.id), { modalidade: mod, planId: pid });
             showAlert('Migrado.', 'success');
             if (plan && pricingChoice) {
                 await generateBatchCarnet({ ...reg, modalidade: mod, planId: pid }, plan, mod, pricingChoice);
@@ -584,7 +601,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
             // Tenta buscar ID existente para evitar duplicidade, mas NÃO bloqueia se não achar.
             let customerId = null;
             try {
-                const custRes = await fetch(`${workerUrl}/customers-by-cpf/${cpf}`);
+                const custRes = await fetch(`${workerUrl}${workerPath(`/customers-by-cpf/${cpf}`)}`);
                 const custData = await custRes.json();
                 if (custData.customer) {
                     customerId = custData.customer.id;
@@ -610,7 +627,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
             };
             if (data.discount) payload.discount = data.discount;
 
-            const res = await fetch(`${workerUrl}/create-payment`, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } });
+            const res = await fetch(`${workerUrl}/create-payment`, { method: 'POST', body: JSON.stringify(workerPayload(payload)), headers: { 'Content-Type': 'application/json' } });
             const pRes = await res.json();
             if (pRes.success && pRes.payment) {
                 await SyncService.savePaymentToFirestore(pRes.payment, reg.id);
@@ -662,9 +679,12 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
                     notify: false
                 };
 
-                const res = await fetch(`${workerUrl}/payments/${id}/receive-in-cash`, {
+                const res = await fetch(`${workerUrl}${workerPath(`/payments/${id}/receive-in-cash`)}`, {
                     method: 'POST',
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify(workerPayload({
+                        ...payload,
+                        stagePay: paymentConfig.provider === 'cora' && paymentConfig.environment === 'stage'
+                    })),
                     headers: { 'Content-Type': 'application/json' }
                 });
 

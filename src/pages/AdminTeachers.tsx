@@ -35,7 +35,7 @@ export default function AdminTeachers() {
         telefone: '',
         cpf: '',
         active: true,
-        senha: 'arena2026'
+        senha: 'rumo2026'
     });
 
     const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
@@ -72,7 +72,7 @@ export default function AdminTeachers() {
 
     const fetchStudentCounts = async () => {
         try {
-            const snap = await getDocs(collection(db, 'arena_simonesia_2026_registrations'));
+            const snap = await getDocs(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const counts: Record<string, number> = {};
             snap.docs.forEach(doc => {
                 const data = doc.data();
@@ -126,7 +126,7 @@ export default function AdminTeachers() {
     };
 
     const resetForm = () => {
-        setFormData({ nome: '', email: '', telefone: '', cpf: '', active: true, senha: 'arena2026' });
+        setFormData({ nome: '', email: '', telefone: '', cpf: '', active: true, senha: 'rumo2026' });
         setEditingId(null);
     };
 
@@ -137,7 +137,7 @@ export default function AdminTeachers() {
             telefone: teacher.telefone,
             cpf: teacher.cpf,
             active: teacher.active !== false,
-            senha: teacher.senha || 'arena2026'
+            senha: teacher.senha || 'rumo2026'
         });
         setEditingId(teacher.id);
         setShowModal(true);
@@ -230,7 +230,7 @@ export default function AdminTeachers() {
                     <button
                         onClick={() => { resetForm(); setShowModal(true); }}
                         style={{
-                            padding: '12px 24px', background: '#007d2f', color: '#fff', border: 'none',
+                            padding: '12px 24px', background: '#00a63a', color: '#fff', border: 'none',
                             borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px',
                             boxShadow: '0 4px 12px rgba(0, 125, 47, 0.2)'
                         }}
@@ -251,7 +251,7 @@ export default function AdminTeachers() {
                         width: '100%', padding: '15px 15px 15px 50px', borderRadius: '15px', border: '1px solid #eee', fontSize: '1rem',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.02)', outline: 'none', transition: 'all 0.2s'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#007d2f'}
+                    onFocus={(e) => e.target.style.borderColor = '#00a63a'}
                     onBlur={(e) => e.target.style.borderColor = '#eee'}
                 />
             </div>

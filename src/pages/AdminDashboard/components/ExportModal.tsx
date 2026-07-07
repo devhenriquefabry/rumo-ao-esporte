@@ -16,6 +16,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     isOpen, onClose, activeModality, selectedColumns, onColumnToggle, onGenerate, currentSortBy
 }) => {
     const [pdfSortBy, setPdfSortBy] = useState<string>(currentSortBy);
+    const scopeLabel = activeModality ? activeModality.toUpperCase() : 'TODOS';
 
     useEffect(() => {
         if (isOpen) {
@@ -41,7 +42,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                         <X size={24} />
                     </button>
                 </div>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '20px' }}>Selecione as informações para <strong>{activeModality?.toUpperCase()}</strong>:</p>
+                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '20px' }}>Selecione as informações para <strong>{scopeLabel}</strong>:</p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '25px' }}>
                     {COLUMN_OPTIONS.map((col) => {
@@ -60,7 +61,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                     padding: '16px 10px', borderRadius: '12px',
                                     background: isSelected ? '#fff1f1' : '#f8f9fa',
-                                    border: `2px solid ${isSelected ? '#007d2f' : '#eee'}`,
+                                    border: `2px solid ${isSelected ? '#00a63a' : '#eee'}`,
                                     cursor: 'pointer', textAlign: 'center', position: 'relative',
                                     minHeight: '70px', transition: 'all 0.2s'
                                 }}>
@@ -68,17 +69,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                                         type="checkbox"
                                         checked={isSelected}
                                         onChange={() => onColumnToggle(col.id)}
-                                        style={{ position: 'absolute', top: '8px', right: '8px', accentColor: '#007d2f', width: '16px', height: '16px' }}
+                                        style={{ position: 'absolute', top: '8px', right: '8px', accentColor: '#00a63a', width: '16px', height: '16px' }}
                                     />
-                                    <span style={{ fontSize: '0.85rem', fontWeight: '700', color: isSelected ? '#007d2f' : '#666' }}>{col.label}</span>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: '700', color: isSelected ? '#00a63a' : '#666' }}>{col.label}</span>
 
                                     {isStatusFin && isSelected && (
                                         <div
                                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onColumnToggle('waButton'); }}
                                             style={{
                                                 marginTop: '12px', padding: '8px 12px', borderRadius: '8px',
-                                                background: isWaButtonSelected ? '#007d2f' : '#fff',
-                                                border: `1px solid ${isWaButtonSelected ? '#007d2f' : '#ddd'}`,
+                                                background: isWaButtonSelected ? '#00a63a' : '#fff',
+                                                border: `1px solid ${isWaButtonSelected ? '#00a63a' : '#ddd'}`,
                                                 display: 'flex', alignItems: 'center', gap: '8px',
                                                 transition: 'all 0.2s'
                                             }}
@@ -89,7 +90,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                                                 background: isWaButtonSelected ? '#fff' : 'transparent',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center'
                                             }}>
-                                                {isWaButtonSelected && <div style={{ width: '8px', height: '8px', background: '#007d2f', borderRadius: '1px' }} />}
+                                                {isWaButtonSelected && <div style={{ width: '8px', height: '8px', background: '#00a63a', borderRadius: '1px' }} />}
                                             </div>
                                             <span style={{
                                                 fontSize: '0.75rem', fontWeight: '600',
@@ -110,7 +111,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                         Ordenar PDF por:
                     </label>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                        <div style={{ position: 'absolute', left: '12px', pointerEvents: 'none', color: '#007d2f', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ position: 'absolute', left: '12px', pointerEvents: 'none', color: '#00a63a', display: 'flex', alignItems: 'center' }}>
                             <ArrowUpDown size={15} />
                         </div>
                         <select
@@ -133,7 +134,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                                 boxSizing: 'border-box'
                             }}
                             onFocus={(e) => {
-                                e.target.style.borderColor = '#007d2f';
+                                e.target.style.borderColor = '#00a63a';
                                 e.target.style.boxShadow = '0 0 0 2px rgba(0, 125, 47, 0.15)';
                             }}
                             onBlur={(e) => {
@@ -155,7 +156,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <button onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #ddd', background: '#fff', fontWeight: 'bold' }}>Cancelar</button>
-                    <button onClick={() => onGenerate(pdfSortBy)} disabled={selectedColumns.length === 0} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: 'bold', opacity: selectedColumns.length === 0 ? 0.5 : 1 }}>Gerar PDF</button>
+                    <button onClick={() => onGenerate(pdfSortBy)} disabled={selectedColumns.length === 0} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: 'bold', opacity: selectedColumns.length === 0 ? 0.5 : 1 }}>Gerar PDF</button>
                 </div>
             </div>
         </div>

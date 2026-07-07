@@ -151,7 +151,7 @@ export const AdminSystemTest: React.FC = () => {
                             </select>
                         </div>
                         {paymentMethod === 'CREDIT_CARD' && <p style={{ fontSize: '0.8rem', color: 'red' }}>Atenção: Teste de cartão enviará dados INVÁLIDOS propositalmente apenas para testar a rota.</p>}
-                        <button type="submit" disabled={loadingPayment} style={{ padding: '10px', background: '#007d2f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        <button type="submit" disabled={loadingPayment} style={{ padding: '10px', background: '#00a63a', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                             {loadingPayment ? 'Processando...' : 'Criar Pagamento Teste'}
                         </button>
                     </form>

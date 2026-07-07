@@ -23,7 +23,7 @@ const Portaria: React.FC = () => {
     useEffect(() => {
         const fetchAllStudents = async () => {
             try {
-                const q = query(collection(db, 'arena_simonesia_2026_registrations'), orderBy('responsavel.nome'));
+                const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'), orderBy('responsavel.nome'));
                 const snap = await getDocs(q);
 
                 const allStudents: StudentSearchItem[] = [];
@@ -108,7 +108,7 @@ const Portaria: React.FC = () => {
                     alignItems: 'center',
                     gap: '12px'
                 }}>
-                    <Clock size={24} color="#007d2f" />
+                    <Clock size={24} color="#00a63a" />
                     <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#1e293b', fontWeight: '800' }}>
                         ÚLTIMOS ACESSOS
                     </h2>
@@ -134,7 +134,7 @@ const Portaria: React.FC = () => {
                                 transition: 'all 0.2s',
                                 backgroundColor: loading ? '#f8fafc' : '#fff'
                             }}
-                            onFocus={(e) => e.target.style.borderColor = '#007d2f'}
+                            onFocus={(e) => e.target.style.borderColor = '#00a63a'}
                             onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                         />
 

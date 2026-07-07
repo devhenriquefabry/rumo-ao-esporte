@@ -75,7 +75,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateSel
                         width: '100%',
                         borderRadius: '50%',
                         border: 'none',
-                        background: isSelected ? '#007d2f' : isToday ? '#fff5f5' : 'transparent',
+                        background: isSelected ? '#00a63a' : isToday ? '#eef8ff' : 'transparent',
                         color: isSelected ? '#fff' : isDisabled ? '#ccc' : '#333',
                         fontWeight: isSelected || isToday ? 'bold' : 'normal',
                         cursor: isDisabled ? 'not-allowed' : 'pointer',
@@ -115,7 +115,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateSel
                 >
                     <ChevronLeft size={20} color="#666" />
                 </button>
-                <div style={{ fontWeight: 'bold', color: '#00237f', fontSize: '1rem', textTransform: 'capitalize' }}>
+                <div style={{ fontWeight: 'bold', color: '#17428f', fontSize: '1rem', textTransform: 'capitalize' }}>
                     {monthNames[month]} {year}
                 </div>
                 <button

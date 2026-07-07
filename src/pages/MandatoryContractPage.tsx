@@ -28,7 +28,7 @@ export default function MandatoryContractPage() {
 
             try {
                 const normalizedEmail = user.email.toLowerCase().trim();
-                const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
                 const snap = await getDocs(q);
 
                 if (!snap.empty) {
@@ -81,7 +81,7 @@ export default function MandatoryContractPage() {
 
     const handleLogout = async () => {
         await signOut(auth);
-        localStorage.removeItem('uba_student_auth');
+        localStorage.removeItem('rae_student_auth');
         navigate('/aluno/login');
     };
 
@@ -99,7 +99,7 @@ export default function MandatoryContractPage() {
                 signedAt: new Date().toISOString()
             };
 
-            const docRef = doc(db, 'arena_simonesia_2026_registrations', registrationId);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', registrationId);
             await updateDoc(docRef, { alunos: updatedAlunos });
 
             const nextPendingIndex = updatedAlunos.findIndex((a: any) => !a.signatureData);
@@ -130,7 +130,7 @@ export default function MandatoryContractPage() {
         return (
             <div style={{
                 height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexDirection: 'column', gap: '15px', color: '#00237f'
+                flexDirection: 'column', gap: '15px', color: '#17428f'
             }}>
                 <div className="spinner"></div>
                 <div>Verificando...</div>
@@ -144,7 +144,7 @@ export default function MandatoryContractPage() {
         <div style={{ background: '#f5f7fa', minHeight: '100vh' }}>
             {/* Header Alert - Drastically Compact */}
             <div style={{
-                background: '#007d2f', color: '#fff', padding: '8px',
+                background: '#00a63a', color: '#fff', padding: '8px',
                 textAlign: 'center', position: 'sticky', top: 0, zIndex: 1000,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}>
@@ -158,8 +158,8 @@ export default function MandatoryContractPage() {
                 {!showFullContract ? (
                     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
                         <img
-                            src="/arena-logo-transparent.png"
-                            alt="Arena Simonésia"
+                            src="/rumo-ao-esporte-logo.png"
+                            alt="Rumo ao Esporte"
                             style={{ width: '200px', height: 'auto', margin: '0 auto 5px', display: 'block' }}
                         />
                         {/* INTRO CARD - Much more compact */}
@@ -258,7 +258,7 @@ export default function MandatoryContractPage() {
                             <button
                                 onClick={() => { setShowFullContract(false); setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100); }}
                                 style={{
-                                    background: '#00237f', color: '#fff', border: 'none', padding: '10px 20px',
+                                    background: '#17428f', color: '#fff', border: 'none', padding: '10px 20px',
                                     borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.95rem'
                                 }}
                             >

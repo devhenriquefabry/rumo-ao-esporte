@@ -25,7 +25,7 @@ import {
     Store
 } from 'lucide-react';
 
-const MAIN_ADMIN_EMAIL = 'arenasimonesia@admin.com';
+const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
 
 export default function StudentLayout() {
     const navigate = useNavigate();
@@ -66,35 +66,35 @@ export default function StudentLayout() {
     // Security Check
     useEffect(() => {
         const checkAuth = async () => {
-            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail) {
                 // Skip normal security redirects while impersonating
                 return;
             }
 
-            const localAuth = localStorage.getItem('uba_student_auth');
+            const localAuth = localStorage.getItem('rae_student_auth');
             const currentEmail = auth.currentUser?.email?.toLowerCase().trim();
 
             if (currentEmail === MAIN_ADMIN_EMAIL) {
-                localStorage.removeItem('uba_student_auth');
-                localStorage.removeItem('uba_teacher_auth');
-                localStorage.setItem('uba_admin_auth', 'true');
+                localStorage.removeItem('rae_student_auth');
+                localStorage.removeItem('rae_teacher_auth');
+                localStorage.setItem('rae_admin_auth', 'true');
                 navigate('/admin/dashboard');
                 return;
             }
 
             if (!localAuth) {
                 if (auth.currentUser) {
-                    localStorage.setItem('uba_student_auth', 'true');
+                    localStorage.setItem('rae_student_auth', 'true');
                 } else {
                     navigate('/aluno/login');
                 }
             }
 
             // Also ensure we DO NOT have admin auth
-            if (localStorage.getItem('uba_admin_auth')) {
-                localStorage.removeItem('uba_admin_auth');
-                localStorage.removeItem('uba_student_auth');
+            if (localStorage.getItem('rae_admin_auth')) {
+                localStorage.removeItem('rae_admin_auth');
+                localStorage.removeItem('rae_student_auth');
                 await signOut(auth);
                 navigate('/aluno/login');
             }
@@ -105,11 +105,11 @@ export default function StudentLayout() {
     // Fetch basic info
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail || (user && user.email)) {
                 try {
                     const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
-                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
                     const snap = await getDocs(q);
 
                     const studentsAggregated: any[] = [];
@@ -174,9 +174,9 @@ export default function StudentLayout() {
 
     const handleLogout = async () => {
         await signOut(auth);
-        localStorage.removeItem('uba_student_auth');
-        localStorage.removeItem('uba_impersonated_student_email');
-        localStorage.removeItem('uba_impersonated_student_back_id');
+        localStorage.removeItem('rae_student_auth');
+        localStorage.removeItem('rae_impersonated_student_email');
+        localStorage.removeItem('rae_impersonated_student_back_id');
         navigate('/aluno/login');
     };
 
@@ -218,8 +218,8 @@ export default function StudentLayout() {
                                 width: '100%',
                                 padding: collapsed ? '12px 0' : '8px 16px',
                                 border: 'none',
-                                background: isActive ? '#fcf2f2' : 'transparent',
-                                color: isActive ? '#007d2f' : '#00237f',
+                                background: isActive ? '#eef8ff' : 'transparent',
+                                color: isActive ? '#00a63a' : '#17428f',
                                 textAlign: collapsed ? 'center' : 'left',
                                 cursor: 'pointer',
                                 fontSize: '0.82rem',
@@ -231,7 +231,7 @@ export default function StudentLayout() {
                                 borderRadius: '6px'
                             }}
                         >
-                            <span style={{ color: isActive ? '#007d2f' : '#00237f', display: 'flex' }}>{icon}</span>
+                            <span style={{ color: isActive ? '#00a63a' : '#17428f', display: 'flex' }}>{icon}</span>
                             {!collapsed && <span style={{ flex: 1, textTransform: 'uppercase' }}>{label}</span>}
                             {!collapsed && <ChevronRight size={16} style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />}
                         </button>
@@ -249,8 +249,8 @@ export default function StudentLayout() {
                                             style={{
                                                 padding: '6px 15px',
                                                 border: 'none',
-                                                background: isSubActive ? '#007d2f' : 'transparent',
-                                                color: isSubActive ? '#fff' : '#00237f',
+                                                background: isSubActive ? '#00a63a' : 'transparent',
+                                                color: isSubActive ? '#fff' : '#17428f',
                                                 borderRadius: '6px',
                                                 textAlign: 'left',
                                                 cursor: 'pointer',
@@ -261,7 +261,7 @@ export default function StudentLayout() {
                                                 gap: '8px'
                                             }}
                                         >
-                                            <div style={{ width: '6px', height: '6px', background: isSubActive ? '#fff' : '#00237f', borderRadius: '50%', opacity: isSubActive ? 1 : 0.4 }} />
+                                            <div style={{ width: '6px', height: '6px', background: isSubActive ? '#fff' : '#17428f', borderRadius: '50%', opacity: isSubActive ? 1 : 0.4 }} />
                                             <span style={{ textTransform: 'uppercase' }}>{sub.label}</span>
                                         </button>
                                     );
@@ -269,7 +269,7 @@ export default function StudentLayout() {
                             </div>
                         )}
                     </div>
-                    {!collapsed && <div style={{ height: '1px', background: 'rgba(0, 35, 127, 0.08)', margin: '4px -10px' }} />}
+                    {!collapsed && <div style={{ height: '1px', background: 'rgba(23, 66, 143, 0.10)', margin: '4px -10px' }} />}
                 </>
             );
         }
@@ -287,8 +287,8 @@ export default function StudentLayout() {
                         width: '100%',
                         padding: collapsed ? '12px 0' : '8px 16px',
                         border: 'none',
-                        background: isActive ? '#007d2f' : 'transparent',
-                        color: isActive ? '#fff' : '#00237f',
+                        background: isActive ? '#00a63a' : 'transparent',
+                        color: isActive ? '#fff' : '#17428f',
                         textAlign: collapsed ? 'center' : 'left',
                         cursor: 'pointer',
                         fontSize: '0.82rem',
@@ -303,12 +303,12 @@ export default function StudentLayout() {
                     onMouseOver={e => !isActive && (e.currentTarget.style.background = '#f0f4ff')}
                     onMouseOut={e => !isActive && (e.currentTarget.style.background = 'transparent')}
                 >
-                    <span style={{ color: isActive ? '#fff' : '#00237f', display: 'flex' }}>{icon}</span>
+                    <span style={{ color: isActive ? '#fff' : '#17428f', display: 'flex' }}>{icon}</span>
                     {!collapsed && <span style={{ flex: 1, textTransform: 'uppercase' }}>{label}</span>}
                     {badge > 0 && !collapsed && (
                         <span style={{
-                            background: isActive ? '#fff' : '#00237f',
-                            color: isActive ? '#007d2f' : '#fff',
+                            background: isActive ? '#fff' : '#17428f',
+                            color: isActive ? '#00a63a' : '#fff',
                             fontSize: '0.7rem',
                             fontWeight: 'bold',
                             padding: '2px 8px',
@@ -318,7 +318,7 @@ export default function StudentLayout() {
                         </span>
                     )}
                 </button>
-                {!collapsed && <div style={{ height: '1px', background: 'rgba(0, 35, 127, 0.08)', margin: '4px -10px' }} />}
+                {!collapsed && <div style={{ height: '1px', background: 'rgba(23, 66, 143, 0.10)', margin: '4px -10px' }} />}
             </div>
         );
     };
@@ -363,7 +363,7 @@ export default function StudentLayout() {
                 boxShadow: isMobile ? '0 -4px 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h3 style={{ margin: 0, color: '#00237f', fontSize: '1.2rem', textTransform: 'uppercase' }}>{title}</h3>
+                    <h3 style={{ margin: 0, color: '#17428f', fontSize: '1.2rem', textTransform: 'uppercase' }}>{title}</h3>
                     <button onClick={onClose} style={{ background: '#eee', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer' }}>
                         <X size={20} color="#555" />
                     </button>
@@ -397,7 +397,7 @@ export default function StudentLayout() {
                 transition: 'all 0.2s ease'
             }}
         >
-            <div style={{ color: '#007d2f', background: '#fcf2f2', padding: '12px', borderRadius: '14px', display: 'flex' }}>
+            <div style={{ color: '#00a63a', background: '#eef8ff', padding: '12px', borderRadius: '14px', display: 'flex' }}>
                 <Icon size={22} strokeWidth={2.5} />
             </div>
             <span style={{
@@ -414,8 +414,8 @@ export default function StudentLayout() {
     );
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f7fa', flexDirection: 'column' }}>
-            {localStorage.getItem('uba_impersonated_student_email') && (
+        <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)', flexDirection: 'column' }}>
+            {localStorage.getItem('rae_impersonated_student_email') && (
                 <div style={{
                     background: '#1e293b',
                     color: '#fff',
@@ -433,10 +433,10 @@ export default function StudentLayout() {
                     <span>👁️ MODO VISUALIZAÇÃO: Simulando acesso do atleta ({studentName})</span>
                     <button
                         onClick={async () => {
-                            localStorage.removeItem('uba_impersonated_student_email');
-                            const backId = localStorage.getItem('uba_impersonated_student_back_id');
+                            localStorage.removeItem('rae_impersonated_student_email');
+                            const backId = localStorage.getItem('rae_impersonated_student_back_id');
                             if (backId) {
-                                localStorage.removeItem('uba_impersonated_student_back_id');
+                                localStorage.removeItem('rae_impersonated_student_back_id');
                                 window.location.href = `/admin/details/${backId}`;
                             } else {
                                 window.location.href = '/admin/dashboard';
@@ -466,8 +466,8 @@ export default function StudentLayout() {
             {isMobile && (
                 <div style={{
                     padding: '15px 20px',
-                    background: '#fff',
-                    borderBottom: '1px solid #eee',
+                    background: 'linear-gradient(135deg, #17428f 0%, #09245c 100%)',
+                    borderBottom: '1px solid rgba(255,255,255,0.14)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -476,11 +476,11 @@ export default function StudentLayout() {
                     zIndex: 90
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ height: '30px' }} />
-                        <span style={{ fontWeight: 'bold', color: '#00237f' }}>ÁREA DO ALUNO</span>
+                        <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ height: '34px', borderRadius: '6px' }} />
+                        <span style={{ fontWeight: 'bold', color: '#fff' }}>ÁREA DO ALUNO</span>
                     </div>
                     {/* User Avatar Placeholder */}
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#00237f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f4c20d', color: '#09245c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px' }}>
                         {studentName.charAt(0)}
                     </div>
                 </div>
@@ -499,8 +499,8 @@ export default function StudentLayout() {
                 {!isMobile && (
                     <aside style={{
                         width: collapsed ? '80px' : '260px',
-                        background: '#fff',
-                        borderRight: '1px solid #eee',
+                        background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)',
+                        borderRight: '1px solid #dce7f3',
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'sticky',
@@ -510,8 +510,8 @@ export default function StudentLayout() {
                         transition: 'all 0.3s ease'
                     }}>
                         {/* Sidebar Header */}
-                        <div style={{ width: '100%', borderBottom: '1px solid #f0f0f0', overflow: 'hidden', padding: collapsed ? '10px' : '0' }}>
-                            <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ width: '100%', display: 'block', objectFit: 'contain', height: collapsed ? '40px' : 'auto' }} />
+                        <div style={{ width: '100%', borderBottom: '1px solid #dce7f3', overflow: 'hidden', padding: collapsed ? '8px' : '14px', background: 'radial-gradient(circle at 22% 8%, rgba(244, 194, 13, 0.24), transparent 34%), linear-gradient(135deg, #17428f 0%, #09245c 100%)' }}>
+                            <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ width: '100%', display: 'block', objectFit: 'contain', height: collapsed ? '56px' : 'auto', borderRadius: '8px', boxShadow: collapsed ? 'none' : '0 14px 28px rgba(6, 26, 64, 0.28)' }} />
                         </div>
 
                         {/* Nav */}
@@ -528,15 +528,15 @@ export default function StudentLayout() {
                         </nav>
 
                         {/* Sidebar Footer */}
-                        <div style={{ padding: collapsed ? '20px 5px' : '20px', borderTop: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ padding: collapsed ? '20px 5px' : '20px', borderTop: '1px solid #dce7f3', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <button
                                 onClick={() => setCollapsed(!collapsed)}
                                 style={{
                                     width: '100%',
                                     padding: '8px',
-                                    background: '#f5f7fa',
+                                    background: '#eef8ff',
                                     border: 'none',
-                                    color: '#555',
+                                    color: '#17428f',
                                     borderRadius: '8px',
                                     cursor: 'pointer',
                                     display: 'flex',
@@ -555,8 +555,8 @@ export default function StudentLayout() {
                                     width: '100%',
                                     padding: '12px',
                                     background: '#fff',
-                                    border: '1px solid #ddd',
-                                    color: '#666',
+                                    border: '1px solid #dce7f3',
+                                    color: '#17428f',
                                     borderRadius: '8px',
                                     cursor: 'pointer',
                                     fontWeight: '700',
@@ -585,12 +585,12 @@ export default function StudentLayout() {
                 bottom: 0,
                 left: isMobile ? 0 : (collapsed ? '80px' : '260px'),
                 right: 0,
-                background: '#fff',
-                borderTop: '1px solid #eee',
+                background: 'rgba(255,255,255,0.96)',
+                borderTop: '1px solid #dce7f3',
                 display: 'flex',
                 height: '70px',
                 zIndex: 300,
-                boxShadow: '0 -2px 10px rgba(0,0,0,0.05)',
+                boxShadow: '0 -10px 28px rgba(6, 26, 64, 0.10)',
                 transition: 'left 0.3s ease'
             }}>
                 <button
@@ -599,13 +599,13 @@ export default function StudentLayout() {
                     style={{
                         flex: 1,
                         border: 'none',
-                        background: activeSheet === 'menu' ? '#fff5f5' : 'transparent',
+                        background: activeSheet === 'menu' ? 'linear-gradient(180deg, #eef8ff, #f2fff7)' : 'transparent',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '4px',
-                        color: activeSheet === 'menu' ? '#007d2f' : '#888',
+                        color: activeSheet === 'menu' ? '#17428f' : '#63708a',
                         fontSize: '0.8rem',
                         fontWeight: 'bold',
                         cursor: 'pointer'
@@ -614,7 +614,7 @@ export default function StudentLayout() {
                     <Menu size={22} />
                     MENU
                 </button>
-                <div style={{ width: '1px', background: '#eee', height: '30px', alignSelf: 'center' }} />
+                <div style={{ width: '1px', background: '#dce7f3', height: '30px', alignSelf: 'center' }} />
 
                 {storeEnabled && (
                     <>
@@ -624,13 +624,13 @@ export default function StudentLayout() {
                             style={{
                                 flex: 1,
                                 border: 'none',
-                                background: location.pathname === '/aluno/loja' ? '#fff5f5' : 'transparent',
+                                background: location.pathname === '/aluno/loja' ? 'linear-gradient(180deg, #eef8ff, #f2fff7)' : 'transparent',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '4px',
-                                color: location.pathname === '/aluno/loja' ? '#007d2f' : '#888',
+                                color: location.pathname === '/aluno/loja' ? '#17428f' : '#63708a',
                                 fontSize: '0.8rem',
                                 fontWeight: 'bold',
                                 cursor: 'pointer'
@@ -639,7 +639,7 @@ export default function StudentLayout() {
                             <Store size={22} />
                             LOJA
                         </button>
-                        <div style={{ width: '1px', background: '#eee', height: '30px', alignSelf: 'center' }} />
+                        <div style={{ width: '1px', background: '#dce7f3', height: '30px', alignSelf: 'center' }} />
                     </>
                 )}
 
@@ -649,20 +649,20 @@ export default function StudentLayout() {
                     style={{
                         flex: 1,
                         border: 'none',
-                        background: activeSheet === 'gate' ? '#fff5f5' : 'transparent',
+                        background: activeSheet === 'gate' ? 'linear-gradient(180deg, #eef8ff, #f2fff7)' : 'transparent',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '4px',
-                        color: activeSheet === 'gate' ? '#007d2f' : '#888',
+                        color: activeSheet === 'gate' ? '#17428f' : '#63708a',
                         fontSize: '0.8rem',
                         fontWeight: 'bold',
                         cursor: 'pointer'
                     }}
                 >
                     <div style={{
-                        background: '#007d2f',
+                        background: 'linear-gradient(135deg, #00a63a 0%, #17428f 100%)',
                         borderRadius: '50%',
                         width: '30px',
                         height: '30px',
@@ -705,7 +705,7 @@ export default function StudentLayout() {
                         {/* Section 3: Institucional */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                             <MenuGridItem icon={Instagram} label="Instagram" onClick={() => window.open('https://www.instagram.com/clubeuba/', '_blank')} />
-                            <MenuGridItem icon={Radio} label="Rádio Arena Simonésia" link="/aluno/radio" />
+                            <MenuGridItem icon={Radio} label="Rádio Rumo ao Esporte" link="/aluno/radio" />
                         </div>
 
                         <div style={{ marginTop: '10px' }}>
@@ -715,8 +715,8 @@ export default function StudentLayout() {
                                     width: '100%',
                                     padding: '14px',
                                     background: '#fff',
-                                    border: '1px solid #ffcfcf',
-                                    color: '#007d2f',
+                                    border: '1px solid #c9f2d6',
+                                    color: '#00a63a',
                                     borderRadius: '12px',
                                     fontWeight: 'bold',
                                     display: 'flex',
@@ -755,7 +755,7 @@ export default function StudentLayout() {
                                             padding: '6px 12px',
                                             borderRadius: '20px',
                                             border: 'none',
-                                            background: selectedStudentIndex === idx ? '#007d2f' : '#eee',
+                                            background: selectedStudentIndex === idx ? '#00a63a' : '#eee',
                                             color: selectedStudentIndex === idx ? '#fff' : '#666',
                                             fontSize: '0.75rem',
                                             fontWeight: 'bold',
@@ -770,7 +770,7 @@ export default function StudentLayout() {
                         )}
 
                         <div style={{ marginBottom: '15px' }}>
-                            <h4 style={{ margin: 0, color: '#00237f', textTransform: 'uppercase', fontSize: '1rem' }}>
+                            <h4 style={{ margin: 0, color: '#17428f', textTransform: 'uppercase', fontSize: '1rem' }}>
                                 {allStudents[selectedStudentIndex]?.nome || studentName}
                             </h4>
                         </div>
@@ -800,13 +800,13 @@ export default function StudentLayout() {
                         </div>
 
                         <div style={{
-                            background: '#fcf2f2',
+                            background: '#eef8ff',
                             padding: '12px',
                             borderRadius: '10px',
-                            border: '1px dashed #ffcfcf',
+                            border: '1px dashed #c9f2d6',
                             margin: '0 20px'
                         }}>
-                            <p style={{ fontSize: '0.75rem', color: '#007d2f', margin: 0, fontWeight: 'bold' }}>
+                            <p style={{ fontSize: '0.75rem', color: '#00a63a', margin: 0, fontWeight: 'bold' }}>
                                 CÓDIGO DE ACESSO INDIVIDUAL
                             </p>
                         </div>

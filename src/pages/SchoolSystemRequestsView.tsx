@@ -115,7 +115,7 @@ const formatDate = (value: any) => {
 };
 
 export default function SchoolSystemRequestsView() {
-  const [authenticated, setAuthenticated] = useState(() => Boolean(localStorage.getItem('uba_admin_auth')));
+  const [authenticated, setAuthenticated] = useState(() => Boolean(localStorage.getItem('rae_admin_auth')));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [items, setItems] = useState<RequestItem[]>([]);
@@ -138,7 +138,7 @@ export default function SchoolSystemRequestsView() {
     try {
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        localStorage.setItem('uba_admin_auth', 'true');
+        localStorage.setItem('rae_admin_auth', 'true');
       } catch {
         const employeeQuery = query(
           collection(db, 'employees'),
@@ -150,7 +150,7 @@ export default function SchoolSystemRequestsView() {
         if (employeeSnapshot.empty) throw new Error('Credenciais inválidas ou acesso não autorizado.');
 
         const employeeDoc = employeeSnapshot.docs[0];
-        localStorage.setItem('uba_admin_auth', JSON.stringify({ id: employeeDoc.id, ...employeeDoc.data() }));
+        localStorage.setItem('rae_admin_auth', JSON.stringify({ id: employeeDoc.id, ...employeeDoc.data() }));
       }
 
       setAuthenticated(true);
@@ -170,8 +170,8 @@ export default function SchoolSystemRequestsView() {
     return (
       <div className="landing-page" style={{ padding: '20px' }}>
         <div className="landing-content" style={{ background: '#fff', color: '#343a40', width: '100%', maxWidth: '460px', padding: '34px' }}>
-          <Lock size={44} color="#007d2f" />
-          <h1 style={{ color: '#007d2f', fontSize: '1.6rem', marginTop: '14px', marginBottom: '8px' }}>Acesso às solicitações</h1>
+          <Lock size={44} color="#00a63a" />
+          <h1 style={{ color: '#00a63a', fontSize: '1.6rem', marginTop: '14px', marginBottom: '8px' }}>Acesso às solicitações</h1>
           <p style={{ color: '#6c757d', marginBottom: '24px' }}>Entre com uma conta administrativa para visualizar os cadastros recebidos.</p>
           <form onSubmit={handleLogin} style={{ width: '100%', display: 'grid', gap: '14px' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
@@ -194,7 +194,7 @@ export default function SchoolSystemRequestsView() {
   return (
     <div className="container">
       <header className="header">
-        <img src="/arena-logo-transparent.png" alt="Logo" className="header-logo" onError={event => { event.currentTarget.style.display = 'none'; }} />
+        <img src="/rumo-ao-esporte-logo.png" alt="Logo" className="header-logo" onError={event => { event.currentTarget.style.display = 'none'; }} />
         <h1 className="header-title">SOLICITAÇÕES DE SISTEMA PARA ESCOLA</h1>
       </header>
 
@@ -223,8 +223,8 @@ export default function SchoolSystemRequestsView() {
 }
 
 function RequestCard({ item }: { item: RequestItem }) {
-  const primary = item.escola?.palette?.primary || '#007d2f';
-  const secondary = item.escola?.palette?.secondary || '#00451d';
+  const primary = item.escola?.palette?.primary || '#00a63a';
+  const secondary = item.escola?.palette?.secondary || '#06376d';
   const accent = item.escola?.palette?.accent || '#f8f9fa';
 
   const chipStyle = {

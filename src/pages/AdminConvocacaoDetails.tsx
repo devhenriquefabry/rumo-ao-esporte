@@ -60,7 +60,7 @@ function SortableJogadorItem({ id, jogador, showNumbers, onRemove, onSwap }: Sor
                         ? `/professor/aluno/${jogador.regId || jogador.id.split('_')[0]}/${jogador.id.includes('_') ? jogador.id.split('_')[1] : '0'}`
                         : `/admin/details/${jogador.regId || jogador.id.split('_')[0]}`
                     }
-                    style={{ fontWeight: '800', color: '#007d2f', textDecoration: 'underline', textTransform: 'uppercase', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+                    style={{ fontWeight: '800', color: '#00a63a', textDecoration: 'underline', textTransform: 'uppercase', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
                 >
                     {jogador.nome}
                 </Link>
@@ -74,7 +74,7 @@ function SortableJogadorItem({ id, jogador, showNumbers, onRemove, onSwap }: Sor
                             }
                             style={{
                                 fontSize: '0.65rem',
-                                color: '#007d2f',
+                                color: '#00a63a',
                                 fontWeight: 'bold',
                                 background: '#fff1f0',
                                 padding: '1px 5px',
@@ -96,7 +96,7 @@ function SortableJogadorItem({ id, jogador, showNumbers, onRemove, onSwap }: Sor
                             width: '45px',
                             padding: '6px 4px',
                             textAlign: 'center',
-                            border: '2px solid #007d2f',
+                            border: '2px solid #00a63a',
                             borderRadius: '6px',
                             fontSize: '0.9rem',
                             fontWeight: 'bold',
@@ -233,7 +233,7 @@ export default function AdminConvocacaoDetails() {
     const fetchConvocacao = async () => {
         try {
             setLoading(true, 'Carregando detalhes...');
-            const docRef = doc(db, 'arena_simonesia_2026_convocacoes', id as string);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_convocacoes', id as string);
             const snap = await getDoc(docRef);
             if (snap.exists()) {
                 const data = { id: snap.id, ...snap.data() } as Convocacao;
@@ -247,7 +247,7 @@ export default function AdminConvocacaoDetails() {
                 setUseRivalInfo(!!data.rivalNome || !!data.rivalLogo);
                 setCasaNome(data.casaNome || '');
                 setCasaLogo(data.casaLogo || '');
-                setUseCasaInfo(!!data.casaLogo || (!!data.casaNome && data.casaNome !== 'Arena Simonésia'));
+                setUseCasaInfo(!!data.casaLogo || (!!data.casaNome && data.casaNome !== 'Rumo ao Esporte'));
                 setShowNumbers(data.showNumbers !== false); // Default to true
 
                 // Converte Unix para formato de input datetime-local
@@ -328,7 +328,7 @@ export default function AdminConvocacaoDetails() {
         if (!convocacao) return;
         try {
             setLoading(true, 'Salvando alterações...');
-            const docRef = doc(db, 'arena_simonesia_2026_convocacoes', convocacao.id as string);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_convocacoes', convocacao.id as string);
             const updatedData = {
                 ...convocacao,
                 jogo: jogoNome,
@@ -336,7 +336,7 @@ export default function AdminConvocacaoDetails() {
                 tecnico: useTecnico ? tecnico.trim() : '',
                 rivalNome: useRivalInfo ? rivalNome.trim() : '',
                 rivalLogo: useRivalInfo ? (rivalLogo || '') : '',
-                casaNome: useCasaInfo ? casaNome.trim() : 'Arena Simonésia',
+                casaNome: useCasaInfo ? casaNome.trim() : 'Rumo ao Esporte',
                 casaLogo: useCasaInfo ? (casaLogo || '') : '',
                 showNumbers,
                 showDataJogo: useDataJogo,
@@ -363,7 +363,7 @@ export default function AdminConvocacaoDetails() {
             async () => {
                 try {
                     setLoading(true, 'Excluindo...');
-                    const docRef = doc(db, 'arena_simonesia_2026_convocacoes', id);
+                    const docRef = doc(db, 'rumo_ao_esporte_2026_convocacoes', id);
                     await deleteDoc(docRef);
                     showAlert('Convocação excluída com sucesso!', 'success');
                     navigate('/admin/jogos/convocacao');
@@ -499,13 +499,13 @@ export default function AdminConvocacaoDetails() {
                     </button>
                     <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Trophy size={isMobile ? 20 : 24} color="#007d2f" />
+                            <Trophy size={isMobile ? 20 : 24} color="#00a63a" />
                             <input
                                 type="text"
                                 value={jogoNome}
                                 onChange={e => setJogoNome(e.target.value)}
                                 placeholder="Nome do Jogo"
-                                style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', border: 'none', borderBottom: '2px solid #eee', color: '#007d2f', fontWeight: '800', outline: 'none', padding: '0 5px 2px 5px', width: '100%', maxWidth: '400px', background: 'transparent' }}
+                                style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', border: 'none', borderBottom: '2px solid #eee', color: '#00a63a', fontWeight: '800', outline: 'none', padding: '0 5px 2px 5px', width: '100%', maxWidth: '400px', background: 'transparent' }}
                             />
                         </div>
                         <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -519,7 +519,7 @@ export default function AdminConvocacaoDetails() {
                                     }}
                                     style={{ opacity: 0, width: 0, height: 0 }}
                                 />
-                                <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useDataJogo ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
+                                <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useDataJogo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
                                 <span style={{ position: 'absolute', height: '12px', width: '12px', left: useDataJogo ? '15px' : '2px', bottom: '2px', backgroundColor: 'white', borderRadius: '50%', transition: '.4s' }}></span>
                             </label>
                             {useDataJogo ? (
@@ -547,7 +547,7 @@ export default function AdminConvocacaoDetails() {
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button
                             onClick={handleSave}
-                            style={{ flex: 1, background: '#007d2f', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(195,34,40,0.3)', fontSize: isMobile ? '0.85rem' : '1rem' }}
+                            style={{ flex: 1, background: '#00a63a', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(195,34,40,0.3)', fontSize: isMobile ? '0.85rem' : '1rem' }}
                         >
                             <Save size={18} /> SALVAR
                         </button>
@@ -569,7 +569,7 @@ export default function AdminConvocacaoDetails() {
                 transition: 'all 0.3s ease',
                 gap: '15px'
             }}>
-                <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: '800', color: showNumbers ? '#007d2f' : '#666', textAlign: 'center' }}>
+                <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: '800', color: showNumbers ? '#00a63a' : '#666', textAlign: 'center' }}>
                     {showNumbers ? (isMobile ? 'NÚMEROS ATIVOS' : 'NÚMEROS DAS CAMISAS ATIVOS NA ARTE') : (isMobile ? 'NÚMEROS OCULTOS' : 'NÚMEROS DAS CAMISAS OCULTOS NA ARTE')}
                 </span>
                 <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer', flexShrink: 0 }}>
@@ -581,7 +581,7 @@ export default function AdminConvocacaoDetails() {
                     />
                     <span style={{
                         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: showNumbers ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s'
+                        backgroundColor: showNumbers ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
                     }}></span>
                     <span style={{
                         position: 'absolute', height: '14px', width: '14px', left: showNumbers ? '23px' : '3px', bottom: '3px',
@@ -605,7 +605,7 @@ export default function AdminConvocacaoDetails() {
                                 }}
                                 style={{ opacity: 0, width: 0, height: 0 }}
                             />
-                            <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useTecnico ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
+                            <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useTecnico ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
                             <span style={{ position: 'absolute', height: '14px', width: '14px', left: useTecnico ? '23px' : '3px', bottom: '3px', backgroundColor: 'white', borderRadius: '50%', transition: '.4s' }}></span>
                         </label>
                     </div>
@@ -634,7 +634,7 @@ export default function AdminConvocacaoDetails() {
             {/* Casa Options */}
             <div style={{ background: useCasaInfo ? '#fff1f0' : '#f5f5f5', padding: '20px', borderRadius: '12px', border: useCasaInfo ? '1px solid #ffccc7' : '1px solid #ddd', marginBottom: '20px', boxShadow: useCasaInfo ? '0 2px 8px rgba(0,0,0,0.05)' : 'none', transition: 'all 0.3s' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: useCasaInfo ? '15px' : '0' }}>
-                    <label style={{ fontSize: '0.9rem', fontWeight: '800', color: useCasaInfo ? '#007d2f' : '#666' }}>INFORMAÇÕES DO TIME DA CASA (Opcional)</label>
+                    <label style={{ fontSize: '0.9rem', fontWeight: '800', color: useCasaInfo ? '#00a63a' : '#666' }}>INFORMAÇÕES DO TIME DA CASA (Opcional)</label>
                     <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
                         <input
                             type="checkbox"
@@ -642,13 +642,13 @@ export default function AdminConvocacaoDetails() {
                             onChange={e => {
                                 setUseCasaInfo(e.target.checked);
                                 if (!e.target.checked) {
-                                    setCasaNome('Arena Simonésia');
+                                    setCasaNome('Rumo ao Esporte');
                                     setCasaLogo('');
                                 }
                             }}
                             style={{ opacity: 0, width: 0, height: 0 }}
                         />
-                        <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useCasaInfo ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
+                        <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useCasaInfo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
                         <span style={{ position: 'absolute', height: '14px', width: '14px', left: useCasaInfo ? '23px' : '3px', bottom: '3px', backgroundColor: 'white', borderRadius: '50%', transition: '.4s' }}></span>
                     </label>
                 </div>
@@ -656,13 +656,13 @@ export default function AdminConvocacaoDetails() {
                 {useCasaInfo && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '800', color: '#007d2f', marginBottom: '8px' }}>NOME DO TIME DA CASA</label>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '800', color: '#00a63a', marginBottom: '8px' }}>NOME DO TIME DA CASA</label>
                             <div style={{ position: 'relative' }}>
                                 <input
                                     type="text"
                                     value={casaNome}
                                     onChange={e => setCasaNome(e.target.value)}
-                                    placeholder="Ex: Arena Simonésia"
+                                    placeholder="Ex: Rumo ao Esporte"
                                     style={{ width: '100%', padding: '10px', paddingRight: '35px', border: '1px solid #ffccc7', borderRadius: '8px', outline: 'none' }}
                                 />
                                 {casaNome && (
@@ -676,7 +676,7 @@ export default function AdminConvocacaoDetails() {
                             </div>
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '800', color: '#007d2f', marginBottom: '8px' }}>LOGO DA CASA</label>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '800', color: '#00a63a', marginBottom: '8px' }}>LOGO DA CASA</label>
                             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                 <input
                                     type="file"
@@ -718,7 +718,7 @@ export default function AdminConvocacaoDetails() {
                             }}
                             style={{ opacity: 0, width: 0, height: 0 }}
                         />
-                        <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useRivalInfo ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
+                        <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: useRivalInfo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s' }}></span>
                         <span style={{ position: 'absolute', height: '14px', width: '14px', left: useRivalInfo ? '23px' : '3px', bottom: '3px', backgroundColor: 'white', borderRadius: '50%', transition: '.4s' }}></span>
                     </label>
                 </div>
@@ -778,8 +778,8 @@ export default function AdminConvocacaoDetails() {
                     style={{
                         width: '100%',
                         background: '#fff',
-                        color: '#007d2f',
-                        border: '2px solid #007d2f',
+                        color: '#00a63a',
+                        border: '2px solid #00a63a',
                         padding: '15px',
                         borderRadius: '12px',
                         fontWeight: '900',
@@ -792,7 +792,7 @@ export default function AdminConvocacaoDetails() {
                         transition: 'all 0.2s ease',
                         boxShadow: '0 4px 12px rgba(195,34,40,0.1)'
                     }}
-                    onMouseOver={e => { e.currentTarget.style.background = '#fff5f5'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseOver={e => { e.currentTarget.style.background = '#eef8ff'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                     onMouseOut={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
                     <Plus size={22} strokeWidth={3} /> ADICIONAR JOGADOR À CONVOCAÇÃO
@@ -887,7 +887,7 @@ export default function AdminConvocacaoDetails() {
                                             <div>
                                                 <Link
                                                     to={`/admin/details/${student.regId}`}
-                                                    style={{ fontWeight: '800', color: '#007d2f', textDecoration: 'underline', textTransform: 'uppercase', fontSize: '0.95rem', display: 'block' }}
+                                                    style={{ fontWeight: '800', color: '#00a63a', textDecoration: 'underline', textTransform: 'uppercase', fontSize: '0.95rem', display: 'block' }}
                                                 >
                                                     {student.aluno?.nome}
                                                 </Link>

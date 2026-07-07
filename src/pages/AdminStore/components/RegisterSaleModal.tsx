@@ -101,7 +101,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
     const fetchStudents = async () => {
         setLoadingStudents(true);
         try {
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'), orderBy('createdAt', 'desc'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'), orderBy('createdAt', 'desc'));
             const snap = await getDocs(q);
             const list: StudentOption[] = [];
             snap.docs.forEach(docSnap => {
@@ -132,7 +132,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
     const fetchProducts = async () => {
         setLoadingProducts(true);
         try {
-            const q = query(collection(db, 'uba_store_products'));
+            const q = query(collection(db, 'rae_store_products'));
             const snap = await getDocs(q);
             const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as StoreProduct)).filter(p => p.active && p.stock > 0);
             setProducts(list);
@@ -198,7 +198,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                 billingType: selectedPaymentMethod,
                 responsibleName: selectedStudent.responsavelNome,
                 responsibleCpf: selectedStudent.responsavelCpf,
-                responsibleEmail: selectedStudent.responsavelEmail || `uba_${Date.now()}@temp.com`,
+                responsibleEmail: selectedStudent.responsavelEmail || `rae_${Date.now()}@temp.com`,
                 responsiblePhone: selectedStudent.responsavelPhone,
                 childName: selectedStudent.nome,
                 description,
@@ -249,7 +249,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                     const compressedBlob = await compressImage(receiptFile);
                     const formData = new FormData();
                     formData.append('file', compressedBlob, receiptFile.name);
-                    formData.append('folder', 'uba_store_receipts');
+                    formData.append('folder', 'rae_store_receipts');
 
                     const response = await fetch(`${workerUrl}/images/upload`, {
                         method: 'POST',
@@ -316,10 +316,10 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                 updatedAt: new Date().toISOString(),
             };
 
-            await addDoc(collection(db, 'uba_store_orders'), orderPayload);
+            await addDoc(collection(db, 'rae_store_orders'), orderPayload);
 
             // Decrement stock
-            await updateDoc(doc(db, 'uba_store_products', selectedProduct.id!), {
+            await updateDoc(doc(db, 'rae_store_products', selectedProduct.id!), {
                 stock: increment(-quantity),
             });
 
@@ -363,7 +363,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                 {/* Header */}
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#00237f', fontWeight: 800 }}>
+                        <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#17428f', fontWeight: 800 }}>
                             {step === 6 ? 'Venda Registrada!' : 'Registrar Venda'}
                         </h2>
                         {step < 6 && (
@@ -374,11 +374,11 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                     return (
                                         <div key={i} style={{
                                             display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 'bold',
-                                            color: step > engineStep ? '#2e7d32' : step === engineStep ? '#00237f' : '#bbb',
+                                            color: step > engineStep ? '#2e7d32' : step === engineStep ? '#17428f' : '#bbb',
                                         }}>
                                             <div style={{
                                                 width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                background: step > engineStep ? '#2e7d32' : step === engineStep ? '#00237f' : '#eee',
+                                                background: step > engineStep ? '#2e7d32' : step === engineStep ? '#17428f' : '#eee',
                                                 color: step > engineStep || step === engineStep ? '#fff' : '#bbb', fontSize: '0.7rem',
                                             }}>
                                                 {step > engineStep ? <Check size={12} /> : i + 1}
@@ -422,11 +422,11 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                     onClick={() => { setSaleType('charge'); setStep(1); }}
                                     style={{
                                         flex: 1, padding: '24px', borderRadius: '16px', background: saleType === 'charge' ? '#e8eaf6' : '#f9f9f9',
-                                        border: saleType === 'charge' ? '2px solid #00237f' : '1px solid #ddd',
+                                        border: saleType === 'charge' ? '2px solid #17428f' : '1px solid #ddd',
                                         cursor: 'pointer', transition: 'all 0.15s', textAlign: 'center'
                                     }}
                                 >
-                                    <div style={{ background: '#00237f', width: 48, height: 48, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
+                                    <div style={{ background: '#17428f', width: 48, height: 48, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
                                         <CreditCard size={24} color="#fff" />
                                     </div>
                                     <h3 style={{ margin: '0 0 5px', color: '#333' }}>Gerar cobrança</h3>
@@ -464,7 +464,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                             onClick={() => { setSelectedStudent(s); setStep(2); }}
                                             style={{
                                                 display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px',
-                                                border: selectedStudent?.studentId === s.studentId ? '2px solid #00237f' : '1px solid #eee',
+                                                border: selectedStudent?.studentId === s.studentId ? '2px solid #17428f' : '1px solid #eee',
                                                 borderRadius: '12px', background: selectedStudent?.studentId === s.studentId ? '#f0f4ff' : '#fafafa',
                                                 cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
                                             }}
@@ -473,7 +473,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                                 {s.fotoUrl ? (
                                                     <img src={s.fotoUrl} alt={s.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
-                                                    <User size={20} color="#00237f" />
+                                                    <User size={20} color="#17428f" />
                                                 )}
                                             </div>
                                             <div style={{ flex: 1 }}>
@@ -497,8 +497,8 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                     {step === 2 && (
                         <div>
                             <div style={{ marginBottom: '15px', padding: '12px 16px', background: '#f0f4ff', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <User size={16} color="#00237f" />
-                                <span style={{ fontWeight: 'bold', color: '#00237f', fontSize: '0.9rem' }}>{selectedStudent?.nome}</span>
+                                <User size={16} color="#17428f" />
+                                <span style={{ fontWeight: 'bold', color: '#17428f', fontSize: '0.9rem' }}>{selectedStudent?.nome}</span>
                             </div>
 
                             {loadingProducts ? (
@@ -577,9 +577,9 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                                 onClick={() => setSelectedSize(s)}
                                                 style={{
                                                     padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer',
-                                                    border: selectedSize === s ? '2px solid #00237f' : '1px solid #ddd',
+                                                    border: selectedSize === s ? '2px solid #17428f' : '1px solid #ddd',
                                                     background: selectedSize === s ? '#e8eaf6' : '#fff',
-                                                    color: selectedSize === s ? '#00237f' : '#555',
+                                                    color: selectedSize === s ? '#17428f' : '#555',
                                                 }}
                                             >
                                                 {s}
@@ -600,9 +600,9 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                                 onClick={() => setSelectedVariations(prev => ({ ...prev, [v.name]: opt }))}
                                                 style={{
                                                     padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer',
-                                                    border: selectedVariations[v.name] === opt ? '2px solid #00237f' : '1px solid #ddd',
+                                                    border: selectedVariations[v.name] === opt ? '2px solid #17428f' : '1px solid #ddd',
                                                     background: selectedVariations[v.name] === opt ? '#e8eaf6' : '#fff',
-                                                    color: selectedVariations[v.name] === opt ? '#00237f' : '#555',
+                                                    color: selectedVariations[v.name] === opt ? '#17428f' : '#555',
                                                 }}
                                             >
                                                 {opt}
@@ -683,9 +683,9 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                             flex: '1 1 auto', padding: '14px 20px', borderRadius: '12px', cursor: 'pointer',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                             fontWeight: 'bold', fontSize: '0.9rem', transition: 'all 0.15s',
-                                            border: selectedPaymentMethod === pm ? '2px solid #00237f' : '1px solid #ddd',
+                                            border: selectedPaymentMethod === pm ? '2px solid #17428f' : '1px solid #ddd',
                                             background: selectedPaymentMethod === pm ? '#e8eaf6' : '#fff',
-                                            color: selectedPaymentMethod === pm ? '#00237f' : '#555',
+                                            color: selectedPaymentMethod === pm ? '#17428f' : '#555',
                                         }}
                                     >
                                         {PM_LABELS[pm]}
@@ -781,7 +781,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                         <label style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', marginBottom: '4px' }}>Link de Pagamento (Cartão/Boleto/Pix)</label>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <input type="text" readOnly value={paymentInfo.invoiceUrl} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.85rem' }} />
-                                            <a href={paymentInfo.invoiceUrl} target="_blank" rel="noreferrer" style={{ background: '#00237f', color: '#fff', borderRadius: '8px', padding: '0 15px', display: 'flex', alignItems: 'center', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                            <a href={paymentInfo.invoiceUrl} target="_blank" rel="noreferrer" style={{ background: '#17428f', color: '#fff', borderRadius: '8px', padding: '0 15px', display: 'flex', alignItems: 'center', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold' }}>
                                                 Abrir
                                             </a>
                                         </div>
@@ -796,7 +796,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                                                     navigator.clipboard.writeText(paymentInfo.pixCopyPaste!);
                                                     showAlert('Chave copiada para a área de transferência!', 'success');
                                                 }}
-                                                style={{ width: '100%', marginTop: '8px', background: '#e8eaf6', border: '1px solid #00237f', color: '#00237f', padding: '8px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                style={{ width: '100%', marginTop: '8px', background: '#e8eaf6', border: '1px solid #17428f', color: '#17428f', padding: '8px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
                                             >
                                                 Copiar Chave
                                             </button>
@@ -827,7 +827,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                             onClick={() => canProceedStep3() ? setStep(saleType === 'paid' ? 4 : 5) : showAlert('Preencha todos os campos obrigatórios.', 'error')}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 24px', borderRadius: '10px',
-                                border: 'none', background: '#00237f', color: '#fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem',
+                                border: 'none', background: '#17428f', color: '#fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem',
                                 opacity: canProceedStep3() ? 1 : 0.5,
                             }}
                         >
@@ -840,7 +840,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                             onClick={() => paymentDate ? setStep(5) : showAlert('Insira a data do pagamento', 'error')}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 24px', borderRadius: '10px',
-                                border: 'none', background: '#00237f', color: '#fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem',
+                                border: 'none', background: '#17428f', color: '#fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem',
                             }}
                         >
                             Pagamento <ChevronRight size={18} />
@@ -866,7 +866,7 @@ export default function RegisterSaleModal({ isOpen, onClose, onSaleComplete }: P
                         <button
                             onClick={() => { onSaleComplete(); onClose(); }}
                             style={{
-                                padding: '12px 28px', borderRadius: '10px', border: 'none', background: '#00237f',
+                                padding: '12px 28px', borderRadius: '10px', border: 'none', background: '#17428f',
                                 color: '#fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.95rem', marginLeft: 'auto',
                             }}
                         >

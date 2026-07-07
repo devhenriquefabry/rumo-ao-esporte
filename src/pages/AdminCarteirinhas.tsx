@@ -7,6 +7,31 @@ import { Download, Search, FileDown, Eye } from 'lucide-react';
 import PageTitle from '../components/PageTitle';
 import PageContainer from '../components/PageContainer';
 
+const CARD_QR_SIZE_MM = 12.4;
+const CARD_QR_RIGHT_MM = 4.6;
+const CARD_QR_TOP_MM = 3.7;
+const CARD_BACK_LOGO_URL = '/real-logo-transparente.svg';
+const CARD_BACK_LOGO_SIZE_MM = 13.4;
+const CARD_BACK_LOGO_X_MM = 67.2;
+const CARD_BACK_LOGO_Y_MM = 34.8;
+
+const loadImageAsPngDataUrl = async (src: string) => {
+    const img = new Image();
+    img.src = src;
+    await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
+
+    const width = img.naturalWidth || 600;
+    const height = img.naturalHeight || 420;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas context failed');
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas.toDataURL('image/png');
+};
+
 export default function AdminCarteirinhas() {
     const navigate = useNavigate();
     const [allStudents, setAllStudents] = useState<any[]>([]);
@@ -20,7 +45,7 @@ export default function AdminCarteirinhas() {
     useEffect(() => {
         const fetchRegs = async () => {
             try {
-                const q = query(collection(db, "arena_simonesia_2026_registrations"));
+                const q = query(collection(db, "rumo_ao_esporte_2026_registrations"));
                 const querySnapshot = await getDocs(q);
                 const rawData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -166,7 +191,7 @@ export default function AdminCarteirinhas() {
 
             // Text coordinates matching StudentCard.tsx
             docPDF.setFontSize(7.5);
-            docPDF.setTextColor(0, 125, 47); // Arena Green
+            docPDF.setTextColor(0, 125, 47);
             docPDF.setFont('helvetica', 'bold');
 
             // Name: (40.2%, 46.0%)
@@ -194,7 +219,7 @@ export default function AdminCarteirinhas() {
                 await QRCode.toCanvas(qrCanvas, qrData, { margin: 1, width: 256 });
                 const qrDataUrl = qrCanvas.toDataURL('image/png');
 
-                docPDF.addImage(qrDataUrl, 'PNG', 66.8, 3.2, 15.4, 15.4);
+                docPDF.addImage(qrDataUrl, 'PNG', pageWidth - CARD_QR_RIGHT_MM - CARD_QR_SIZE_MM, CARD_QR_TOP_MM, CARD_QR_SIZE_MM, CARD_QR_SIZE_MM);
             } catch (qrErr) {
                 console.error("Error adding QR to PDF:", qrErr);
             }
@@ -204,9 +229,10 @@ export default function AdminCarteirinhas() {
             // =====================
             docPDF.addPage([85.6, 54], 'l');
 
-            // Solid black back side
-            docPDF.setFillColor(0, 0, 0);
-            docPDF.rect(0, 0, pageWidth, pageHeight, 'F');
+            const backBgImg = new Image();
+            backBgImg.src = '/verso-carteirinha.png';
+            await new Promise((resolve) => { backBgImg.onload = resolve; backBgImg.onerror = resolve; });
+            docPDF.addImage(backBgImg, 'PNG', 0, 0, pageWidth, pageHeight);
 
             // White text
             docPDF.setTextColor(255, 255, 255);
@@ -214,7 +240,7 @@ export default function AdminCarteirinhas() {
             // Header: Logo text + "Responsável Financeiro"
             docPDF.setFont('helvetica', 'bold');
             docPDF.setFontSize(7);
-            docPDF.text('Arena Simonésia 2026', 5, 6);
+            docPDF.text('Rumo ao Esporte 2026', 5, 6);
             docPDF.setFont('helvetica', 'normal');
             docPDF.setFontSize(5);
             docPDF.text('RESPONSÁVEL FINANCEIRO', pageWidth - 5, 6, { align: 'right' });
@@ -262,10 +288,8 @@ export default function AdminCarteirinhas() {
             }
 
             // Logo at bottom right
-            const logoImg = new Image();
-            logoImg.src = '/arena-logo-transparent.png';
-            await new Promise((resolve) => { logoImg.onload = resolve; logoImg.onerror = resolve; });
-            docPDF.addImage(logoImg, 'JPEG', pageWidth - 14, pageHeight - 10, 10, 7);
+            const logoDataUrl = await loadImageAsPngDataUrl(CARD_BACK_LOGO_URL);
+            docPDF.addImage(logoDataUrl, 'PNG', CARD_BACK_LOGO_X_MM, CARD_BACK_LOGO_Y_MM, CARD_BACK_LOGO_SIZE_MM, CARD_BACK_LOGO_SIZE_MM);
 
             docPDF.save(`Carteirinha_${student.nome.replace(/\s+/g, '_')}.pdf`);
         } catch (error) {
@@ -293,6 +317,12 @@ export default function AdminCarteirinhas() {
             const bgImg = new Image();
             bgImg.src = '/carteirinha.png';
             await new Promise((resolve) => { bgImg.onload = resolve; bgImg.onerror = resolve; });
+            const backBgImg = new Image();
+            backBgImg.src = '/verso-carteirinha.png';
+            await new Promise((resolve) => { backBgImg.onload = resolve; backBgImg.onerror = resolve; });
+            const backLogoDataUrl = await loadImageAsPngDataUrl(CARD_BACK_LOGO_URL);
+            const QRCodeModule = await import('qrcode');
+            const QRCode = QRCodeModule.default || QRCodeModule;
 
             // Process filtered students
             for (let i = 0; i < filteredStudents.length; i++) {
@@ -327,6 +357,66 @@ export default function AdminCarteirinhas() {
                 docPDF.text(item.numeroCota ? String(item.numeroCota) : '-', 45.0, 29.6);
                 docPDF.text(item.aluno.cpf || '-', 36.8, 34.8);
                 docPDF.text(item.aluno.dataNascimento || '-', 58.2, 40.2);
+
+                try {
+                    const qrData = `${item.aluno.cpf || ''}|${item.aluno.dataNascimento || ''}|${item.aluno.nome || ''}`;
+                    const qrCanvas = document.createElement('canvas');
+                    await QRCode.toCanvas(qrCanvas, qrData, { margin: 1, width: 256 });
+                    const qrDataUrl = qrCanvas.toDataURL('image/png');
+                    docPDF.addImage(qrDataUrl, 'PNG', pageWidth - CARD_QR_RIGHT_MM - CARD_QR_SIZE_MM, CARD_QR_TOP_MM, CARD_QR_SIZE_MM, CARD_QR_SIZE_MM);
+                } catch (qrErr) {
+                    console.error(`Error adding QR to PDF for ${item.aluno.nome}:`, qrErr);
+                }
+
+                docPDF.addPage([85.6, 54], 'l');
+                docPDF.addImage(backBgImg, 'PNG', 0, 0, pageWidth, pageHeight);
+
+                docPDF.setTextColor(255, 255, 255);
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(7);
+                docPDF.text('Rumo ao Esporte 2026', 5, 6);
+                docPDF.setFont('helvetica', 'normal');
+                docPDF.setFontSize(5);
+                docPDF.text('RESPONSÃVEL FINANCEIRO', pageWidth - 5, 6, { align: 'right' });
+
+                const responsavel = item.responsavel || {};
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(9);
+                const nomeResp = responsavel.nome || '-';
+                docPDF.text(nomeResp.length > 35 ? nomeResp.substring(0, 35) + '...' : nomeResp, 5, 14);
+
+                docPDF.setFontSize(5);
+                docPDF.setFont('helvetica', 'normal');
+                docPDF.text('CPF', 5, 20);
+                docPDF.text('Telefone', pageWidth / 2, 20);
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(6);
+                docPDF.text(responsavel.cpf || '-', 5, 24);
+                docPDF.text(responsavel.telefonePrincipal || responsavel.telefone || '-', pageWidth / 2, 24);
+
+                docPDF.setFontSize(5);
+                docPDF.setFont('helvetica', 'normal');
+                docPDF.text('Email', 5, 30);
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(6);
+                docPDF.text(responsavel.email || '-', 5, 34);
+
+                const endereco = responsavel.endereco || {};
+                const enderecoStr = [endereco.rua, endereco.numero, endereco.bairro, endereco.cidade, endereco.uf].filter(Boolean).join(', ');
+                docPDF.setFontSize(5);
+                docPDF.setFont('helvetica', 'normal');
+                docPDF.text('EndereÃ§o', 5, 40);
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(5.5);
+                const maxCharsPerLine = 50;
+                if (enderecoStr.length > maxCharsPerLine) {
+                    docPDF.text(enderecoStr.substring(0, maxCharsPerLine), 5, 44);
+                    docPDF.text(enderecoStr.substring(maxCharsPerLine, maxCharsPerLine * 2), 5, 48);
+                } else {
+                    docPDF.text(enderecoStr || '-', 5, 44);
+                }
+
+                docPDF.addImage(backLogoDataUrl, 'PNG', CARD_BACK_LOGO_X_MM, CARD_BACK_LOGO_Y_MM, CARD_BACK_LOGO_SIZE_MM, CARD_BACK_LOGO_SIZE_MM);
             }
 
             docPDF.save('Todas_Carteirinhas.pdf');
@@ -369,7 +459,7 @@ export default function AdminCarteirinhas() {
                             onClick={generateBatchPDF}
                             disabled={exporting || loading || filteredStudents.length === 0}
                             style={{
-                                background: '#007d2f',
+                                background: '#00a63a',
                                 color: '#fff',
                                 border: 'none',
                                 padding: '10px 20px',
@@ -411,7 +501,7 @@ export default function AdminCarteirinhas() {
                                 padding: '12px 30px',
                                 borderRadius: '12px 12px 0 0',
                                 border: 'none',
-                                background: modalityFilter === tab.id ? '#007d2f' : 'transparent',
+                                background: modalityFilter === tab.id ? '#00a63a' : 'transparent',
                                 color: modalityFilter === tab.id ? '#fff' : '#888',
                                 fontWeight: '800',
                                 fontSize: '0.9rem',
@@ -499,9 +589,9 @@ export default function AdminCarteirinhas() {
                                                 flex: 1,
                                                 padding: '8px',
                                                 background: '#fff',
-                                                border: '1px solid #007d2f',
+                                                border: '1px solid #00a63a',
                                                 borderRadius: '6px',
-                                                color: '#007d2f',
+                                                color: '#00a63a',
                                                 cursor: 'pointer',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -512,12 +602,12 @@ export default function AdminCarteirinhas() {
                                                 transition: 'all 0.2s'
                                             }}
                                             onMouseOver={(e) => {
-                                                e.currentTarget.style.background = '#007d2f';
+                                                e.currentTarget.style.background = '#00a63a';
                                                 e.currentTarget.style.color = '#fff';
                                             }}
                                             onMouseOut={(e) => {
                                                 e.currentTarget.style.background = '#fff';
-                                                e.currentTarget.style.color = '#007d2f';
+                                                e.currentTarget.style.color = '#00a63a';
                                             }}
                                         >
                                             <Eye size={16} /> Detalhes do Aluno
@@ -551,7 +641,7 @@ export default function AdminCarteirinhas() {
                         width: '40px',
                         height: '40px',
                         border: '4px solid #f3f3f3',
-                        borderTop: '4px solid #007d2f',
+                        borderTop: '4px solid #00a63a',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite'
                     }} />

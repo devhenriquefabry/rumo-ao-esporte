@@ -33,10 +33,10 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ modalityFilter, stats, o
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
 
             {/* Alunos */}
-            <div className="stat-card" style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #007d2f' }}>
+            <div className="stat-card" style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #00a63a' }}>
                 <div style={{ color: '#666', fontSize: '0.9rem', marginBottom: '5px' }}>ALUNOS ({modalityFilter.toUpperCase()})</div>
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', color: '#333' }}>
-                    <Users size={24} color="#007d2f" /> {stats.total}
+                    <Users size={24} color="#00a63a" /> {stats.total}
                 </div>
                 <div style={{ display: 'flex', gap: '15px', marginTop: '10px', fontSize: '0.75rem' }}>
                     <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>✓ {stats.approvedCount} Aprovados</div>
@@ -53,21 +53,21 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ modalityFilter, stats, o
                     padding: '20px',
                     borderRadius: '12px',
                     boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                    borderLeft: '4px solid #007d2f',
+                    borderLeft: '4px solid #00a63a',
                     cursor: onPendingClick ? 'pointer' : 'default',
                     transition: 'all 0.2s ease',
                     position: 'relative',
                     overflow: 'hidden'
                 }}
             >
-                <div style={{ color: '#007d2f', fontSize: '0.9rem', marginBottom: '5px', textTransform: 'uppercase', fontWeight: 'bold' }}>EM ATRASO E PENDENTE</div>
+                <div style={{ color: '#00a63a', fontSize: '0.9rem', marginBottom: '5px', textTransform: 'uppercase', fontWeight: 'bold' }}>EM ATRASO E PENDENTE</div>
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#333', marginBottom: '5px' }}>{stats.pendingCount}</div>
-                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#007d2f', marginBottom: '15px' }}>{fmt(stats.pendingAmount)}</div>
+                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#00a63a', marginBottom: '15px' }}>{fmt(stats.pendingAmount)}</div>
                 
                 {stats.pendingCount > 0 ? (
                     <button 
                         style={{
-                            background: '#007d2f',
+                            background: '#00a63a',
                             color: '#fff',
                             border: 'none',
                             borderRadius: '8px',
@@ -101,7 +101,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ modalityFilter, stats, o
             </div>
 
             {/* Receita Recebida / A Receber */}
-            <div className="stat-card" style={{ background: '#007d2f', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0, 125, 47, 0.2)', borderLeft: '4px solid #9a1a1f' }}>
+            <div className="stat-card" style={{ background: '#00a63a', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0, 125, 47, 0.2)', borderLeft: '4px solid #9a1a1f' }}>
 
                 {/* Labels esse mês */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>

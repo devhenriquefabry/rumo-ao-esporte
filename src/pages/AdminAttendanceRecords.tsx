@@ -47,7 +47,7 @@ export default function AdminAttendanceRecords() {
     const fetchRecords = async () => {
         try {
             setLoading(true);
-            const q = query(collection(db, 'arena_simonesia_2026_chamadas'), orderBy('date', 'desc'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_chamadas'), orderBy('date', 'desc'));
             const snap = await getDocs(q);
             const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as AttendanceRecord));
             setRecords(list);
@@ -79,7 +79,7 @@ export default function AdminAttendanceRecords() {
         const fileName = `Chamada_${(record.turmaNome || record.turmaLabel || 'Turma').replace(/\s+/g, '_')}_${dateStr.split(',')[0].replace(/\//g, '-')}.pdf`;
 
         // Style constants
-        const primaryColor = [0, 125, 47]; // #007d2f
+        const primaryColor = [0, 125, 47]; // #00a63a
 
         // Helper to load image as Base64
         const loadImage = (url: string): Promise<string> => {
@@ -179,12 +179,12 @@ export default function AdminAttendanceRecords() {
     const handleDelete = async (record: AttendanceRecord) => {
         showConfirm(
             <div style={{ textAlign: 'left' }}>
-                <h3 style={{ color: '#007d2f', marginTop: 0 }}>Excluir este registro?</h3>
+                <h3 style={{ color: '#00a63a', marginTop: 0 }}>Excluir este registro?</h3>
                 <p>Esta ação removerá permanentemente este registro de presença do histórico.</p>
             </div>,
             async () => {
                 try {
-                    await deleteDoc(doc(db, 'arena_simonesia_2026_chamadas', record.id!));
+                    await deleteDoc(doc(db, 'rumo_ao_esporte_2026_chamadas', record.id!));
                     setRecords(prev => prev.filter(r => r.id !== record.id));
                     setSelectedRecord(null);
                     showAlert('Registro excluído com sucesso!', 'success');
@@ -239,7 +239,7 @@ export default function AdminAttendanceRecords() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: '#007d2f'
+                                color: '#00a63a'
                             }}>
                                 <ClipboardCheck size={28} />
                             </div>
@@ -270,7 +270,7 @@ export default function AdminAttendanceRecords() {
                             </div>
 
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#007d2f' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#00a63a' }}>
                                     {record.presentCount ?? record.totalPresentes ?? 0}/{record.totalCount ?? record.totalAlunos ?? 0}
                                 </div>
                                 <div style={{ fontSize: '0.7rem', color: '#999', textTransform: 'uppercase', fontWeight: 'bold' }}>Presentes</div>
@@ -298,7 +298,7 @@ export default function AdminAttendanceRecords() {
                         <div style={{ padding: '25px', borderBottom: '1px solid #eee', background: '#fafafa' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <div>
-                                    <h2 style={{ margin: 0, color: '#007d2f', fontSize: '1.4rem', fontWeight: '900' }}>{selectedRecord.turmaNome || selectedRecord.turmaLabel || 'Turma sem nome'}</h2>
+                                    <h2 style={{ margin: 0, color: '#00a63a', fontSize: '1.4rem', fontWeight: '900' }}>{selectedRecord.turmaNome || selectedRecord.turmaLabel || 'Turma sem nome'}</h2>
                                     <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '0.9rem' }}>{formatDate(selectedRecord.date || selectedRecord.dataIso)}</p>
                                 </div>
                                 <button onClick={() => setSelectedRecord(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>
@@ -360,7 +360,7 @@ export default function AdminAttendanceRecords() {
                                 className="native-button"
                                 style={{
                                     width: '100%',
-                                    background: '#00237f',
+                                    background: '#17428f',
                                     color: '#fff',
                                     border: 'none',
                                     padding: '12px',
@@ -395,7 +395,7 @@ export default function AdminAttendanceRecords() {
                                     textDecoration: 'underline',
                                     marginTop: '5px'
                                 }}
-                                onMouseOver={e => e.currentTarget.style.color = '#007d2f'}
+                                onMouseOver={e => e.currentTarget.style.color = '#00a63a'}
                                 onMouseOut={e => e.currentTarget.style.color = '#999'}
                             >
                                 Excluir Registro

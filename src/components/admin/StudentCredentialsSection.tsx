@@ -111,7 +111,7 @@ export default function StudentCredentialsSection({
         const password = currentPassword;
         const loginUrl = `${window.location.origin}/aluno/login`;
 
-        const text = `Olá, *${name}*! 👋\n\nAqui estão suas credenciais de acesso ao *Portal do Aluno Arena Simonésia 2026*:\n\n📧 *Login:* ${email}\n🔑 *Senha:* ${password}\n\n🌐 *Portal:* ${loginUrl}\n\n_Guarde estas informações com segurança._`;
+        const text = `Olá, *${name}*! 👋\n\nAqui estão suas credenciais de acesso ao *Portal do Aluno Rumo ao Esporte 2026*:\n\n📧 *Login:* ${email}\n🔑 *Senha:* ${password}\n\n🌐 *Portal:* ${loginUrl}\n\n_Guarde estas informações com segurança._`;
         const encodedText = encodeURIComponent(text);
 
         window.open(`https://wa.me/55${phone}?text=${encodedText}`, '_blank');
@@ -139,7 +139,7 @@ export default function StudentCredentialsSection({
     const cancelButtonStyle = {
         ...buttonStyle,
         background: '#ffebee',
-        color: '#007d2f'
+        color: '#00a63a'
     };
 
     // Default password calculation (CPF numbers)
@@ -173,7 +173,7 @@ export default function StudentCredentialsSection({
                     marginBottom: '15px',
                     padding: '10px 15px',
                     background: '#ffebee',
-                    color: '#007d2f',
+                    color: '#00a63a',
                     borderRadius: '8px',
                     fontSize: '0.85rem',
                     fontWeight: 'bold',
@@ -192,7 +192,7 @@ export default function StudentCredentialsSection({
                     background: '#f8f9fa',
                     padding: '8px 12px',
                     borderRadius: '10px',
-                    border: editingEmail ? '2px solid #007d2f' : '1px solid #eee',
+                    border: editingEmail ? '2px solid #00a63a' : '1px solid #eee',
                     transition: 'all 0.2s'
                 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
@@ -252,7 +252,7 @@ export default function StudentCredentialsSection({
                     background: '#f8f9fa',
                     padding: '8px 12px',
                     borderRadius: '10px',
-                    border: editingPassword ? '2px solid #007d2f' : '1px solid #eee',
+                    border: editingPassword ? '2px solid #00a63a' : '1px solid #eee',
                     transition: 'all 0.2s'
                 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -347,16 +347,16 @@ export default function StudentCredentialsSection({
                         showAlert('E-mail do responsável não cadastrado.', 'error');
                         return;
                     }
-                    localStorage.setItem('uba_impersonated_student_email', email);
-                    localStorage.setItem('uba_impersonated_student_back_id', data.id);
-                    localStorage.setItem('uba_student_auth', 'true');
+                    localStorage.setItem('rae_impersonated_student_email', email);
+                    localStorage.setItem('rae_impersonated_student_back_id', data.id);
+                    localStorage.setItem('rae_student_auth', 'true');
                     window.location.href = '/aluno/dashboard';
                 }}
                 style={{
                     width: '100%',
                     marginTop: '10px',
                     padding: '12px',
-                    background: '#00237f',
+                    background: '#17428f',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '10px',

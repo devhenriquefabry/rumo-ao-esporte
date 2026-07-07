@@ -50,7 +50,7 @@ const AdminRentals: React.FC = () => {
             {/* Header Area */}
             <div style={{ padding: '15px 25px', background: '#fff', borderBottom: '1px solid #eee', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#00237f' }}>ALUGUEL DE ESPAÇOS</h1>
+                    <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#17428f' }}>ALUGUEL DE ESPAÇOS</h1>
                     <p style={{ margin: '5px 0 0', color: '#666' }}>Gerencie reservas de quadras e quiosques</p>
                 </div>
 
@@ -106,7 +106,7 @@ const AdminRentals: React.FC = () => {
                                 borderRadius: '6px',
                                 border: 'none',
                                 background: activeTab === 'calendar' ? '#fff' : 'transparent',
-                                color: activeTab === 'calendar' ? '#00237f' : '#666',
+                                color: activeTab === 'calendar' ? '#17428f' : '#666',
                                 boxShadow: activeTab === 'calendar' ? '0 2px 5px rgba(0,0,0,0.05)' : 'none',
                                 cursor: 'pointer',
                                 fontWeight: 'bold',
@@ -124,7 +124,7 @@ const AdminRentals: React.FC = () => {
                                 borderRadius: '6px',
                                 border: 'none',
                                 background: activeTab === 'locations' ? '#fff' : 'transparent',
-                                color: activeTab === 'locations' ? '#00237f' : '#666',
+                                color: activeTab === 'locations' ? '#17428f' : '#666',
                                 boxShadow: activeTab === 'locations' ? '0 2px 5px rgba(0,0,0,0.05)' : 'none',
                                 cursor: 'pointer',
                                 fontWeight: 'bold',

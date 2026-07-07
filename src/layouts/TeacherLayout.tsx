@@ -65,7 +65,7 @@ export default function TeacherLayout() {
                     }
 
                     // Double check localStorage role just in case
-                    const role = localStorage.getItem('uba_teacher_auth');
+                    const role = localStorage.getItem('rae_teacher_auth');
                     if (!role) {
                         handleLogout();
                         return;
@@ -91,10 +91,10 @@ export default function TeacherLayout() {
     }, [navigate]);
 
     const handleLogout = async () => {
-        localStorage.removeItem('uba_teacher_auth');
+        localStorage.removeItem('rae_teacher_auth');
         localStorage.removeItem('teacherName');
-        localStorage.removeItem('uba_teacher_name');
-        localStorage.removeItem('uba_teacher_role');
+        localStorage.removeItem('rae_teacher_name');
+        localStorage.removeItem('rae_teacher_role');
 
         try {
             await auth.signOut();
@@ -107,14 +107,14 @@ export default function TeacherLayout() {
 
     if (loading) {
         return (
-            <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#f5f7fa' }}>
-                <div style={{ color: '#007d2f', fontWeight: 'bold' }}>Validando acesso...</div>
+            <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)' }}>
+                <div style={{ color: '#00a63a', fontWeight: 'bold' }}>Validando acesso...</div>
             </div>
         );
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f7fa', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)', flexDirection: 'column' }}>
 
             {/* Mobile Header */}
             {isMobile && (

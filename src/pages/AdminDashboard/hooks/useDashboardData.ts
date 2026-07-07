@@ -23,7 +23,7 @@ export function useDashboardData() {
                 const plansList = await planService.getPlans();
                 setPlans(plansList.filter(plan => (plan.modalidade || '').toLowerCase().includes('futebol')));
 
-                const querySnapshot = await getDocs(query(collection(db, "arena_simonesia_2026_registrations")));
+                const querySnapshot = await getDocs(query(collection(db, "rumo_ao_esporte_2026_registrations")));
                 const rawData = querySnapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
                     .filter((reg: any) => (reg.modalidade || '').toLowerCase().includes('futebol'));

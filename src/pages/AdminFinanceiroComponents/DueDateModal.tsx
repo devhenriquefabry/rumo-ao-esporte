@@ -79,7 +79,7 @@ export function DueDateModal({ isOpen, onClose, onSave, initialDate = '' }: DueD
                         disabled={isSaving}
                         style={{
                             flex: 1, padding: '12px', borderRadius: '8px', border: 'none',
-                            background: '#007d2f', color: '#fff', fontWeight: '600', cursor: 'pointer',
+                            background: '#00a63a', color: '#fff', fontWeight: '600', cursor: 'pointer',
                             opacity: isSaving ? 0.7 : 1
                         }}
                     >

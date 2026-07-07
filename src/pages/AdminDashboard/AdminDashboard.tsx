@@ -55,7 +55,7 @@ export default function AdminDashboard({ filterStatus }: AdminDashboardProps) {
                     setDeletingSelected(true);
                     const batch = writeBatch(db);
                     idsToDelete.forEach(id => {
-                        batch.delete(doc(db, 'arena_simonesia_2026_registrations', id));
+                        batch.delete(doc(db, 'rumo_ao_esporte_2026_registrations', id));
                     });
                     await batch.commit();
                     removeRegistrationIds(idsToDelete);
@@ -119,7 +119,6 @@ export default function AdminDashboard({ filterStatus }: AdminDashboardProps) {
                 plans={plans}
                 onNavigate={(id) => navigate(`/admin/details/${id}`)}
                 onResendApproval={handleResendApproval}
-                activeModality={activeModality}
                 filterStatus={filterStatus}
                 selectionEnabled={isSelectionEnabled}
                 selectedIds={selectedIds}

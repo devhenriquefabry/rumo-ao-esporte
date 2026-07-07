@@ -221,7 +221,7 @@ export default function AdminMensagensAutomacao() {
                     <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #eee', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <div style={{ background: '#fff0f0', color: '#007d2f', padding: '12px', borderRadius: '12px' }}><AlertCircle size={24} /></div>
+                                <div style={{ background: '#fff0f0', color: '#00a63a', padding: '12px', borderRadius: '12px' }}><AlertCircle size={24} /></div>
                                 <div>
                                     <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#333' }}>Cobrança após o vencimento</div>
                                     <div style={{ fontSize: '0.85rem', color: '#777' }}>Cobra quando a fatura consta como atrasada</div>
@@ -341,7 +341,7 @@ export default function AdminMensagensAutomacao() {
                                 </div>
                                 <button 
                                     onClick={() => setConfig({...config, finAutoTestDate: '', finAutoTestTime: ''})}
-                                    style={{ background: 'none', border: 'none', color: '#007d2f', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
+                                    style={{ background: 'none', border: 'none', color: '#00a63a', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
                                 >
                                     <X size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Limpar Agendamento
                                 </button>
@@ -391,13 +391,13 @@ export default function AdminMensagensAutomacao() {
                         disabled={saving}
                         style={{
                             padding: '14px 35px',
-                            background: '#007d2f',
+                            background: '#00a63a',
                             color: '#fff',
                             border: 'none',
                             borderRadius: '12px',
                             fontWeight: 'bold',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(0, 125, 47, 0.3)',
+                            boxShadow: '0 4px 15px rgba(0, 166, 58, 0.28)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '10px'

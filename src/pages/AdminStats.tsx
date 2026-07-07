@@ -102,7 +102,7 @@ export default function AdminStats() {
             try {
                 // 1. Fetch Registrations, Plans, Payments and Expenses
                 const [regSnap, fetchedPlans, paySnap, expensesData] = await Promise.all([
-                    getDocs(collection(db, "arena_simonesia_2026_registrations")),
+                    getDocs(collection(db, "rumo_ao_esporte_2026_registrations")),
                     planService.getPlans(),
                     getDocs(collection(db, "financial_payments")),
                     expenseService.listExpenses(workerUrl || '')
@@ -637,7 +637,7 @@ export default function AdminStats() {
         </div>
     );
 
-    const GrowthChart = ({ data, color = '#007d2f', type = 'count' }: { data: any[], color?: string, type?: 'count' | 'currency' }) => {
+    const GrowthChart = ({ data, color = '#00a63a', type = 'count' }: { data: any[], color?: string, type?: 'count' | 'currency' }) => {
         const max = data.length > 0 ? Math.max(...data.map(d => type === 'count' ? d.count : d.value)) : 10;
         const axisMax = Math.ceil(max / 5) * 5;
         const steps = 5;
@@ -768,7 +768,7 @@ export default function AdminStats() {
                             return itemDate.toDateString() === dayDate.toDateString();
                         });
 
-                        const indicatorColor = type === 'registration' ? '#007d2f' : '#10b981';
+                        const indicatorColor = type === 'registration' ? '#00a63a' : '#10b981';
 
                         return (
                             <div
@@ -862,12 +862,12 @@ export default function AdminStats() {
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
                 .native-input { border: 1px solid #e2e8f0; border-radius: 8px; outline: none; transition: all 0.2s; }
-                .native-input:focus { border-color: #007d2f; box-shadow: 0 0 0 3px rgba(0, 125, 47, 0.1); }
+                .native-input:focus { border-color: #00a63a; box-shadow: 0 0 0 3px rgba(23, 66, 143, 0.14); }
             `}</style>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                 <PageTitle
                     title="SISTEMA DE ESTATÍSTICAS"
-                    subtitle="Monitoramento estratégico, financeiro e crescimento Arena Simonésia 2026"
+                    subtitle="Monitoramento estratégico, financeiro e crescimento Rumo ao Esporte 2026"
                 />
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button
@@ -888,12 +888,12 @@ export default function AdminStats() {
                                         <title>Relatório de Despesas - ${selectedMonthLabel}</title>
                                         <style>
                                             body { font-family: sans-serif; padding: 20px; }
-                                            h1 { color: #007d2f; text-align: center; }
+                                            h1 { color: #00a63a; text-align: center; }
                                             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                                             th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
                                             th { background-color: #f8fafc; color: #334155; }
                                             tr:nth-child(even) { background-color: #f1f5f9; }
-                                            .total { margin-top: 30px; text-align: right; font-size: 1.2rem; font-weight: bold; color: #007d2f; border-top: 2px solid #007d2f; padding-top: 10px; }
+                                            .total { margin-top: 30px; text-align: right; font-size: 1.2rem; font-weight: bold; color: #00a63a; border-top: 2px solid #00a63a; padding-top: 10px; }
                                             .footer { margin-top: 50px; text-align: center; color: #64748b; font-size: 0.8rem; }
                                         </style>
                                     </head>
@@ -924,7 +924,7 @@ export default function AdminStats() {
 
                                         <div class="total">TOTAL: ${(total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
                                         
-                                        <div class="footer">Sisteminha de Contrato - Arena Simonésia 2026</div>
+                                        <div class="footer">Sisteminha de Contrato - Rumo ao Esporte 2026</div>
 
                                         <script>
                                             window.onload = () => { window.print(); };
@@ -980,9 +980,9 @@ export default function AdminStats() {
                                         <title>Relat&oacute;rio Estat&iacute;stico - ${selectedMonthLabel}</title>
                                         <style>
                                             body { font-family: sans-serif; padding: 20px; color: #1e293b; background: #f8fafc; }
-                                            h1 { color: #007d2f; text-align: center; }
+                                            h1 { color: #00a63a; text-align: center; }
                                             .header { margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; text-align: center; }
-                                            .month-badge { font-weight: 900; font-size: 2rem; color: #007d2f; border: 3px solid #007d2f; border-radius: 12px; padding: 12px 24px; display: inline-block; margin: 10px auto; letter-spacing: 2px; }
+                                            .month-badge { font-weight: 900; font-size: 2rem; color: #00a63a; border: 3px solid #00a63a; border-radius: 12px; padding: 12px 24px; display: inline-block; margin: 10px auto; letter-spacing: 2px; }
                                             .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 28px; }
                                             .stat-card { min-height: 120px; background: #fff; border-left: 5px solid var(--color); padding: 18px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08); position: relative; overflow: hidden; }
                                             .stat-card.dark { background: #152033; color: #fff; border-left-color: #152033; }
@@ -991,7 +991,7 @@ export default function AdminStats() {
                                             .card-title { font-size: 0.78rem; font-weight: 900; color: inherit; opacity: 0.78; text-transform: uppercase; margin-bottom: 28px; }
                                             .card-value { font-size: 1.75rem; font-weight: 900; color: inherit; }
                                             .card-sub { margin-top: 8px; font-size: 0.78rem; font-weight: 800; color: inherit; opacity: 0.86; }
-                                            .section-title { font-size: 1.1rem; font-weight: 900; color: #1e293b; margin: 30px 0 15px; border-left: 4px solid #007d2f; padding-left: 10px; }
+                                            .section-title { font-size: 1.1rem; font-weight: 900; color: #1e293b; margin: 30px 0 15px; border-left: 4px solid #00a63a; padding-left: 10px; }
                                             table { width: 100%; border-collapse: collapse; background: #fff; }
                                             th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; vertical-align: middle; }
                                             th { background: #f8fafc; font-size: 0.72rem; text-transform: uppercase; color: #64748b; }
@@ -1009,7 +1009,7 @@ export default function AdminStats() {
                                     </head>
                                     <body>
                                         <div class="header">
-                                            <h1 style="margin-bottom: 5px;">ARENA SIMON&Eacute;SIA - RESUMO ESTAT&Iacute;STICO</h1>
+                                            <h1 style="margin-bottom: 5px;">RUMO AO ESPORTE - RESUMO ESTAT&Iacute;STICO</h1>
                                             <div class="month-badge">${selectedMonthLabel}</div>
                                             <p style="margin-top: 10px; color: #64748b;">Relat&oacute;rio gerado em: ${new Date().toLocaleString('pt-BR')}</p>
                                         </div>
@@ -1088,7 +1088,7 @@ export default function AdminStats() {
                                             `).join('')}
                                         </div>
 
-                                        <div class="footer">Este documento &eacute; um resumo operacional do sistema Arena Simon?sia.</div>
+                                        <div class="footer">Este documento &eacute; um resumo operacional do sistema Rumo ao Esporte.</div>
 
                                         <script>
                                             window.onload = () => { window.print(); };
@@ -1218,7 +1218,7 @@ export default function AdminStats() {
                         marginBottom: '8px'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-                            <PieChart size={22} color="#007d2f" />
+                            <PieChart size={22} color="#00a63a" />
                             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: '#1e293b' }}>DISTRIBUIÇÃO POR MODALIDADE (RECEITA)</h3>
                         </div>
                         <div style={{
@@ -1227,7 +1227,7 @@ export default function AdminStats() {
                             gap: '24px'
                         }}>
                             {Object.entries(stats.modalities).sort((a, b) => b[1] - a[1]).map(([key, value]: any) => {
-                                const colors: any = { futebol: '#007d2f', natacao: '#0891b2', voleibol: '#d97706', outros: '#64748b' };
+                                const colors: any = { futebol: '#00a63a', natacao: '#0891b2', voleibol: '#d97706', outros: '#64748b' };
                                 const monthlyPaid = monthlyReceivedByModality[key] || 0;
                                 const monthlyPaidStudents = monthlyPaidStudentsByModality[key] || 0;
                                 return (
@@ -1235,7 +1235,7 @@ export default function AdminStats() {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
                                             <span style={{ fontWeight: '800', color: '#334155', textTransform: 'uppercase' }}>{key}</span>
                                             <div style={{ textAlign: 'right' }}>
-                                                <div style={{ fontWeight: '900', color: colors[key.toLowerCase()] || '#007d2f', fontSize: '1.1rem', lineHeight: '1.2' }}>
+                                                <div style={{ fontWeight: '900', color: colors[key.toLowerCase()] || '#00a63a', fontSize: '1.1rem', lineHeight: '1.2' }}>
                                                     {formatCurrency(stats.mrrByModality[key] || 0)}
                                                 </div>
                                                 <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#059669', marginTop: '2px' }}>
@@ -1530,7 +1530,7 @@ export default function AdminStats() {
                 <div style={{ background: '#fff', padding: '24px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', marginBottom: '32px', position: 'relative' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#007d2f15', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#007d2f' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#00a63a15', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00a63a' }}>
                                 <TrendingUp size={20} />
                             </div>
                             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: '#1e293b' }}>CADASTROS (CRESCIMENTO)</h3>
@@ -1541,7 +1541,7 @@ export default function AdminStats() {
                                 style={{
                                     padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
                                     background: regViewMode === 'calendar' ? '#fff' : 'transparent',
-                                    color: regViewMode === 'calendar' ? '#007d2f' : '#64748b',
+                                    color: regViewMode === 'calendar' ? '#00a63a' : '#64748b',
                                     fontWeight: 'bold', fontSize: '0.8rem', boxShadow: regViewMode === 'calendar' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
                                     transition: 'all 0.2s'
                                 }}
@@ -1551,7 +1551,7 @@ export default function AdminStats() {
                                 style={{
                                     padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
                                     background: regViewMode === 'chart' ? '#fff' : 'transparent',
-                                    color: regViewMode === 'chart' ? '#007d2f' : '#64748b',
+                                    color: regViewMode === 'chart' ? '#00a63a' : '#64748b',
                                     fontWeight: 'bold', fontSize: '0.8rem', boxShadow: regViewMode === 'chart' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
                                     transition: 'all 0.2s'
                                 }}
@@ -1573,7 +1573,7 @@ export default function AdminStats() {
                                 <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>até</span>
                                 <input type="date" className="native-input" style={{ padding: '8px', fontSize: '0.8rem', borderRadius: '8px' }} value={dateRange.end} onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))} />
                             </div>
-                            <GrowthChart data={filteredGrowthData} color="#007d2f" type="count" />
+                            <GrowthChart data={filteredGrowthData} color="#00a63a" type="count" />
                         </div>
                     )}
                 </div>
@@ -1655,7 +1655,7 @@ export default function AdminStats() {
                                     <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: '#1e293b', margin: 0, textTransform: 'uppercase' }}>
                                         {selectedDayType === 'payment' ? 'Pagamentos do Dia' : 'Cadastros do Dia'}
                                     </h2>
-                                    <p style={{ margin: '4px 0 0', color: selectedDayType === 'payment' ? '#10b981' : '#007d2f', fontWeight: '800', fontSize: '1rem' }}>
+                                    <p style={{ margin: '4px 0 0', color: selectedDayType === 'payment' ? '#10b981' : '#00a63a', fontWeight: '800', fontSize: '1rem' }}>
                                         {selectedDay.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                                     </p>
                                 </div>
@@ -1702,7 +1702,7 @@ export default function AdminStats() {
                                                         }
                                                     </>
                                                 ) : (
-                                                    <>MODALIDADE: <span style={{ color: '#007d2f' }}>{String(item.modalidade || 'N/A').toUpperCase()}</span></>
+                                                    <>MODALIDADE: <span style={{ color: '#00a63a' }}>{String(item.modalidade || 'N/A').toUpperCase()}</span></>
                                                 )}
                                             </div>
                                         </div>
@@ -1718,8 +1718,8 @@ export default function AdminStats() {
                                                 </>
                                             ) : (
                                                 <div style={{
-                                                    padding: '4px 8px', borderRadius: '6px', background: '#007d2f15',
-                                                    color: '#007d2f', fontWeight: '900', fontSize: '0.7rem'
+                                                    padding: '4px 8px', borderRadius: '6px', background: '#00a63a15',
+                                                    color: '#00a63a', fontWeight: '900', fontSize: '0.7rem'
                                                 }}>
                                                     REGISTRADO
                                                 </div>
@@ -1762,7 +1762,7 @@ export default function AdminStats() {
                     {/* Approval Funnel */}
                     <div style={{ background: '#fff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-                            <Activity size={20} color="#007d2f" />
+                            <Activity size={20} color="#00a63a" />
                             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: '#1e293b' }}>FUNIL DE APROVAÇÃO</h3>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1771,9 +1771,9 @@ export default function AdminStats() {
                                 <Calendar size={20} color="#94a3b8" />
                             </div>
                             <div style={{ textAlign: 'center', padding: '2px' }}><div style={{ width: '2px', height: '10px', background: '#e2e8f0', margin: '0 auto' }} /></div>
-                            <div style={{ background: '#fff5f5', padding: '15px', borderRadius: '12px', borderLeft: '4px solid #007d2f', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div><p style={{ margin: 0, fontSize: '0.75rem', color: '#007d2f', fontWeight: 'bold' }}>AGUARDANDO APROVAÇÃO</p><span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#007d2f' }}>{stats.pendingRegistrations}</span></div>
-                                <Clock size={20} color="#007d2f" />
+                            <div style={{ background: '#eef8ff', padding: '15px', borderRadius: '12px', borderLeft: '4px solid #00a63a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div><p style={{ margin: 0, fontSize: '0.75rem', color: '#00a63a', fontWeight: 'bold' }}>AGUARDANDO APROVAÇÃO</p><span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#00a63a' }}>{stats.pendingRegistrations}</span></div>
+                                <Clock size={20} color="#00a63a" />
                             </div>
                             <div style={{ textAlign: 'center', padding: '2px' }}><div style={{ width: '2px', height: '10px', background: '#e2e8f0', margin: '0 auto' }} /></div>
                             <div style={{ background: '#f0fdf4', padding: '15px', borderRadius: '12px', borderLeft: '4px solid #10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1787,15 +1787,15 @@ export default function AdminStats() {
                     {/* Demographics */}
                     <div style={{ background: '#fff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-                            <Users size={20} color="#007d2f" />
+                            <Users size={20} color="#00a63a" />
                             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: '#1e293b' }}>DEMOGRAFIA (FAIXA ETÁRIA)</h3>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '15px' }}>
                             {[
-                                { label: 'Arena Baby', sub: '(0-5 anos)', val: stats.ageGroups.baby, color: '#ec4899' },
-                                { label: 'Arena Kids', sub: '(6-12 anos)', val: stats.ageGroups.kids, color: '#3b82f6' },
-                                { label: 'Arena Teens', sub: '(13-17 anos)', val: stats.ageGroups.teens, color: '#f59e0b' },
-                                { label: 'Arena Adults', sub: '(18+ anos)', val: stats.ageGroups.adults, color: '#1e293b' }
+                                { label: 'Rumo Baby', sub: '(0-5 anos)', val: stats.ageGroups.baby, color: '#ec4899' },
+                                { label: 'Rumo Kids', sub: '(6-12 anos)', val: stats.ageGroups.kids, color: '#3b82f6' },
+                                { label: 'Rumo Teens', sub: '(13-17 anos)', val: stats.ageGroups.teens, color: '#f59e0b' },
+                                { label: 'Rumo Adults', sub: '(18+ anos)', val: stats.ageGroups.adults, color: '#1e293b' }
                             ].map(group => (
                                 <div key={group.label} style={{ background: '#f8fafc', padding: '15px', borderRadius: '16px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
                                     <p style={{ margin: '0 0 4px', fontSize: '0.8rem', fontWeight: '800', color: group.color }}>{group.label.toUpperCase()}</p>

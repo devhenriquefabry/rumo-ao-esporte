@@ -71,7 +71,7 @@ export default function FinancialActionsModal({
             }}>
                 {/* Header */}
                 <div style={{ padding: '20px 25px', borderBottom: '1px solid #eee', position: 'relative', flexShrink: 0 }}>
-                    <div style={{ color: '#007d2f', fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    <div style={{ color: '#00a63a', fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase', marginBottom: '4px' }}>
                         GERENCIAR FINANCEIRO
                     </div>
                     <div style={{ color: '#666', fontSize: '0.9rem' }}>{alunoNome}</div>
@@ -95,11 +95,11 @@ export default function FinancialActionsModal({
 
                         {/* SECTION 1: MIGRATION */}
                         <div style={{
-                            border: '1px solid #007d2f', borderRadius: '8px', padding: '20px',
+                            border: '1px solid #00a63a', borderRadius: '8px', padding: '20px',
                             background: '#fff', position: 'relative'
                         }}>
                             <div style={{
-                                color: '#007d2f', fontWeight: '900', fontSize: '0.8rem',
+                                color: '#00a63a', fontWeight: '900', fontSize: '0.8rem',
                                 textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '0.5px'
                             }}>
                                 MIGRAÇÃO DE PLANO / MODALIDADE
@@ -138,7 +138,7 @@ export default function FinancialActionsModal({
                                 onClick={handleMigrate}
                                 disabled={!selectedPlanId || isMigrating}
                                 style={{
-                                    width: '100%', padding: '12px', background: '#007d2f', color: '#fff',
+                                    width: '100%', padding: '12px', background: '#00a63a', color: '#fff',
                                     border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.9rem',
                                     cursor: 'pointer', opacity: (selectedPlanId && !isMigrating) ? 1 : 0.6,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
@@ -151,11 +151,11 @@ export default function FinancialActionsModal({
 
                         {/* SECTION 2: MANUAL CHARGE */}
                         <div style={{
-                            border: '1px solid #007d2f', borderRadius: '8px', padding: '20px',
+                            border: '1px solid #00a63a', borderRadius: '8px', padding: '20px',
                             background: '#fff', position: 'relative'
                         }}>
                             <div style={{
-                                color: '#007d2f', fontWeight: '900', fontSize: '0.8rem',
+                                color: '#00a63a', fontWeight: '900', fontSize: '0.8rem',
                                 textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '0.5px'
                             }}>
                                 LANÇAMENTO MANUAL DE COBRANÇA
@@ -207,9 +207,9 @@ export default function FinancialActionsModal({
                                                 onClick={() => setChargeBillingType(type)}
                                                 style={{
                                                     flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid',
-                                                    borderColor: chargeBillingType === type ? '#007d2f' : '#ddd',
+                                                    borderColor: chargeBillingType === type ? '#00a63a' : '#ddd',
                                                     background: chargeBillingType === type ? '#fff0f0' : '#fff',
-                                                    color: chargeBillingType === type ? '#007d2f' : '#666',
+                                                    color: chargeBillingType === type ? '#00a63a' : '#666',
                                                     fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem'
                                                 }}
                                             >

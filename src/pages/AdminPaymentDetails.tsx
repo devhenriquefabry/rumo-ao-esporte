@@ -152,7 +152,7 @@ export default function AdminPaymentDetails() {
 
     const handleWhatsAppShare = () => {
         if (!payment) return;
-        const message = `Olá! Segue o link para pagamento da fatura Arena Simonésia: ${payment.invoiceUrl}\n\nQualquer dúvida, estamos à disposição! ⚽🏀`;
+        const message = `Olá! Segue o link para pagamento da fatura Rumo ao Esporte: ${payment.invoiceUrl}\n\nQualquer dúvida, estamos à disposição! ⚽🏀`;
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     };

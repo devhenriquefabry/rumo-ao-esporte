@@ -31,7 +31,7 @@ export default function TransferModal({
                 <h3 style={{ margin: '0 0 20px 0', color: '#333', textAlign: 'center', fontSize: '1.1rem' }}>Remanejar Aluno</h3>
 
                 <div className="native-card animate-scale-in" style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#007d2f', marginBottom: '5px' }}>{alunoNome}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#00a63a', marginBottom: '5px' }}>{alunoNome}</div>
                     <div className="native-badge native-badge-info">{modalidade.toUpperCase()}</div>
                 </div>
 
@@ -41,9 +41,9 @@ export default function TransferModal({
                         <div style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>{assignedTurma ? assignedTurma.nome : '-'}</div>
                         <div style={{ fontSize: '0.85rem', color: '#666' }}>{assignedTurma ? assignedTurma.horario : 'Sem turma'}</div>
                     </div>
-                    <div style={{ color: '#007d2f', transform: 'rotate(180deg)' }}><ArrowLeft /></div>
-                    <div className="native-card animate-target-border" style={{ flex: 1, textAlign: 'center', margin: 0, border: '2px dashed #007d2f' }}>
-                        <div className="section-title" style={{ marginBottom: '8px', color: '#007d2f' }}>NOVA TURMA</div>
+                    <div style={{ color: '#00a63a', transform: 'rotate(180deg)' }}><ArrowLeft /></div>
+                    <div className="native-card animate-target-border" style={{ flex: 1, textAlign: 'center', margin: 0, border: '2px dashed #00a63a' }}>
+                        <div className="section-title" style={{ marginBottom: '8px', color: '#00a63a' }}>NOVA TURMA</div>
                         <select
                             value={selectedTurmaId}
                             onChange={(e) => setSelectedTurmaId(e.target.value)}

@@ -15,12 +15,12 @@ export default function StudentCarteirinha() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail || (user && user.email)) {
                 try {
                     // 1. Fetch ALL Registrations for this email (normalized)
                     const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
-                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
                     const snap = await getDocs(q);
 
                     const studentsAggregated: any[] = [];
@@ -86,7 +86,7 @@ export default function StudentCarteirinha() {
     if (allStudents.length === 0) return (
         <PageContainer>
             <div style={{ textAlign: 'center', padding: '50px' }}>
-                <h2 style={{ color: '#007d2f' }}>Nenhuma carteirinha disponível.</h2>
+                <h2 style={{ color: '#00a63a' }}>Nenhuma carteirinha disponível.</h2>
                 <p style={{ color: '#666' }}>Entre em contato com a secretaria se acreditar que isso é um erro.</p>
             </div>
         </PageContainer>
@@ -116,8 +116,8 @@ export default function StudentCarteirinha() {
                             onClick={() => setSelectedIndex(index)}
                             style={{
                                 padding: '8px 16px',
-                                background: selectedIndex === index ? '#00237f' : '#eef2ff',
-                                color: selectedIndex === index ? '#fff' : '#00237f',
+                                background: selectedIndex === index ? '#17428f' : '#eef2ff',
+                                color: selectedIndex === index ? '#fff' : '#17428f',
                                 border: 'none',
                                 borderRadius: '20px',
                                 fontWeight: 'bold',
@@ -141,7 +141,7 @@ export default function StudentCarteirinha() {
                 gap: '30px',
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '5px' }}>
-                    <h3 style={{ color: '#00237f', margin: 0, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <h3 style={{ color: '#17428f', margin: 0, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         {selectedStudent.nome}
                     </h3>
                     <span style={{ fontSize: '0.9rem', color: '#666' }}>
@@ -182,7 +182,7 @@ export default function StudentCarteirinha() {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <Clock size={18} color="#007d2f" />
+                        <Clock size={18} color="#00a63a" />
                         {showHistory ? 'Ocultar Histórico' : 'Ver meu histórico de acesso'}
                         {showHistory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>

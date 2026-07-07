@@ -149,7 +149,7 @@ export const clearAndCreateTurmas = async (): Promise<{ success: boolean; messag
         console.log(`Created ${createdTurmas.length} new turmas`);
 
         // 3. Fetch all registrations and allocate students (CORRECT COLLECTION)
-        const regsSnap = await getDocs(collection(db, 'arena_simonesia_2026_registrations'));
+        const regsSnap = await getDocs(collection(db, 'rumo_ao_esporte_2026_registrations'));
         let allocatedCount = 0;
         let skippedCount = 0;
         let regUpdatedCount = 0;
@@ -207,7 +207,7 @@ export const clearAndCreateTurmas = async (): Promise<{ success: boolean; messag
 
             // Write updates to DB
             if (hasChanges) {
-                await updateDoc(doc(db, 'arena_simonesia_2026_registrations', regDoc.id), { alunos: updatedAlunos });
+                await updateDoc(doc(db, 'rumo_ao_esporte_2026_registrations', regDoc.id), { alunos: updatedAlunos });
                 regUpdatedCount++;
             }
         }

@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
                             alignItems: 'center',
                             gap: '8px',
                             padding: '8px 14px',
-                            background: '#007d2f',
+                            background: '#00a63a',
                             border: 'none',
                             borderRadius: '4px',
                             color: '#fff',

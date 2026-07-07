@@ -70,7 +70,7 @@ export default function AdminTurmas() {
             const turmasSnapshot = await getDocs(turmasQuery);
 
             // 2. Fetch all students
-            const studentsQuery = query(collection(db, "arena_simonesia_2026_registrations"), orderBy("createdAt", "desc"));
+            const studentsQuery = query(collection(db, "rumo_ao_esporte_2026_registrations"), orderBy("createdAt", "desc"));
             const studentsSnapshot = await getDocs(studentsQuery);
 
             // Create a map of turmaId -> turma data
@@ -186,7 +186,7 @@ export default function AdminTurmas() {
                 <button
                     onClick={() => { resetForm(); setShowModal(true); }}
                     style={{
-                        padding: '12px 20px', background: '#007d2f', color: '#fff', border: 'none',
+                        padding: '12px 20px', background: '#00a63a', color: '#fff', border: 'none',
                         borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
                     }}
                 >
@@ -210,8 +210,8 @@ export default function AdminTurmas() {
                                     padding: '15px',
                                     background: 'transparent',
                                     border: 'none',
-                                    borderBottom: isActive ? '3px solid #007d2f' : '3px solid transparent',
-                                    color: isActive ? '#007d2f' : '#888',
+                                    borderBottom: isActive ? '3px solid #00a63a' : '3px solid transparent',
+                                    color: isActive ? '#00a63a' : '#888',
                                     cursor: 'pointer',
                                     fontWeight: isActive ? 'bold' : '500',
                                     fontSize: '1rem',
@@ -235,9 +235,9 @@ export default function AdminTurmas() {
                             width: '100%',
                             padding: '15px',
                             background: '#fff',
-                            border: '2px dashed #007d2f',
+                            border: '2px dashed #00a63a',
                             borderRadius: '12px',
-                            color: '#007d2f',
+                            color: '#00a63a',
                             fontWeight: 'bold',
                             display: 'flex',
                             alignItems: 'center',
@@ -249,7 +249,7 @@ export default function AdminTurmas() {
                             fontSize: '1rem'
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#fff5f5';
+                            e.currentTarget.style.background = '#eef8ff';
                             e.currentTarget.style.transform = 'scale(1.01)';
                         }}
                         onMouseLeave={(e) => {
@@ -272,7 +272,7 @@ export default function AdminTurmas() {
                                         setFormData(prev => ({ ...prev, modalidade: activeModality }));
                                         setShowModal(true);
                                     }}
-                                    style={{ marginTop: '15px', padding: '10px 20px', background: '#007d2f', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                                    style={{ marginTop: '15px', padding: '10px 20px', background: '#00a63a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
                                     Criar Turma de {activeModality.charAt(0).toUpperCase() + activeModality.slice(1)}
                                 </button>
@@ -302,7 +302,7 @@ export default function AdminTurmas() {
                                                 }}
                                                 onMouseEnter={(e) => {
                                                     if (window.innerWidth > 768) {
-                                                        e.currentTarget.style.borderColor = '#007d2f';
+                                                        e.currentTarget.style.borderColor = '#00a63a';
                                                         e.currentTarget.style.transform = 'translateY(-2px)';
                                                         e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
                                                     }
@@ -320,7 +320,7 @@ export default function AdminTurmas() {
                                                         {horario || '--:--'}
                                                     </div>
                                                     <div className="turma-name" style={{ marginTop: '5px', fontSize: 'clamp(0.8rem, 3vw, 1.1rem)', color: '#555', lineHeight: '1.2' }}>
-                                                        <span style={{ color: '#007d2f', fontWeight: 'bold' }}>Turma:</span> {nome}
+                                                        <span style={{ color: '#00a63a', fontWeight: 'bold' }}>Turma:</span> {nome}
                                                     </div>
                                                     <div className="turma-details" style={{ marginTop: '5px', fontSize: '0.85rem', color: '#666' }}>
                                                         <div><span style={{ fontWeight: 'bold' }}>Dias:</span> {dias.length > 0 ? dias.join(', ') : '-'}</div>
@@ -330,7 +330,7 @@ export default function AdminTurmas() {
 
                                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                     <div style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                        <Users size={14} color="#007d2f" />
+                                                        <Users size={14} color="#00a63a" />
                                                         <span className="turma-count" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#333' }}>{students.length} Alunos</span>
                                                     </div>
                                                 </div>
@@ -427,7 +427,7 @@ export default function AdminTurmas() {
                                             onClick={() => toggleDia(dia)}
                                             style={{
                                                 padding: '10px 15px', borderRadius: '8px', border: '1px solid #ddd',
-                                                background: formData.dias.includes(dia) ? '#007d2f' : '#fff',
+                                                background: formData.dias.includes(dia) ? '#00a63a' : '#fff',
                                                 color: formData.dias.includes(dia) ? '#fff' : '#333',
                                                 cursor: 'pointer', fontWeight: 'bold'
                                             }}
@@ -462,7 +462,7 @@ export default function AdminTurmas() {
                                 </button>
                                 <button
                                     type="submit"
-                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#007d2f', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#00a63a', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
                                     {editingTurma ? 'Salvar' : 'Criar Turma'}
                                 </button>

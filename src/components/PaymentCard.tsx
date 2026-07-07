@@ -97,7 +97,7 @@ export function PaymentCard({
             : '';
 
         let msg = `Olá, ${firstName}!\n\n`;
-        msg += `*${p.description || 'Mensalidade Arena Simonésia'}*\n\n`;
+        msg += `*${p.description || 'Mensalidade Rumo ao Esporte'}*\n\n`;
 
         if (notDueYet) {
             if (diffDays === 0) {
@@ -135,7 +135,7 @@ export function PaymentCard({
             msg += `Acesse sua fatura:\n${p.invoiceUrl}\n\n`;
         }
 
-        msg += `Qualquer dúvida, estamos à disposição!\n\nEquipe Arena Simonésia\nContato: +55 33 8414-4053`;
+        msg += `Qualquer dúvida, estamos à disposição!\n\nEquipe Rumo ao Esporte\nContato: +55 33 8414-4053`;
 
         return encodeURIComponent(msg);
     };
@@ -157,10 +157,10 @@ export function PaymentCard({
                 margin: '2px',
                 background: statusLabelOverride?.toUpperCase() === 'EM DIA'
                     ? '#f0fdf4'
-                    : (isCurrentPayment ? 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' : '#fff'),
+                    : (isCurrentPayment ? 'linear-gradient(135deg, #eef8ff 0%, #ffffff 100%)' : '#fff'),
                 borderLeft: statusLabelOverride?.toUpperCase() === 'EM DIA'
                     ? '4px solid #2e7d32'
-                    : (isCurrentPayment ? '4px solid #007d2f' : 'none'),
+                    : (isCurrentPayment ? '4px solid #00a63a' : 'none'),
                 paddingLeft: (isCurrentPayment || statusLabelOverride) ? '17px' : '20px',
                 ...(statusLabelOverride?.toUpperCase() === 'EM DIA' ? {
                     boxShadow: 'inset 0 0 10px rgba(46, 125, 50, 0.05)'
@@ -328,7 +328,7 @@ export function PaymentCard({
                                     title="Excluir Cobrança"
                                     style={{
                                         background: '#fff',
-                                        color: '#007d2f',
+                                        color: '#00a63a',
                                         border: '1px solid #fee2e2',
                                         padding: '8px',
                                         borderRadius: '6px',
@@ -371,8 +371,8 @@ export function PaymentCard({
                                     rel="noopener noreferrer"
                                     style={{
                                         background: '#fff',
-                                        color: '#00237f',
-                                        border: '1px solid #00237f',
+                                        color: '#17428f',
+                                        border: '1px solid #17428f',
                                         padding: '8px 12px',
                                         borderRadius: '6px',
                                         textDecoration: 'none',
@@ -415,7 +415,7 @@ export function PaymentCard({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
-                                    background: isCurrentPayment ? (statusLabelOverride?.toUpperCase() === 'EM DIA' ? '#2e7d32' : '#007d2f') : '#666',
+                                    background: isCurrentPayment ? (statusLabelOverride?.toUpperCase() === 'EM DIA' ? '#2e7d32' : '#00a63a') : '#666',
                                     color: '#fff',
                                     padding: '10px 20px',
                                     borderRadius: '6px',
@@ -426,7 +426,7 @@ export function PaymentCard({
                                     alignItems: 'center',
                                     gap: '6px',
                                     transition: 'all 0.2s ease',
-                                    boxShadow: isCurrentPayment ? (statusLabelOverride?.toUpperCase() === 'EM DIA' ? '0 2px 8px rgba(46, 125, 50, 0.3)' : '0 2px 8px rgba(0, 125, 47, 0.3)') : 'none'
+                                    boxShadow: isCurrentPayment ? (statusLabelOverride?.toUpperCase() === 'EM DIA' ? '0 2px 8px rgba(46, 125, 50, 0.3)' : '0 2px 8px rgba(0, 166, 58, 0.28)') : 'none'
                                 }}
                             >
                                 <ExternalLink size={14} /> {isCurrentPayment ? (statusLabelOverride?.toUpperCase() === 'EM DIA' ? 'VER FATURA' : 'PAGAR AGORA') : 'ADIANTAR'}
@@ -464,7 +464,7 @@ export function PaymentCard({
                                         title="Excluir Registro de Pagamento"
                                         style={{
                                             background: '#fff',
-                                            color: '#007d2f',
+                                            color: '#00a63a',
                                             border: '1px solid #fee2e2',
                                             padding: '8px',
                                             borderRadius: '6px',

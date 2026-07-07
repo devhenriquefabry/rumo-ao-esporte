@@ -137,7 +137,7 @@ function generateWhatsAppUrl(item: Student) {
     const invoiceUrl = item.financialInvoiceUrl || '';
 
     const msg = [
-        `https://arenasimonesia.web.app`,
+        `https://rumo-ao-esporte.web.app`,
         ``,
         `Olá, tudo bem?`,
         ``,
@@ -148,7 +148,7 @@ function generateWhatsAppUrl(item: Student) {
         `É muito importante manter as mensalidades em dia para garantir o acesso ao sistema.`,
         invoiceUrl ? `Link para pagamento: ${invoiceUrl}` : '',
         ``,
-        `Caso já tenha pago, por favor desconsidere. Atenciosamente, Equipe Arena Simonésia.`
+        `Caso já tenha pago, por favor desconsidere. Atenciosamente, Equipe Rumo ao Esporte.`
     ].filter(Boolean).join('\n');
 
     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;

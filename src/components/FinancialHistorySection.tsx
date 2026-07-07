@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, DollarSign, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PaymentCard } from './PaymentCard';
+import {
+    DEFAULT_PAYMENT_PROVIDER_CONFIG,
+    getPaymentProviderConfig,
+    withPaymentProviderPayload,
+    withPaymentProviderQuery,
+    type PaymentProviderConfig
+} from '../utils/paymentProviderConfig';
 
 interface FinancialHistorySectionProps {
     id: string;
@@ -25,23 +32,39 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
     const [showFuture, setShowFuture] = useState(false);
     const [showPaid, setShowPaid] = useState(false);
     const [activeTab, setActiveTab] = useState<'plan' | 'manual'>('plan');
+    const [paymentConfig, setPaymentConfig] = useState<PaymentProviderConfig>(DEFAULT_PAYMENT_PROVIDER_CONFIG);
+    const [paymentConfigLoaded, setPaymentConfigLoaded] = useState(false);
 
     useEffect(() => {
-        if (cpf) fetchHistory();
+        let active = true;
+        getPaymentProviderConfig()
+            .then(config => {
+                if (!active) return;
+                setPaymentConfig(config);
+            })
+            .finally(() => {
+                if (active) setPaymentConfigLoaded(true);
+            });
 
-        const handleRefresh = () => fetchHistory();
-        window.addEventListener('refresh-financial-history', handleRefresh);
-        return () => window.removeEventListener('refresh-financial-history', handleRefresh);
-    }, [cpf]);
+        return () => {
+            active = false;
+        };
+    }, []);
 
-    const fetchHistory = async () => {
+    const fetchHistory = useCallback(async (config = paymentConfig) => {
+        if (!cpf || !workerUrl) {
+            setHistory([]);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const custRes = await fetch(`${workerUrl}/customers-by-cpf/${cpf.replace(/\D/g, '')}`);
+            const custRes = await fetch(`${workerUrl}${withPaymentProviderQuery(`/customers-by-cpf/${cpf.replace(/\D/g, '')}`, config)}`);
             const custData = await custRes.json();
 
             if (custData.success && custData.customer) {
-                const payRes = await fetch(`${workerUrl}/payments?customer=${custData.customer.id}&limit=100`);
+                const payRes = await fetch(`${workerUrl}${withPaymentProviderQuery(`/payments?customer=${encodeURIComponent(custData.customer.id)}&limit=100`, config)}`);
                 const payData = await payRes.json();
 
                 // Filtrar apenas cobranças deste sistema (ARENA2026) E desta modalidade específica
@@ -72,7 +95,17 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
         } finally {
             setLoading(false);
         }
-    };
+    }, [allRegistrations, cpf, currentPlanId, filterModality, paymentConfig, plans, workerUrl]);
+
+    useEffect(() => {
+        if (paymentConfigLoaded) fetchHistory(paymentConfig);
+    }, [fetchHistory, paymentConfig, paymentConfigLoaded]);
+
+    useEffect(() => {
+        const handleRefresh = () => fetchHistory(paymentConfig);
+        window.addEventListener('refresh-financial-history', handleRefresh);
+        return () => window.removeEventListener('refresh-financial-history', handleRefresh);
+    }, [fetchHistory, paymentConfig]);
 
     const manualCharges = history.filter(p => p.externalReference?.includes('MANUAL_'));
     const planCharges = history.filter(p => !p.externalReference?.includes('MANUAL_'));
@@ -108,14 +141,14 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                 flexWrap: 'wrap',
                 gap: '10px'
             }}>
-                <h3 style={{ fontSize: '1.1rem', color: '#007d2f', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, minWidth: 'fit-content' }}>
-                    <TrendingUp size={20} /> Pagamentos {filterModality && <span style={{ fontSize: '0.8rem', background: '#007d2f', color: '#fff', padding: '2px 8px', borderRadius: '4px', marginLeft: '5px' }}>{filterModality.toUpperCase()}</span>}
+                <h3 style={{ fontSize: '1.1rem', color: '#00a63a', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, minWidth: 'fit-content' }}>
+                    <TrendingUp size={20} /> Pagamentos {filterModality && <span style={{ fontSize: '0.8rem', background: '#00a63a', color: '#fff', padding: '2px 8px', borderRadius: '4px', marginLeft: '5px' }}>{filterModality.toUpperCase()}</span>}
                 </h3>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
                     <button
                         onClick={() => navigate(`/admin/financeiro?regId=${id}`)}
                         style={{
-                            background: '#fff', color: '#007d2f', border: '1px solid #007d2f',
+                            background: '#fff', color: '#00a63a', border: '1px solid #00a63a',
                             padding: '8px 12px', borderRadius: '8px', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 'bold',
                             whiteSpace: 'nowrap', flex: 1, justifyContent: 'center', maxWidth: '200px'
@@ -128,7 +161,7 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                         <button
                             onClick={onAddModality}
                             style={{
-                                background: '#007d2f', color: '#fff', border: 'none',
+                                background: '#00a63a', color: '#fff', border: 'none',
                                 padding: '8px 16px', borderRadius: '8px', cursor: 'pointer',
                                 display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 'bold',
                                 whiteSpace: 'nowrap', flex: '1.5', justifyContent: 'center', maxWidth: '220px',
@@ -145,7 +178,7 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
             {contractStatus === 'aprovado' && (
                 <div className="native-card" style={{
                     marginBottom: '20px',
-                    background: '#fff5f5',
+                    background: '#eef8ff',
                     border: '1px solid #fee2e2',
                     display: 'flex',
                     flexDirection: 'column',
@@ -153,14 +186,14 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                     padding: '15px'
                 }}>
                     <div>
-                        <div className="section-title" style={{ marginBottom: '8px', fontSize: '0.7rem', color: '#007d2f' }}>MODALIDADES ATIVAS</div>
+                        <div className="section-title" style={{ marginBottom: '8px', fontSize: '0.7rem', color: '#00a63a' }}>MODALIDADES ATIVAS</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {(allRegistrations.length > 0 ? allRegistrations : [{ planId: currentPlanId, modalidade: '' }]).map((reg, idx) => {
                                 const plan = plans.find(p => p.id === reg.planId);
                                 return (
                                     <div key={reg.id || idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #fee2e2' }}>
                                         <div style={{ fontWeight: 'bold', color: '#333', fontSize: '0.95rem' }}>
-                                            <span style={{ color: '#007d2f', marginRight: '8px' }}>{reg.modalidade?.toUpperCase()}</span>
+                                            <span style={{ color: '#00a63a', marginRight: '8px' }}>{reg.modalidade?.toUpperCase()}</span>
                                             {plan?.nome || 'Plano não encontrado'}
                                         </div>
                                         <div style={{ fontSize: '0.85rem', color: '#666' }}>
@@ -184,8 +217,8 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                         fontWeight: 'bold',
                         border: 'none',
                         background: 'none',
-                        color: activeTab === 'plan' ? '#007d2f' : '#999',
-                        borderBottom: activeTab === 'plan' ? '2px solid #007d2f' : '2px solid transparent',
+                        color: activeTab === 'plan' ? '#00a63a' : '#999',
+                        borderBottom: activeTab === 'plan' ? '2px solid #00a63a' : '2px solid transparent',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         display: 'flex',
@@ -203,8 +236,8 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                         fontWeight: 'bold',
                         border: 'none',
                         background: 'none',
-                        color: activeTab === 'manual' ? '#007d2f' : '#999',
-                        borderBottom: activeTab === 'manual' ? '2px solid #007d2f' : '2px solid transparent',
+                        color: activeTab === 'manual' ? '#00a63a' : '#999',
+                        borderBottom: activeTab === 'manual' ? '2px solid #00a63a' : '2px solid transparent',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         display: 'flex',
@@ -248,8 +281,13 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                                 onReceiveInCash={async () => {
                                     if (!window.confirm(`Confirmar recebimento em DINHEIRO no valor de R$ ${p.value.toFixed(2)}?`)) return;
                                     try {
-                                        const payload = { paymentDate: new Date().toISOString().split('T')[0], value: p.value, notify: false };
-                                        const res = await fetch(`${workerUrl}/payments/${p.id}/receive-in-cash`, {
+                                        const payload = withPaymentProviderPayload({
+                                            paymentDate: new Date().toISOString().split('T')[0],
+                                            value: p.value,
+                                            notify: false,
+                                            stagePay: paymentConfig.provider === 'cora' && paymentConfig.environment === 'stage'
+                                        }, paymentConfig);
+                                        const res = await fetch(`${workerUrl}${withPaymentProviderQuery(`/payments/${p.id}/receive-in-cash`, paymentConfig)}`, {
                                             method: 'POST',
                                             body: JSON.stringify(payload),
                                             headers: { 'Content-Type': 'application/json' }
@@ -271,7 +309,7 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                                 {/* Fatura em Aberto */}
                                 {open.length > 0 && (
                                     <div>
-                                        <div style={{ padding: '4px 0', fontSize: '0.75rem', color: '#007d2f', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px', borderBottom: '1px solid #fee2e2' }}>
+                                        <div style={{ padding: '4px 0', fontSize: '0.75rem', color: '#00a63a', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px', borderBottom: '1px solid #fee2e2' }}>
                                             {open.length > 1 ? `Faturas Em Aberto (${open.length})` : 'Fatura Em Aberto'}
                                         </div>
                                         <div style={{ border: '1px solid #fee2e2', borderRadius: '12px', overflow: 'hidden' }}>

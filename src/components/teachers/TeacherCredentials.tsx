@@ -23,7 +23,7 @@ export default function TeacherCredentials({
     const [editingEmail, setEditingEmail] = useState(false);
     const [editingPassword, setEditingPassword] = useState(false);
     const [emailValue, setEmailValue] = useState(teacher.email);
-    const [passwordValue, setPasswordValue] = useState(teacher.senha || 'arena2026');
+    const [passwordValue, setPasswordValue] = useState(teacher.senha || 'rumo2026');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -88,7 +88,7 @@ export default function TeacherCredentials({
     };
 
     const handleCancelPassword = () => {
-        setPasswordValue(teacher.senha || 'arena2026');
+        setPasswordValue(teacher.senha || 'rumo2026');
         setEditingPassword(false);
         setError(null);
     };
@@ -115,7 +115,7 @@ export default function TeacherCredentials({
     const cancelButtonStyle = {
         ...buttonStyle,
         background: '#ffebee',
-        color: '#007d2f'
+        color: '#00a63a'
     };
 
     return (
@@ -125,7 +125,7 @@ export default function TeacherCredentials({
             </div>
 
             {error && (
-                <div style={{ marginBottom: '8px', padding: '6px 10px', background: '#ffebee', color: '#007d2f', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                <div style={{ marginBottom: '8px', padding: '6px 10px', background: '#ffebee', color: '#00a63a', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                     {error}
                 </div>
             )}
@@ -222,7 +222,7 @@ export default function TeacherCredentials({
                             />
                         ) : (
                             <span style={{ fontSize: '0.8rem', color: '#333', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                {isVisible ? (teacher.senha || 'arena2026') : '••••••••'}
+                                {isVisible ? (teacher.senha || 'rumo2026') : '••••••••'}
                             </span>
                         )}
                     </div>
@@ -263,7 +263,7 @@ export default function TeacherCredentials({
                                     {isVisible ? <EyeOff size={14} /> : <Eye size={14} />}
                                 </button>
                                 <button
-                                    onClick={() => onCopy(teacher.senha || 'arena2026', 'Senha')}
+                                    onClick={() => onCopy(teacher.senha || 'rumo2026', 'Senha')}
                                     style={buttonStyle}
                                     title="Copiar Senha"
                                 >

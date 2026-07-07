@@ -3,16 +3,28 @@
 
 /* Variables */
 :root {
-  --primary-color: #007d2f;
+  --brand-blue: #17428f;
+  --brand-blue-dark: #09245c;
+  --brand-blue-deep: #061a40;
+  --brand-green: #00a63a;
+  --brand-green-dark: #007a2a;
+  --brand-gold: #f4c20d;
+  --brand-gold-dark: #c88a04;
+  --brand-cyan: #59c8df;
+
+  --primary-color: var(--brand-blue);
   --secondary-color: #ffffff;
-  --accent-color: #0ea85b;
-  --success-color: #27ae60;
+  --accent-color: var(--brand-green);
+  --success-color: #16a34a;
   --danger-color: #e74c3c;
   --white: #ffffff;
-  --light-gray: #f8f9fa;
-  --medium-gray: #6c757d;
-  --dark-gray: #343a40;
-  --border-color: #dee2e6;
+  --light-gray: #f4f8fc;
+  --medium-gray: #63708a;
+  --dark-gray: #10213f;
+  --border-color: #dce7f3;
+  --surface-color: #ffffff;
+  --surface-soft: #f8fbff;
+  --brand-shadow: 0 18px 50px rgba(9, 36, 92, 0.16);
 
   --font-primary: 'Lato', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
   --font-secondary: 'Open Sans', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
@@ -24,17 +36,10 @@
   --spacing-xl: 24px;
   --spacing-xxl: 36px;
 
-  --border-radius: 0;
-  --border-radius-lg: 0;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --box-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-/* Global Sharp Corners Override */
-*,
-*::before,
-*::after {
-  border-radius: 0 !important;
+  --border-radius: 8px;
+  --border-radius-lg: 8px;
+  --box-shadow: 0 8px 24px rgba(9, 36, 92, 0.08);
+  --box-shadow-lg: 0 18px 50px rgba(9, 36, 92, 0.18);
 }
 
 /* Global Styles & Reset */
@@ -53,7 +58,10 @@ body,
 
 body {
   font-family: var(--font-primary);
-  background: linear-gradient(135deg, var(--primary-color) 0%, #00451d 100%);
+  background:
+    radial-gradient(circle at 18% -10%, rgba(244, 194, 13, 0.22), transparent 32%),
+    radial-gradient(circle at 85% 2%, rgba(0, 166, 58, 0.18), transparent 28%),
+    linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 58%, var(--brand-blue-deep) 100%);
   color: var(--dark-gray);
   line-height: 1.6;
   min-height: 100vh;
@@ -83,11 +91,12 @@ body {
 .header-logo {
   max-width: 90%;
   height: auto;
-  max-height: 70px;
+  max-height: 92px;
   object-fit: contain;
   position: relative;
   z-index: 1;
   animation: bounceIn 1.2s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  filter: drop-shadow(0 14px 24px rgba(6, 26, 64, 0.24));
 }
 
 .header-title {
@@ -196,10 +205,10 @@ body {
 
 /* Step States */
 .step.active .step-number {
-  background: var(--white);
-  border-color: var(--white);
+  background: linear-gradient(135deg, var(--brand-gold), #ffe57a);
+  border-color: var(--brand-gold);
   color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(244, 194, 13, 0.28);
 }
 
 .step.active .step-label {
@@ -208,9 +217,9 @@ body {
 }
 
 .step.completed:not(.final-step) .step-number {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(255, 255, 255, 0.8);
-  color: var(--primary-color);
+  background: rgba(0, 166, 58, 0.92);
+  border-color: rgba(0, 166, 58, 0.92);
+  color: var(--white);
 }
 
 .step.completed:not(.final-step) .step-label {
@@ -240,7 +249,7 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: var(--white);
+  background: linear-gradient(90deg, var(--brand-gold), var(--brand-green));
   border-radius: 50px;
   transition: width 0.3s ease;
 }
@@ -256,11 +265,12 @@ body {
 }
 
 .form-section {
-  background: var(--white);
+  background: linear-gradient(180deg, var(--white), var(--surface-soft));
   border-radius: var(--border-radius-lg);
   box-shadow: var(--box-shadow);
   padding: var(--spacing-md);
-  border-left: 4px solid var(--primary-color);
+  border: 1px solid rgba(220, 231, 243, 0.92);
+  border-left: 5px solid var(--brand-gold);
   flex: 1;
   overflow-y: auto;
   display: flex;
@@ -286,7 +296,7 @@ body {
   font-weight: 700;
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-xs);
-  border-bottom: 2px solid var(--light-gray);
+  border-bottom: 2px solid rgba(23, 66, 143, 0.08);
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -314,7 +324,7 @@ body {
 
 label {
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--brand-blue);
   margin-bottom: var(--spacing-xs);
   font-size: 14px;
   font-family: var(--font-secondary);
@@ -344,7 +354,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 125, 47, 0.1);
+  box-shadow: 0 0 0 4px rgba(23, 66, 143, 0.12);
 }
 
 /* Radio & Checkbox */
@@ -399,8 +409,8 @@ textarea:focus {
 
 input[type="radio"]:checked+.radio-custom,
 input[type="checkbox"]:checked+.checkbox-custom {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 input[type="radio"],
@@ -430,14 +440,15 @@ input[type="checkbox"] {
 
 .modality-card:hover,
 .plan-card:hover {
-  border-color: var(--primary-color);
+  border-color: var(--brand-green);
   transform: translateY(-2px);
+  box-shadow: var(--box-shadow-lg);
 }
 
 .modality-card.selected,
 .plan-card.selected {
-  border-color: var(--primary-color);
-  background-color: #fff5f5;
+  border-color: var(--brand-green);
+  background: linear-gradient(180deg, #f2fff7, #eef8ff);
 }
 
 /* Navigation */
@@ -492,7 +503,7 @@ input[type="checkbox"] {
   border: none;
   transition: all 0.3s;
   font-family: var(--font-primary);
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%);
+  background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-blue) 100%);
   color: var(--white);
   box-shadow: var(--box-shadow-lg);
   letter-spacing: 1px;
@@ -516,7 +527,7 @@ input[type="checkbox"] {
 .btn-next:hover,
 .btn-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 14px 28px rgba(0, 166, 58, 0.24);
 }
 
 .btn-next:disabled,
@@ -670,6 +681,34 @@ input[type="checkbox"] {
   .form-section {
     padding: var(--spacing-md);
   }
+
+  .landing-page {
+    padding: 16px;
+  }
+
+  .landing-content {
+    width: 100%;
+    padding: 1.5rem;
+  }
+
+  .landing-logo {
+    width: min(280px, 100%);
+    margin-bottom: 1.5rem;
+  }
+
+  .landing-title {
+    font-size: 1.62rem;
+  }
+
+  .landing-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .btn-start,
+  .btn-student-access {
+    width: 100%;
+  }
 }
 
 /* Landing Page */
@@ -679,18 +718,24 @@ input[type="checkbox"] {
   align-items: center;
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #00451d 100%);
+  background:
+    radial-gradient(circle at 16% 12%, rgba(244, 194, 13, 0.30), transparent 26%),
+    radial-gradient(circle at 86% 18%, rgba(0, 166, 58, 0.25), transparent 28%),
+    radial-gradient(circle at 50% 110%, rgba(89, 200, 223, 0.22), transparent 34%),
+    linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 55%, var(--brand-blue-deep) 100%);
 }
 
 .landing-content {
   text-align: center;
-  padding: 3.25rem 3rem 3rem;
+  padding: 3rem;
   max-width: 800px;
-  background: radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.07) 42%, rgba(255, 255, 255, 0.04));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08)),
+    rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
-  border-radius: 18px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  box-shadow: 0 30px 80px rgba(6, 26, 64, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -698,16 +743,17 @@ input[type="checkbox"] {
 }
 
 .landing-logo {
-  width: min(250px, 68vw);
+  width: min(330px, 76vw);
   height: auto;
   object-fit: contain;
   object-position: center;
-  margin-bottom: 2.25rem;
-  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.28));
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 22px 45px rgba(6, 26, 64, 0.26);
   animation: bounceIn 1.2s cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
-img[src*="arena-logo-transparent.png"] {
+img[src*="rumo-ao-esporte-logo.png"] {
   object-fit: contain;
 }
 
@@ -729,8 +775,8 @@ img[src*="arena-logo-transparent.png"] {
 }
 
 .btn-start {
-  background: var(--white);
-  color: var(--primary-color);
+  background: linear-gradient(135deg, var(--brand-gold), #ffe278);
+  color: var(--brand-blue-deep);
   padding: 1rem 3rem;
   font-size: 1.2rem;
   font-weight: 700;
@@ -738,15 +784,15 @@ img[src*="arena-logo-transparent.png"] {
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 14px 30px rgba(244, 194, 13, 0.24);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .btn-start:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  background: #f8f9fa;
+  box-shadow: 0 18px 36px rgba(244, 194, 13, 0.32);
+  background: linear-gradient(135deg, #ffe278, var(--brand-gold));
 }
 
 .btn-start:active {
@@ -846,7 +892,7 @@ img[src*="arena-logo-transparent.png"] {
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
-  background: #007d2f;
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
   color: #fff;
   font-weight: 900;
 }
@@ -874,7 +920,7 @@ img[src*="arena-logo-transparent.png"] {
 
 .success-summary-grid strong,
 .success-athlete-item strong {
-  color: #007d2f;
+  color: var(--brand-blue);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0;
@@ -911,14 +957,14 @@ img[src*="arena-logo-transparent.png"] {
   height: 58px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007d2f;
+  border: 3px solid var(--brand-green);
 }
 
 .success-athlete-photo-fallback {
   display: grid;
   place-items: center;
   background: #ecfdf3;
-  color: #007d2f;
+  color: var(--brand-green);
   font-weight: 900;
 }
 
@@ -982,7 +1028,9 @@ img[src*="arena-logo-transparent.png"] {
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #00451d 100%);
+  background:
+    radial-gradient(circle at 20% 8%, rgba(244, 194, 13, 0.22), transparent 28%),
+    linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 100%);
   position: absolute;
   overflow-y: auto;
   padding: 22px 0;
@@ -1071,7 +1119,9 @@ img[src*="arena-logo-transparent.png"] {
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #00451d 100%);
+  background:
+    radial-gradient(circle at 20% 8%, rgba(244, 194, 13, 0.22), transparent 28%),
+    linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 100%);
   position: absolute;
   top: 0;
   left: 0;
@@ -1524,7 +1574,7 @@ html {
 }
 
 .native-button-primary {
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--brand-green), var(--brand-blue));
   color: #fff;
 }
 
@@ -1535,8 +1585,8 @@ html {
 
 .native-button-outline {
   background: transparent;
-  border: 2px solid var(--primary-color);
-  color: var(--primary-color);
+  border: 2px solid var(--brand-blue);
+  color: var(--brand-blue);
 }
 
 /* Pill-shaped buttons */
@@ -1578,10 +1628,10 @@ html {
   width: 56px;
   height: 56px;
   border-radius: 50% !important;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--brand-green), var(--brand-blue));
   color: #fff;
   border: none;
-  box-shadow: 0 4px 12px rgba(0, 125, 47, 0.4);
+  box-shadow: 0 12px 26px rgba(0, 166, 58, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1595,7 +1645,7 @@ html {
 }
 
 .fab:hover {
-  box-shadow: 0 6px 16px rgba(0, 125, 47, 0.5);
+  box-shadow: 0 16px 34px rgba(0, 166, 58, 0.36);
 }
 
 /* ==========================================
@@ -1631,7 +1681,7 @@ html {
 }
 
 .native-tab.active {
-  color: var(--primary-color);
+  color: var(--brand-blue);
 }
 
 .native-tab.active::after {
@@ -1641,7 +1691,7 @@ html {
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--primary-color);
+  background: linear-gradient(90deg, var(--brand-gold), var(--brand-green));
 }
 
 /* ==========================================
@@ -1659,7 +1709,7 @@ html {
 }
 
 .native-input:focus {
-  border-color: var(--primary-color);
+  border-color: var(--brand-blue);
   background: #fff;
 }
 
@@ -1698,7 +1748,7 @@ html {
 
 .native-badge-success {
   background: #e8f5e9;
-  color: #2e7d32;
+  color: var(--brand-green-dark);
 }
 
 .native-badge-warning {
@@ -1770,6 +1820,47 @@ html {
   font-weight: 600;
   color: #666;
   margin-bottom: 8px;
+}
+
+/* Rumo ao Esporte brand polish */
+.native-card,
+.detail-card,
+.student-card-admin,
+.success-summary-card,
+.radio-option,
+.checkbox-option,
+.modality-card,
+.plan-card {
+  border-radius: 8px !important;
+}
+
+.native-card,
+.detail-card,
+.student-card-admin,
+.success-summary-card {
+  border: 1px solid rgba(220, 231, 243, 0.9);
+  box-shadow: var(--box-shadow);
+}
+
+button,
+.btn-nav,
+.btn-start,
+.native-button {
+  border-radius: 8px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(244, 194, 13, 0.52);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(244, 194, 13, 0.35);
+  color: var(--brand-blue-deep);
 }
 
 .empty-state-text {

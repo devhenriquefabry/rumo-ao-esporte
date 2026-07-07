@@ -78,8 +78,8 @@ export function FinanceFilters({
                                 <button
                                     onClick={onSelectAll}
                                     style={{
-                                        padding: '0 20px', height: '46px', borderRadius: '10px', border: '1px solid #007d2f',
-                                        background: '#fff', color: '#007d2f', fontWeight: 'bold', cursor: 'pointer',
+                                        padding: '0 20px', height: '46px', borderRadius: '10px', border: '1px solid #00a63a',
+                                        background: '#fff', color: '#00a63a', fontWeight: 'bold', cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem'
                                     }}
                                 >
@@ -151,7 +151,7 @@ export function FinanceFilters({
                             disabled={isSyncing}
                             style={{
                                 padding: '0 20px', height: '46px', borderRadius: '10px', border: 'none',
-                                background: isSyncing ? '#e2e8f0' : '#007d2f', color: '#fff',
+                                background: isSyncing ? '#e2e8f0' : '#00a63a', color: '#fff',
                                 cursor: isSyncing ? 'not-allowed' : 'pointer',
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 fontWeight: '600', fontSize: '0.9rem',
@@ -169,8 +169,8 @@ export function FinanceFilters({
                             onClick={onSmartSync}
                             disabled={isSyncing}
                             style={{
-                                padding: '0 15px', height: '46px', borderRadius: '10px', border: '1px solid #007d2f',
-                                background: isSyncing ? '#fff' : '#fff', color: '#007d2f',
+                                padding: '0 15px', height: '46px', borderRadius: '10px', border: '1px solid #00a63a',
+                                background: isSyncing ? '#fff' : '#fff', color: '#00a63a',
                                 cursor: isSyncing ? 'not-allowed' : 'pointer',
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 fontWeight: '600', fontSize: '0.9rem'

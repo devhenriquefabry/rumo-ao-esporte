@@ -2,6 +2,31 @@
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
 
+const CARD_QR_SIZE_MM = 12.4;
+const CARD_QR_RIGHT_MM = 4.6;
+const CARD_QR_TOP_MM = 3.7;
+const CARD_BACK_LOGO_URL = '/real-logo-transparente.svg';
+const CARD_BACK_LOGO_SIZE_MM = 13.4;
+const CARD_BACK_LOGO_X_MM = 67.2;
+const CARD_BACK_LOGO_Y_MM = 34.8;
+
+const loadImageAsPngDataUrl = async (src: string) => {
+    const img = new Image();
+    img.src = src;
+    await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
+
+    const width = img.naturalWidth || 600;
+    const height = img.naturalHeight || 420;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas context failed');
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas.toDataURL('image/png');
+};
+
 export const generateStudentCardPDF = async (student: any, responsible: any, showAlert: (msg: string, type: 'success' | 'error' | 'warning' | 'info') => void) => {
     const docPDF = new jsPDF({
         orientation: 'l',
@@ -63,7 +88,7 @@ export const generateStudentCardPDF = async (student: any, responsible: any, sho
 
         // Text coordinates
         docPDF.setFontSize(7.5);
-        docPDF.setTextColor(0, 125, 47); // Arena Green
+        docPDF.setTextColor(0, 125, 47);
         docPDF.setFont('helvetica', 'bold');
 
         // Name Formatting Logic
@@ -92,7 +117,7 @@ export const generateStudentCardPDF = async (student: any, responsible: any, sho
             await QRCode.toCanvas(qrCanvas, qrData, { margin: 1, width: 256 });
             const qrDataUrl = qrCanvas.toDataURL('image/png');
 
-            docPDF.addImage(qrDataUrl, 'PNG', 66.8, 3.2, 15.4, 15.4);
+            docPDF.addImage(qrDataUrl, 'PNG', pageWidth - CARD_QR_RIGHT_MM - CARD_QR_SIZE_MM, CARD_QR_TOP_MM, CARD_QR_SIZE_MM, CARD_QR_SIZE_MM);
         } catch (qrErr) {
             console.error("Error adding QR to PDF:", qrErr);
         }
@@ -102,14 +127,16 @@ export const generateStudentCardPDF = async (student: any, responsible: any, sho
         // =====================
         docPDF.addPage([85.6, 54], 'l');
 
-        docPDF.setFillColor(0, 0, 0);
-        docPDF.rect(0, 0, pageWidth, pageHeight, 'F');
+        const backBgImg = new Image();
+        backBgImg.src = '/verso-carteirinha.png';
+        await new Promise((resolve) => { backBgImg.onload = resolve; backBgImg.onerror = resolve; });
+        docPDF.addImage(backBgImg, 'PNG', 0, 0, pageWidth, pageHeight);
 
         docPDF.setTextColor(255, 255, 255);
 
         docPDF.setFont('helvetica', 'bold');
         docPDF.setFontSize(7);
-        docPDF.text('Arena Simonésia 2026', 5, 6);
+        docPDF.text('Rumo ao Esporte 2026', 5, 6);
         docPDF.setFont('helvetica', 'normal');
         docPDF.setFontSize(5);
         docPDF.text('RESPONSÁVEL FINANCEIRO', pageWidth - 5, 6, { align: 'right' });
@@ -150,10 +177,8 @@ export const generateStudentCardPDF = async (student: any, responsible: any, sho
             docPDF.text(enderecoStr || '-', 5, 44);
         }
 
-        const logoImg = new Image();
-        logoImg.src = '/arena-logo-transparent.png';
-        await new Promise((resolve) => { logoImg.onload = resolve; logoImg.onerror = resolve; });
-        docPDF.addImage(logoImg, 'JPEG', pageWidth - 14, pageHeight - 10, 10, 7);
+        const logoDataUrl = await loadImageAsPngDataUrl(CARD_BACK_LOGO_URL);
+        docPDF.addImage(logoDataUrl, 'PNG', CARD_BACK_LOGO_X_MM, CARD_BACK_LOGO_Y_MM, CARD_BACK_LOGO_SIZE_MM, CARD_BACK_LOGO_SIZE_MM);
 
         docPDF.save(`Carteirinha_${student.nome.replace(/\s+/g, '_')}.pdf`);
     } catch (error) {

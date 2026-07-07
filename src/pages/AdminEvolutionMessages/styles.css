@@ -31,7 +31,7 @@
 }
 
 .evolution-message-header h1 {
-  color: #007d2f;
+  color: #00a63a;
   font-size: 1.8rem;
   font-weight: 900;
   letter-spacing: 0;
@@ -86,8 +86,8 @@
 }
 
 .message-tabs button.active {
-  background: #007d2f;
-  border-color: #007d2f;
+  background: #00a63a;
+  border-color: #00a63a;
   color: #fff;
 }
 
@@ -99,7 +99,7 @@
 .message-section-title {
   gap: 9px;
   margin-bottom: 18px;
-  color: #007d2f;
+  color: #00a63a;
 }
 
 .message-field {
@@ -178,7 +178,7 @@
 }
 
 .message-switch input:checked + span {
-  background: #007d2f;
+  background: #00a63a;
 }
 
 .message-switch input:checked + span::after {
@@ -206,12 +206,12 @@
 
 .message-primary-button {
   border: 0;
-  background: #007d2f;
+  background: #00a63a;
   color: #fff;
 }
 
 .message-secondary-button {
-  border: 1px solid #007d2f;
+  border: 1px solid #00a63a;
   background: #fff;
   color: #006528;
 }
@@ -289,8 +289,8 @@
 
 .instance-manager-tools .instance-add-button {
   padding: 0 13px;
-  border-color: #007d2f;
-  background: #007d2f;
+  border-color: #00a63a;
+  background: #00a63a;
   color: #fff;
   font-weight: 800;
 }
@@ -317,7 +317,7 @@
 }
 
 .instance-list-item.selected {
-  border-color: #007d2f;
+  border-color: #00a63a;
   box-shadow: 0 0 0 2px rgba(0, 125, 47, .12);
 }
 

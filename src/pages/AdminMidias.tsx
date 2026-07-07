@@ -32,7 +32,7 @@ export default function AdminMidias() {
     const fetchMidias = async () => {
         try {
             setLoading(true, 'Carregando mídias...');
-            const q = query(collection(db, 'arena_simonesia_2026_midias'), orderBy('createdAt', 'desc'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_midias'), orderBy('createdAt', 'desc'));
             const snap = await getDocs(q);
             const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Midia));
             setMidias(data);
@@ -48,7 +48,7 @@ export default function AdminMidias() {
         if (!window.confirm("Deseja realmente excluir esta mídia? (A exclusão é apenas no banco de dados, o arquivo no R2 continuará existindo).")) return;
 
         try {
-            await deleteDoc(doc(db, 'arena_simonesia_2026_midias', id));
+            await deleteDoc(doc(db, 'rumo_ao_esporte_2026_midias', id));
             setMidias(prev => prev.filter(m => m.id !== id));
             showAlert('Mídia excluída do sistema.', 'success');
         } catch (error) {
@@ -59,7 +59,7 @@ export default function AdminMidias() {
 
     const handleToggleConvocacao = async (id: string, currentStatus: boolean) => {
         try {
-            await updateDoc(doc(db, 'arena_simonesia_2026_midias', id), {
+            await updateDoc(doc(db, 'rumo_ao_esporte_2026_midias', id), {
                 isConvocacao: !currentStatus
             });
             setMidias(prev => prev.map(m => m.id === id ? { ...m, isConvocacao: !currentStatus } : m));
@@ -87,7 +87,7 @@ export default function AdminMidias() {
             const compressed = await compressImage(fileToUpload);
             const formData = new FormData();
             formData.append('file', compressed, fileToUpload.name);
-            formData.append('folder', `arena_simonesia_2026_midias/${selectedAluno.uniqueId}`);
+            formData.append('folder', `rumo_ao_esporte_2026_midias/${selectedAluno.uniqueId}`);
 
             const workerUrl = import.meta.env.VITE_WORKER_URL;
             const res = await fetch(`${workerUrl}/images/upload`, {
@@ -100,7 +100,7 @@ export default function AdminMidias() {
             const url = data.data?.url || data.url;
 
             if (url) {
-                const docRef = await addDoc(collection(db, 'arena_simonesia_2026_midias'), {
+                const docRef = await addDoc(collection(db, 'rumo_ao_esporte_2026_midias'), {
                     url,
                     alunoId: selectedAluno.uniqueId,
                     isConvocacao: isUploadConvocacao,
@@ -151,11 +151,11 @@ export default function AdminMidias() {
         <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ margin: 0, color: '#333', fontSize: '1.8rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <ImageIcon size={28} color="#007d2f" /> Mídias Globais
+                    <ImageIcon size={28} color="#00a63a" /> Mídias Globais
                 </h1>
                 <button
                     onClick={() => setIsUploadModalOpen(true)}
-                    style={{ background: '#007d2f', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    style={{ background: '#00a63a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
                     <Upload size={18} /> UPLOAD DE MÍDIA
                 </button>
@@ -164,11 +164,11 @@ export default function AdminMidias() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                 <div style={{ background: '#fff', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <div style={{ background: '#ffebee', padding: '15px', borderRadius: '12px' }}>
-                        <ImageIcon size={24} color="#007d2f" />
+                        <ImageIcon size={24} color="#00a63a" />
                     </div>
                     <div>
                         <div style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'bold' }}>Total de Fotos</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#007d2f' }}>{midias.length}</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#00a63a' }}>{midias.length}</div>
                     </div>
                 </div>
 
@@ -196,7 +196,7 @@ export default function AdminMidias() {
             <div style={{ background: '#fff', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
                     <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#333', fontWeight: '800' }}>Acervo de Imagens</h2>
-                    <div style={{ display: 'flex', alignItems: 'center', background: '#f5f5f5', borderRadius: '8px', padding: '0 15px', width: '300px', maxWidth: '100%', border: '1px solid #eee', transition: 'border-color 0.2s' }} onFocus={e => e.currentTarget.style.borderColor = '#007d2f'} onBlur={e => e.currentTarget.style.borderColor = '#eee'}>
+                    <div style={{ display: 'flex', alignItems: 'center', background: '#f5f5f5', borderRadius: '8px', padding: '0 15px', width: '300px', maxWidth: '100%', border: '1px solid #eee', transition: 'border-color 0.2s' }} onFocus={e => e.currentTarget.style.borderColor = '#00a63a'} onBlur={e => e.currentTarget.style.borderColor = '#eee'}>
                         <Search size={18} color="#999" />
                         <input
                             type="text"
@@ -224,7 +224,7 @@ export default function AdminMidias() {
                         <div style={{ padding: '25px 30px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fdfdfd' }}>
                             <div>
                                 <h2 style={{ margin: 0, color: '#333', fontSize: '1.5rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Upload size={24} color="#007d2f" /> Adicionar Nova Mídia
+                                    <Upload size={24} color="#00a63a" /> Adicionar Nova Mídia
                                 </h2>
                                 <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '0.9rem' }}>Vincule uma imagem ao perfil de um aluno.</p>
                             </div>
@@ -238,13 +238,13 @@ export default function AdminMidias() {
                                 {/* Left Column: Search Student */}
                                 <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column' }}>
                                     <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', color: '#333', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800' }}>
-                                        <span style={{ background: '#007d2f', color: '#fff', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>1</span>
+                                        <span style={{ background: '#00a63a', color: '#fff', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>1</span>
                                         Identifique o Aluno
                                     </h3>
 
                                     {!selectedAluno ? (
                                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', background: '#f5f5f5', borderRadius: '12px', padding: '5px 15px', marginBottom: '15px', border: '1px solid #e0e0e0', transition: 'border-color 0.2s' }} onFocus={e => e.currentTarget.style.borderColor = '#007d2f'} onBlur={e => e.currentTarget.style.borderColor = '#e0e0e0'}>
+                                            <div style={{ display: 'flex', alignItems: 'center', background: '#f5f5f5', borderRadius: '12px', padding: '5px 15px', marginBottom: '15px', border: '1px solid #e0e0e0', transition: 'border-color 0.2s' }} onFocus={e => e.currentTarget.style.borderColor = '#00a63a'} onBlur={e => e.currentTarget.style.borderColor = '#e0e0e0'}>
                                                 <Search size={20} color="#999" />
                                                 <input
                                                     type="text"
@@ -319,14 +319,14 @@ export default function AdminMidias() {
                                         )}
 
                                         <label style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', border: '3px dashed', borderColor: selectedAluno ? '#e0e0e0' : '#eee', borderRadius: '16px', cursor: (uploading || !selectedAluno) ? 'not-allowed' : 'pointer', background: selectedAluno ? '#fafafa' : '#fff', transition: 'all 0.3s', minHeight: '300px' }}
-                                            onMouseOver={e => { if (!uploading && selectedAluno) { e.currentTarget.style.borderColor = '#007d2f'; e.currentTarget.style.background = '#fffbfc'; e.currentTarget.style.transform = 'scale(1.01)'; } }}
+                                            onMouseOver={e => { if (!uploading && selectedAluno) { e.currentTarget.style.borderColor = '#00a63a'; e.currentTarget.style.background = '#fffbfc'; e.currentTarget.style.transform = 'scale(1.01)'; } }}
                                             onMouseOut={e => { if (!uploading && selectedAluno) { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.background = '#fafafa'; e.currentTarget.style.transform = 'scale(1)'; } }}
                                         >
                                             {uploading ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                                     <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
-                                                    <div style={{ width: '50px', height: '50px', border: '5px solid #f3f3f3', borderTop: '5px solid #007d2f', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '20px', boxShadow: '0 0 15px rgba(0, 125, 47, 0.2)' }}></div>
-                                                    <span style={{ fontWeight: '900', color: '#007d2f', fontSize: '1.1rem' }}>Enviando ao Cloudflare...</span>
+                                                    <div style={{ width: '50px', height: '50px', border: '5px solid #f3f3f3', borderTop: '5px solid #00a63a', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '20px', boxShadow: '0 0 15px rgba(0, 125, 47, 0.2)' }}></div>
+                                                    <span style={{ fontWeight: '900', color: '#00a63a', fontSize: '1.1rem' }}>Enviando ao Cloudflare...</span>
                                                     <span style={{ fontSize: '0.85rem', color: '#999', marginTop: '8px' }}>Otimizando qualidade e armazenando.</span>
                                                 </div>
                                             ) : fileToUpload ? (
@@ -347,11 +347,11 @@ export default function AdminMidias() {
                                             ) : (
                                                 <>
                                                     <div style={{ background: selectedAluno ? '#fff' : 'transparent', padding: '20px', borderRadius: '50%', boxShadow: selectedAluno ? '0 10px 30px rgba(0,0,0,0.05)' : 'none', marginBottom: '20px' }}>
-                                                        <Upload size={54} color={selectedAluno ? "#007d2f" : "#ddd"} style={{ transition: 'color 0.3s' }} />
+                                                        <Upload size={54} color={selectedAluno ? "#00a63a" : "#ddd"} style={{ transition: 'color 0.3s' }} />
                                                     </div>
                                                     <span style={{ fontWeight: '900', color: selectedAluno ? '#333' : '#bbb', fontSize: '1.2rem', textAlign: 'center', marginBottom: '8px' }}>Tocar para buscar foto</span>
                                                     <span style={{ fontSize: '0.9rem', color: '#999', textAlign: 'center', maxWidth: '80%' }}>Extensões suportadas: JPG, PNG, WEBP</span>
-                                                    <span style={{ fontSize: '0.75rem', color: selectedAluno ? '#007d2f' : '#aaa', marginTop: '20px', background: selectedAluno ? '#fff2f2' : '#f5f5f5', padding: '6px 15px', borderRadius: '20px', fontWeight: 'bold' }}>
+                                                    <span style={{ fontSize: '0.75rem', color: selectedAluno ? '#00a63a' : '#aaa', marginTop: '20px', background: selectedAluno ? '#fff2f2' : '#f5f5f5', padding: '6px 15px', borderRadius: '20px', fontWeight: 'bold' }}>
                                                         A resolução será comprimida dinamicamente
                                                     </span>
                                                 </>
@@ -418,7 +418,7 @@ export default function AdminMidias() {
                                     padding: '10px 25px',
                                     borderRadius: '8px',
                                     border: 'none',
-                                    background: (!selectedAluno || !fileToUpload || uploading) ? '#ccc' : '#007d2f',
+                                    background: (!selectedAluno || !fileToUpload || uploading) ? '#ccc' : '#00a63a',
                                     color: '#fff',
                                     fontWeight: 'bold',
                                     cursor: (!selectedAluno || !fileToUpload || uploading) ? 'not-allowed' : 'pointer',

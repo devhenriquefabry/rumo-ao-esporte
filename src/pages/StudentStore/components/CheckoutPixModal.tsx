@@ -87,7 +87,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
             const user = auth.currentUser;
             if (user?.email) {
                 try {
-                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", user.email.toLowerCase().trim()));
+                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", user.email.toLowerCase().trim()));
                     const snap = await getDocs(q);
                     if (!snap.empty) {
                         const data = snap.docs[0].data();
@@ -161,7 +161,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
 
         setLoading(true);
         try {
-            const pDoc = await getDoc(doc(db, 'uba_store_products', product.id!));
+            const pDoc = await getDoc(doc(db, 'rae_store_products', product.id!));
             if (!pDoc.exists() || pDoc.data().stock < quantity) {
                 alert("Estoque insuficiente."); setLoading(false); return;
             }
@@ -243,7 +243,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
             const isPaid = data.payment && ['RECEIVED', 'CONFIRMED', 'AVAILABLE'].includes(data.payment.status);
 
             if (isPaid) {
-                await addDoc(collection(db, 'uba_store_orders'), {
+                await addDoc(collection(db, 'rae_store_orders'), {
                     customerId: auth.currentUser?.uid || 'guest',
                     customerName: buyerInfo.name,
                     customerEmail: auth.currentUser?.email || '',
@@ -264,7 +264,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
                     updatedAt: new Date().toISOString()
                 });
 
-                await updateDoc(doc(db, 'uba_store_products', product.id!), { stock: increment(-quantity) });
+                await updateDoc(doc(db, 'rae_store_products', product.id!), { stock: increment(-quantity) });
                 setStep(3);
             } else {
                 alert("Pagamento não identificado. Aguarde mais alguns instantes.");
@@ -285,7 +285,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
                 {/* Header */}
                 <div style={{ padding: '20px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', position: 'sticky', top: 0, zIndex: 10 }}>
                     <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <ShoppingBag size={20} color="#00237f" /> Finalizar compra
+                        <ShoppingBag size={20} color="#17428f" /> Finalizar compra
                     </h2>
                     <button onClick={onClose} style={{ background: '#e2e8f0', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}>
                         <X size={18} />
@@ -309,7 +309,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
                                 )}
                                 <div>
                                     <h3 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: '#1e293b' }}>{product.name}</h3>
-                                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#00237f' }}>R$ {product.price.toFixed(2)}</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#17428f' }}>R$ {product.price.toFixed(2)}</div>
                                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>{product.stock} disponíveis</div>
                                 </div>
                             </div>
@@ -337,9 +337,9 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
                                                 onClick={() => setSelectedSize(s)}
                                                 style={{
                                                     padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.15s',
-                                                    background: selectedSize === s ? '#00237f' : '#f1f5f9',
+                                                    background: selectedSize === s ? '#17428f' : '#f1f5f9',
                                                     color: selectedSize === s ? '#fff' : '#475569',
-                                                    border: `2px solid ${selectedSize === s ? '#00237f' : '#e2e8f0'}`,
+                                                    border: `2px solid ${selectedSize === s ? '#17428f' : '#e2e8f0'}`,
                                                 }}
                                             >{s}</button>
                                         ))}
@@ -360,9 +360,9 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
                                                 onClick={() => setSelectedVariations(prev => ({ ...prev, [v.name]: opt }))}
                                                 style={{
                                                     padding: '7px 14px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s',
-                                                    background: selectedVariations[v.name] === opt ? '#007d2f' : '#f1f5f9',
+                                                    background: selectedVariations[v.name] === opt ? '#00a63a' : '#f1f5f9',
                                                     color: selectedVariations[v.name] === opt ? '#fff' : '#475569',
-                                                    border: `2px solid ${selectedVariations[v.name] === opt ? '#007d2f' : '#e2e8f0'}`,
+                                                    border: `2px solid ${selectedVariations[v.name] === opt ? '#00a63a' : '#e2e8f0'}`,
                                                 }}
                                             >{opt}</button>
                                         ))}
@@ -560,7 +560,7 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
                                             <input readOnly value={pixCode} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f1f5f9', fontSize: '0.85rem', color: '#334155' }} />
                                             <button
                                                 onClick={() => { navigator.clipboard.writeText(pixCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                                                style={{ padding: '0 16px', background: copied ? '#16a34a' : '#00237f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold' }}
+                                                style={{ padding: '0 16px', background: copied ? '#16a34a' : '#17428f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold' }}
                                             >
                                                 {copied ? <Check size={16} /> : <Copy size={16} />} Copiar
                                             </button>

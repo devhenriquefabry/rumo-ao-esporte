@@ -238,12 +238,12 @@ export default function AdminDetails() {
                                 padding: '15px',
                                 background: '#f8f9fa',
                                 borderRadius: '12px',
-                                border: '1px dashed #007d2f',
+                                border: '1px dashed #00a63a',
                                 opacity: 0.95
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#007d2f' }}></div>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00a63a' }}></div>
                                         <h4 style={{ margin: 0, color: '#333', textTransform: 'uppercase' }}>
                                             {reg.alunos?.[0]?.nome ? `${reg.alunos[0].nome} - ` : ''}{reg.modalidade}
                                         </h4>
@@ -251,7 +251,7 @@ export default function AdminDetails() {
                                     <button
                                         onClick={() => window.location.href = `/admin/details/${reg.id}`}
                                         style={{
-                                            background: '#fff', color: '#007d2f', border: '1px solid #007d2f',
+                                            background: '#fff', color: '#00a63a', border: '1px solid #00a63a',
                                             padding: '5px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer'
                                         }}
                                     >

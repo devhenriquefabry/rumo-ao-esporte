@@ -25,7 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
     pending: '#999',
     sending: '#e67e22',
     sent: '#27ae60',
-    error: '#007d2f',
+    error: '#00a63a',
 };
 const STATUS_LABELS: Record<string, string> = {
     pending: 'Pendente',
@@ -195,14 +195,14 @@ export default function AdminMensagens() {
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {/* Import */}
                     <input type="file" accept=".xlsx,.xls" id="excel-upload-disparos" style={{ display: 'none' }} onChange={handleFileUpload} />
-                    <label htmlFor="excel-upload-disparos" style={toolbarBtnStyle('#007d2f', '#fff', loading ? 'wait' : 'pointer')}>
+                    <label htmlFor="excel-upload-disparos" style={toolbarBtnStyle('#00a63a', '#fff', loading ? 'wait' : 'pointer')}>
                         <Upload size={15} />
                         {loading ? 'Processando...' : 'Importar Excel'}
                     </label>
 
                     {data.length > 0 && (
                         <>
-                            <button onClick={clearList} style={toolbarBtnStyle('#fff', '#007d2f', 'pointer', '1px solid #007d2f')}>
+                            <button onClick={clearList} style={toolbarBtnStyle('#fff', '#00a63a', 'pointer', '1px solid #00a63a')}>
                                 <Trash2 size={15} /> Limpar Lista
                             </button>
                             <button onClick={toggleAll} style={toolbarBtnStyle('#fff', '#555', 'pointer', '1px solid #ddd')}>
@@ -225,13 +225,13 @@ export default function AdminMensagens() {
                                 style={{ paddingLeft: '32px', padding: '9px 12px 9px 32px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.9rem', width: '200px' }}
                             />
                         </div>
-                        <button onClick={() => setShowTemplate(!showTemplate)} style={toolbarBtnStyle('#fff5f5', '#007d2f', 'pointer', '1px solid #f0c0c0')}>
+                        <button onClick={() => setShowTemplate(!showTemplate)} style={toolbarBtnStyle('#eef8ff', '#00a63a', 'pointer', '1px solid #f0c0c0')}>
                             ✏️ {showTemplate ? 'Fechar Template' : 'Editar Mensagem'}
                         </button>
                         <button
                             onClick={() => handleSend(false)}
                             disabled={sending || selectedIds.size === 0}
-                            style={toolbarBtnStyle(selectedIds.size === 0 || sending ? '#e0e0e0' : '#007d2f', '#fff', selectedIds.size === 0 || sending ? 'not-allowed' : 'pointer')}
+                            style={toolbarBtnStyle(selectedIds.size === 0 || sending ? '#e0e0e0' : '#00a63a', '#fff', selectedIds.size === 0 || sending ? 'not-allowed' : 'pointer')}
                         >
                             <Send size={15} />
                             {sending ? `Registrando na fila...` : `Enviar (${selectedIds.size})`}
@@ -248,7 +248,7 @@ export default function AdminMensagens() {
 
             {/* Template editor */}
             {showTemplate && (
-                <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', padding: '24px', marginBottom: '20px', borderLeft: '4px solid #007d2f' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', padding: '24px', marginBottom: '20px', borderLeft: '4px solid #00a63a' }}>
                     <h3 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#333' }}>📝 Template da Mensagem</h3>
                     <p style={{ fontSize: '0.82rem', color: '#888', marginBottom: '12px' }}>
                         Variáveis disponíveis: <code>{'{responsavel}'}</code>, <code>{'{nome}'}</code>, <code>{'{valor}'}</code>, <code>{'{vencimento}'}</code>
@@ -275,7 +275,7 @@ export default function AdminMensagens() {
                     <div style={{ padding: '16px 24px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <strong style={{ color: '#333' }}>{data.length} contato(s)</strong>
                         {searchTerm && <span style={{ color: '#888', fontSize: '0.85rem' }}>— exibindo {filtered.length}</span>}
-                        {selectedIds.size > 0 && <span style={{ marginLeft: 'auto', color: '#007d2f', fontSize: '0.85rem', fontWeight: 600 }}>{selectedIds.size} selecionado(s)</span>}
+                        {selectedIds.size > 0 && <span style={{ marginLeft: 'auto', color: '#00a63a', fontSize: '0.85rem', fontWeight: 600 }}>{selectedIds.size} selecionado(s)</span>}
                     </div>
                     <div style={{ overflowX: 'auto', maxHeight: '560px', overflowY: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
@@ -297,10 +297,10 @@ export default function AdminMensagens() {
                                                 selected ? next.delete(item.id!) : next.add(item.id!);
                                                 setSelectedIds(next);
                                             }}
-                                            style={{ borderBottom: '1px solid #f5f5f5', cursor: 'pointer', background: selected ? '#fff5f5' : 'transparent', transition: 'background 0.15s' }}
+                                            style={{ borderBottom: '1px solid #f5f5f5', cursor: 'pointer', background: selected ? '#eef8ff' : 'transparent', transition: 'background 0.15s' }}
                                         >
                                             <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                <input type="checkbox" checked={selected} readOnly style={{ pointerEvents: 'none', accentColor: '#007d2f', transform: 'scale(1.2)' }} />
+                                                <input type="checkbox" checked={selected} readOnly style={{ pointerEvents: 'none', accentColor: '#00a63a', transform: 'scale(1.2)' }} />
                                             </td>
                                             <td style={{ padding: '12px 16px' }}>
                                                 <span style={{ color: STATUS_COLORS[item.status || 'pending'], fontWeight: item.status === 'sent' ? 600 : 400 }}>

@@ -43,7 +43,7 @@ export default function AssignClassModal({ isOpen, teacherName, turmas, onAssign
             background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px'
         }}>
             <div className="native-card" style={{ width: '100%', maxWidth: '500px', margin: 0, animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)', padding: '30px', borderRadius: '25px', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
-                <h2 style={{ margin: '0 0 10px 0', color: '#007d2f', fontSize: '1.4rem', fontWeight: '900' }}>Atribuir Turmas</h2>
+                <h2 style={{ margin: '0 0 10px 0', color: '#00a63a', fontSize: '1.4rem', fontWeight: '900' }}>Atribuir Turmas</h2>
                 <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.9rem' }}>Vincular novos horários para <b>{teacherName}</b></p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '25px' }}>
@@ -76,7 +76,7 @@ export default function AssignClassModal({ isOpen, teacherName, turmas, onAssign
                                         const allSelected = allIds.every(id => selectedTurmaIds.includes(id));
                                         setSelectedTurmaIds(allSelected ? [] : allIds);
                                     }}
-                                    style={{ background: 'none', border: 'none', color: '#007d2f', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                    style={{ background: 'none', border: 'none', color: '#00a63a', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}
                                 >
                                     {filteredTurmas.every(t => selectedTurmaIds.includes(t.id)) ? 'DESMARCAR TUDO' : 'SELECIONAR TUDO'}
                                 </button>
@@ -96,7 +96,7 @@ export default function AssignClassModal({ isOpen, teacherName, turmas, onAssign
                                                 key={t.id}
                                                 style={{
                                                     display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 15px', borderRadius: '12px',
-                                                    background: isSelected ? '#fff5f5' : '#fff', border: `1.5px solid ${isSelected ? '#007d2f' : '#eee'}`,
+                                                    background: isSelected ? '#eef8ff' : '#fff', border: `1.5px solid ${isSelected ? '#00a63a' : '#eee'}`,
                                                     cursor: 'pointer', transition: 'all 0.2s'
                                                 }}
                                             >
@@ -110,17 +110,17 @@ export default function AssignClassModal({ isOpen, teacherName, turmas, onAssign
                                                             setSelectedTurmaIds([...selectedTurmaIds, t.id]);
                                                         }
                                                     }}
-                                                    style={{ width: '18px', height: '18px', accentColor: '#007d2f' }}
+                                                    style={{ width: '18px', height: '18px', accentColor: '#00a63a' }}
                                                 />
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: isSelected ? '#007d2f' : '#333' }}>{t.nome}</span>
+                                                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: isSelected ? '#00a63a' : '#333' }}>{t.nome}</span>
                                                     <span style={{ fontSize: '0.75rem', color: '#888' }}>{t.horario} • {t.dias?.join(', ')}</span>
                                                 </div>
                                             </label>
                                         );
                                     })
                                 ) : (
-                                    <div style={{ padding: '20px', textAlign: 'center', color: '#007d2f', fontSize: '0.85rem' }}>Não há turmas disponíveis para esta modalidade.</div>
+                                    <div style={{ padding: '20px', textAlign: 'center', color: '#00a63a', fontSize: '0.85rem' }}>Não há turmas disponíveis para esta modalidade.</div>
                                 )
                             ) : (
                                 <div style={{ padding: '20px', textAlign: 'center', color: '#bbb', fontSize: '0.85rem' }}>Escolha uma modalidade primeiro</div>
@@ -141,9 +141,9 @@ export default function AssignClassModal({ isOpen, teacherName, turmas, onAssign
                         disabled={selectedTurmaIds.length === 0}
                         style={{
                             flex: 1, height: '50px', borderRadius: '15px', border: 'none',
-                            background: selectedTurmaIds.length > 0 ? '#007d2f' : '#ddd',
+                            background: selectedTurmaIds.length > 0 ? '#00a63a' : '#ddd',
                             color: '#fff', fontWeight: '900', cursor: selectedTurmaIds.length > 0 ? 'pointer' : 'default',
-                            boxShadow: selectedTurmaIds.length > 0 ? '0 6px 15px rgba(0, 125, 47, 0.3)' : 'none'
+                            boxShadow: selectedTurmaIds.length > 0 ? '0 6px 15px rgba(0, 166, 58, 0.28)' : 'none'
                         }}
                     >
                         CONFIRMAR {selectedTurmaIds.length > 0 && `(${selectedTurmaIds.length})`}

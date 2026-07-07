@@ -60,7 +60,7 @@ export default function ResponsibleDetailsSection({ data, setData, isEditing = f
             padding: '12px',
             borderRadius: '12px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-            borderLeft: '4px solid #007d2f',
+            borderLeft: '4px solid #00a63a',
             width: '100%',
             marginBottom: '10px'
         }}>
@@ -68,8 +68,8 @@ export default function ResponsibleDetailsSection({ data, setData, isEditing = f
                 onClick={() => setIsOpen(!isOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '8px', borderBottom: '1px solid #eee', cursor: 'pointer', userSelect: 'none' }}
             >
-                {isOpen ? <ChevronDown size={18} color="#007d2f" /> : <ChevronRight size={18} color="#007d2f" />}
-                <User size={18} color="#007d2f" />
+                {isOpen ? <ChevronDown size={18} color="#00a63a" /> : <ChevronRight size={18} color="#00a63a" />}
+                <User size={18} color="#00a63a" />
                 <h3 style={{ margin: 0, color: '#333', fontSize: '1rem', flex: 1 }}>Responsável Financeiro</h3>
             </div>
 

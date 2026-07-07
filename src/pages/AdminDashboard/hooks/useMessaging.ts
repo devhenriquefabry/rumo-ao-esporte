@@ -1,7 +1,7 @@
 import { useDialog } from '../../../context/CustomDialogContext';
 import type { Student, Turma } from '../types';
 
-const STUDENT_LOGIN_URL = 'https://arenasimonesia.web.app/aluno/login';
+const STUDENT_LOGIN_URL = 'https://rumo-ao-esporte.web.app/aluno/login';
 
 export function useMessaging(turmas: Turma[]) {
     const { showAlert } = useDialog();
@@ -29,7 +29,7 @@ export function useMessaging(turmas: Turma[]) {
         const lines = [
             `Olá ${nomeResponsavel}, tudo bem?`,
             '',
-            `O cadastro do aluno(a) *${nomeAluno}* foi *APROVADO* com sucesso na Arena Simonésia!`,
+            `O cadastro do aluno(a) *${nomeAluno}* foi *APROVADO* com sucesso na Rumo ao Esporte!`,
             '',
             ...(assignedTurma ? [
                 '*DETALHES DA TURMA:*',
@@ -50,7 +50,7 @@ export function useMessaging(turmas: Turma[]) {
                 '',
             ] : []),
             'Atenciosamente,',
-            'Equipe Arena Simonésia',
+            'Equipe Rumo ao Esporte',
             '',
             'Dúvidas? Entre em contato: +55 33 8414-4053'
         ];

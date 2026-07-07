@@ -295,7 +295,7 @@ const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClose, loca
                     <X size={24} color="#666" />
                 </button>
 
-                <h2 style={{ marginTop: 0, color: '#00237f', fontSize: '1.4rem' }}>Nova Reserva</h2>
+                <h2 style={{ marginTop: 0, color: '#17428f', fontSize: '1.4rem' }}>Nova Reserva</h2>
 
                 {/* Step 1: Selection */}
                 {step === 1 && (
@@ -340,7 +340,7 @@ const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClose, loca
 
                         {selectedLocation && (
                             <div style={{ background: '#f0f4ff', padding: '10px', borderRadius: '8px', marginTop: '5px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', color: '#00237f' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', color: '#17428f' }}>
                                     <span>Total Estimado:</span>
                                     <span>R$ {totalPrice.toFixed(2)}</span>
                                 </div>
@@ -421,7 +421,7 @@ const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClose, loca
                             <button
                                 onClick={handleCreateBooking}
                                 disabled={loading}
-                                style={{ flex: 2, padding: '12px', background: '#00237f', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                style={{ flex: 2, padding: '12px', background: '#17428f', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
                             >
                                 {loading ? 'Gerando Cobrança...' : 'Confirmar Reserva'}
                             </button>

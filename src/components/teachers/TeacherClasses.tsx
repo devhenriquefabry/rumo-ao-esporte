@@ -34,7 +34,7 @@ export default function TeacherClasses({ teacher, classes, studentCounts, onAssi
                         }}
                         style={{
                             background: '#f0f4f8',
-                            color: '#007d2f',
+                            color: '#00a63a',
                             border: 'none',
                             borderRadius: '6px',
                             padding: '2px 8px',
@@ -62,7 +62,7 @@ export default function TeacherClasses({ teacher, classes, studentCounts, onAssi
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s', gap: '10px'
                             }}
                             onMouseEnter={teacher.active ? (e) => {
-                                e.currentTarget.style.borderColor = '#007d2f';
+                                e.currentTarget.style.borderColor = '#00a63a';
                                 e.currentTarget.style.background = '#fff';
                             } : undefined}
                             onMouseLeave={teacher.active ? (e) => {
@@ -71,7 +71,7 @@ export default function TeacherClasses({ teacher, classes, studentCounts, onAssi
                             } : undefined}
                         >
                             <div style={{ flex: 1 }}>
-                                <span>{t.nome} <span style={{ color: '#999', fontWeight: 'normal', fontSize: '0.7rem' }}>• {t.horario}</span> <span style={{ color: '#007d2f', fontWeight: 'bold', fontSize: '0.7rem', marginLeft: '5px' }}>({studentCounts[t.id] || 0} alunos)</span></span>
+                                <span>{t.nome} <span style={{ color: '#999', fontWeight: 'normal', fontSize: '0.7rem' }}>• {t.horario}</span> <span style={{ color: '#00a63a', fontWeight: 'bold', fontSize: '0.7rem', marginLeft: '5px' }}>({studentCounts[t.id] || 0} alunos)</span></span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 {teacher.active && (
@@ -99,7 +99,7 @@ export default function TeacherClasses({ teacher, classes, studentCounts, onAssi
                                         <XCircle size={14} />
                                     </button>
                                 )}
-                                {teacher.active && <ArrowRight size={14} color="#007d2f" />}
+                                {teacher.active && <ArrowRight size={14} color="#00a63a" />}
                             </div>
                         </div>
                     ))
@@ -114,7 +114,7 @@ export default function TeacherClasses({ teacher, classes, studentCounts, onAssi
                                 }}
                                 style={{
                                     alignSelf: 'center',
-                                    background: '#007d2f',
+                                    background: '#00a63a',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '8px',

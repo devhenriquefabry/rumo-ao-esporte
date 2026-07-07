@@ -67,7 +67,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
             for (const chunk of chunks) {
                 if (thumbHigh) break;
                 const q = query(
-                    collection(db, 'arena_simonesia_2026_midias'),
+                    collection(db, 'rumo_ao_esporte_2026_midias'),
                     where('alunoId', 'in', chunk)
                 );
                 const snap = await getDocs(q);
@@ -119,7 +119,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
             let highlights: Midia[] = [];
             for (const chunk of chunks) {
                 const q = query(
-                    collection(db, 'arena_simonesia_2026_midias'),
+                    collection(db, 'rumo_ao_esporte_2026_midias'),
                     where('alunoId', 'in', chunk)
                 );
                 const snap = await getDocs(q);
@@ -217,7 +217,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', width: '90%', maxWidth: '400px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
                         <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <ImageIcon size={24} color="#007d2f" />
+                            <ImageIcon size={24} color="#00a63a" />
                             Gerar Imagem
                         </h3>
                         <p style={{ color: '#666', marginBottom: '25px', lineHeight: '1.5' }}>
@@ -233,7 +233,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                                     handleCloseAll();
                                 }}
                                 style={{ flex: 1, position: 'relative', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: '2px solid transparent', transition: 'all 0.2s', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', opacity: isLoadingPreview ? 0.5 : 1 }}
-                                onMouseOver={(e) => { e.currentTarget.style.borderColor = '#007d2f'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                                onMouseOver={(e) => { e.currentTarget.style.borderColor = '#00a63a'; e.currentTarget.style.transform = 'scale(1.02)'; }}
                                 onMouseOut={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
                             >
                                 <img src={previewGeral || "/convocacao.png"} alt="Layout Geral" style={{ width: '100%', display: 'block' }} />
@@ -245,7 +245,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                                 <div
                                     onClick={handlePrepareIndividualImage}
                                     style={{ flex: 1, position: 'relative', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: '2px solid transparent', transition: 'all 0.2s', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', opacity: isLoadingPreview ? 0.5 : 1 }}
-                                    onMouseOver={(e) => { e.currentTarget.style.borderColor = '#007d2f'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                                    onMouseOver={(e) => { e.currentTarget.style.borderColor = '#00a63a'; e.currentTarget.style.transform = 'scale(1.02)'; }}
                                     onMouseOut={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
                                 >
                                     <img src={previewIndividual || "/convocacao-individual.png"} alt="Layout Individual" style={{ width: '100%', display: 'block' }} />
@@ -298,14 +298,14 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                                                 cursor: 'pointer',
                                                 borderRadius: '12px',
                                                 overflow: 'hidden',
-                                                border: isSelected ? '4px solid #007d2f' : '2px solid transparent',
+                                                border: isSelected ? '4px solid #00a63a' : '2px solid transparent',
                                                 transition: 'all 0.2s',
                                                 background: '#f5f5f5',
                                                 position: 'relative'
                                             }}
                                         >
                                             {isSelected && (
-                                                <div style={{ position: 'absolute', top: '5px', right: '5px', background: '#007d2f', color: '#fff', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                                <div style={{ position: 'absolute', top: '5px', right: '5px', background: '#00a63a', color: '#fff', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, fontSize: '0.7rem', fontWeight: 'bold' }}>
                                                     ✓
                                                 </div>
                                             )}
@@ -337,7 +337,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                                 style={{
                                     flex: 2,
                                     padding: '12px',
-                                    background: selectedHighs.length > 0 ? '#007d2f' : '#ccc',
+                                    background: selectedHighs.length > 0 ? '#00a63a' : '#ccc',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '8px',

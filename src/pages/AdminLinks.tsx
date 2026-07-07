@@ -17,7 +17,7 @@ export default function AdminLinks() {
         const fetchData = async () => {
             try {
                 // 1. Fetch all registrations to count students
-                const snapshot = await getDocs(collection(db, 'arena_simonesia_2026_registrations'));
+                const snapshot = await getDocs(collection(db, 'rumo_ao_esporte_2026_registrations'));
                 const newCounts: Record<string, number> = {};
 
                 snapshot.docs.forEach(doc => {
@@ -68,7 +68,7 @@ export default function AdminLinks() {
                     <div key={mod.id} style={{ marginBottom: '40px' }}>
                         <h2 style={{
                             fontSize: '1.4rem',
-                            color: '#007d2f',
+                            color: '#00a63a',
                             borderBottom: '2px solid #eee',
                             paddingBottom: '10px',
                             marginBottom: '20px',
@@ -88,7 +88,7 @@ export default function AdminLinks() {
                                     <div key={t.id} style={{ background: '#fff', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', border: '1px solid #f0f0f0' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                             <h3 style={{ fontSize: '1.1rem', color: '#444', margin: 0 }}>{t.nome}</h3>
-                                            <span style={{ background: '#007d2f', color: '#fff', fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', height: 'fit-content' }}>
+                                            <span style={{ background: '#00a63a', color: '#fff', fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', height: 'fit-content' }}>
                                                 {count} alunos
                                             </span>
                                         </div>
@@ -115,7 +115,7 @@ export default function AdminLinks() {
                                                 onClick={() => copyToClipboard(link, t.id)}
                                                 title="Copiar Link"
                                                 style={{
-                                                    background: copied === t.id ? '#2e7d32' : '#007d2f',
+                                                    background: copied === t.id ? '#2e7d32' : '#00a63a',
                                                     color: '#fff',
                                                     border: 'none',
                                                     width: '40px',

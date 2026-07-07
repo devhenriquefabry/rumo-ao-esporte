@@ -11,7 +11,7 @@ export default function TeacherDashboard() {
     const [turmas, setTurmas] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const [teacherName, setTeacherName] = useState(localStorage.getItem('uba_teacher_name') || 'Professor');
+    const [teacherName, setTeacherName] = useState(localStorage.getItem('rae_teacher_name') || 'Professor');
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -30,8 +30,8 @@ export default function TeacherDashboard() {
 
                     // Security check: Is this teacher active?
                     if (teacherData.active === false) {
-                        localStorage.removeItem('uba_teacher_name');
-                        localStorage.removeItem('uba_teacher_role');
+                        localStorage.removeItem('rae_teacher_name');
+                        localStorage.removeItem('rae_teacher_role');
                         await auth.signOut();
                         alert("Seu acesso de professor foi desativado. Entre em contato com a secretaria.");
                         navigate('/aluno/login');
@@ -41,7 +41,7 @@ export default function TeacherDashboard() {
                     const myName = teacherData.nome;
                     if (myName) {
                         setTeacherName(myName);
-                        localStorage.setItem('uba_teacher_name', myName);
+                        localStorage.setItem('rae_teacher_name', myName);
                     }
 
                     // 2. Fetch Turmas where responsavel == myName
@@ -53,7 +53,7 @@ export default function TeacherDashboard() {
                         .filter((t: any) => t.ativo !== false);
 
                     // Fetch student counts
-                    const studentsQuery = query(collection(db, "arena_simonesia_2026_registrations"));
+                    const studentsQuery = query(collection(db, "rumo_ao_esporte_2026_registrations"));
                     const studentsSnap = await getDocs(studentsQuery);
 
                     const counts: Record<string, number> = {};
@@ -72,7 +72,7 @@ export default function TeacherDashboard() {
                     // Use local date string (YYYY-MM-DD) to avoid UTC rollover issues
                     const today = new Date().toLocaleDateString('en-CA');
                     const qChamadas = query(
-                        collection(db, 'arena_simonesia_2026_chamadas'),
+                        collection(db, 'rumo_ao_esporte_2026_chamadas'),
                         where('data', '==', today)
                     );
                     const snapChamadas = await getDocs(qChamadas);
@@ -130,7 +130,7 @@ export default function TeacherDashboard() {
                                     key={turma.id}
                                     onClick={() => navigate(`/professor/turmas/${turma.id}`)}
                                     className="native-card touch-feedback"
-                                    style={{ cursor: 'pointer', borderLeft: `4px solid #007d2f`, position: 'relative' }}
+                                    style={{ cursor: 'pointer', borderLeft: `4px solid #00a63a`, position: 'relative' }}
                                 >
                                     <div style={{ position: 'absolute', top: '15px', right: '15px', background: '#f5f5f5', padding: '5px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>
                                         {turma.modalidade?.toUpperCase()}
@@ -140,16 +140,16 @@ export default function TeacherDashboard() {
 
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#555' }}>
-                                            <Clock size={18} color="#007d2f" />
+                                            <Clock size={18} color="#00a63a" />
                                             <span style={{ fontWeight: 'bold' }}>{turma.horario}</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#555' }}>
-                                            <Calendar size={18} color="#007d2f" />
+                                            <Calendar size={18} color="#00a63a" />
                                             <span>{turma.dias?.join(', ')}</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#555', marginTop: '5px' }}>
-                                            <Users size={18} color="#00237f" />
-                                            <span style={{ fontWeight: 'bold', color: '#00237f' }}>{turma.studentCount} Alunos</span>
+                                            <Users size={18} color="#17428f" />
+                                            <span style={{ fontWeight: 'bold', color: '#17428f' }}>{turma.studentCount} Alunos</span>
                                         </div>
 
                                         {turma.attendanceDone && (

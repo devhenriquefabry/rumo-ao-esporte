@@ -52,7 +52,7 @@ export default function AdminBirthdays() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const q = query(collection(db, "arena_simonesia_2026_registrations"));
+                const q = query(collection(db, "rumo_ao_esporte_2026_registrations"));
                 const querySnapshot = await getDocs(q);
                 const list: BirthdayStudent[] = [];
                 const today = new Date();
@@ -276,7 +276,7 @@ export default function AdminBirthdays() {
         }
 
         const firstName = student.nome.split(' ')[0];
-        const text = `Parabéns ${firstName}!\n\nA Arena Simonésia deseja a você um dia repleto de alegria, saúde e muitas conquistas. Que este novo ciclo seja brilhante!\n\nFeliz aniversário!`;
+        const text = `Parabéns ${firstName}!\n\nA Rumo ao Esporte deseja a você um dia repleto de alegria, saúde e muitas conquistas. Que este novo ciclo seja brilhante!\n\nFeliz aniversário!`;
 
         setSendingStatus(prev => ({ ...prev, [student.id]: 'sending' }));
         setConfirmModal({ isOpen: false, student: null });
@@ -376,7 +376,7 @@ export default function AdminBirthdays() {
                             borderRadius: '10px',
                             border: 'none',
                             fontWeight: 'bold',
-                            color: activeTab === 'futuros' ? '#007d2f' : '#666',
+                            color: activeTab === 'futuros' ? '#00a63a' : '#666',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -395,7 +395,7 @@ export default function AdminBirthdays() {
                             borderRadius: '10px',
                             border: 'none',
                             fontWeight: 'bold',
-                            color: activeTab === 'passados' ? '#007d2f' : '#666',
+                            color: activeTab === 'passados' ? '#00a63a' : '#666',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -410,7 +410,7 @@ export default function AdminBirthdays() {
                         onClick={() => setShowAutomationModal(true)}
                         style={{
                             padding: '8px 20px',
-                            background: '#00237f',
+                            background: '#17428f',
                             borderRadius: '10px',
                             border: 'none',
                             fontWeight: 'bold',
@@ -673,10 +673,10 @@ export default function AdminBirthdays() {
                             position: 'relative', overflow: 'hidden'
                         }}
                     >
-                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '6px', background: 'linear-gradient(90deg, #00237f, #007d2f)' }}></div>
+                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '6px', background: 'linear-gradient(90deg, #17428f, #00a63a)' }}></div>
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                            <h3 style={{ margin: 0, color: '#00237f', fontWeight: '900', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <h3 style={{ margin: 0, color: '#17428f', fontWeight: '900', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <Settings size={24} /> Automação de Parabéns
                             </h3>
                             <button 
@@ -691,7 +691,7 @@ export default function AdminBirthdays() {
                         <div style={{ display: 'grid', gap: '20px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '15px', borderRadius: '14px', border: '1px solid #e2e8f0', cursor: 'pointer' }} onClick={() => setWhatsappConfig({...whatsappConfig, birthdayAutomationEnabled: !whatsappConfig.birthdayAutomationEnabled})}>
                                 <span style={{ fontWeight: 'bold', color: '#334155' }}>Ativar Envio Automático Diário</span>
-                                <div style={{ width: '50px', height: '26px', background: whatsappConfig.birthdayAutomationEnabled ? '#00237f' : '#cbd5e1', borderRadius: '13px', position: 'relative', transition: 'all 0.3s' }}>
+                                <div style={{ width: '50px', height: '26px', background: whatsappConfig.birthdayAutomationEnabled ? '#17428f' : '#cbd5e1', borderRadius: '13px', position: 'relative', transition: 'all 0.3s' }}>
                                     <div style={{ width: '20px', height: '20px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '3px', left: whatsappConfig.birthdayAutomationEnabled ? '27px' : '3px', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}></div>
                                 </div>
                             </div>
@@ -719,8 +719,8 @@ export default function AdminBirthdays() {
                                 onClick={handleTriggerNow}
                                 disabled={isTriggering}
                                 style={{
-                                    marginTop: '10px', padding: '12px', borderRadius: '16px', border: '2px solid #00237f',
-                                    background: 'transparent', color: '#00237f', fontWeight: '800', fontSize: '0.9rem',
+                                    marginTop: '10px', padding: '12px', borderRadius: '16px', border: '2px solid #17428f',
+                                    background: 'transparent', color: '#17428f', fontWeight: '800', fontSize: '0.9rem',
                                     cursor: isTriggering ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                                     transition: 'all 0.2s'
                                 }}
@@ -734,7 +734,7 @@ export default function AdminBirthdays() {
                                 disabled={isSaving}
                                 style={{
                                     marginTop: '10px', padding: '16px', borderRadius: '16px', border: 'none',
-                                    background: '#00237f', color: '#fff', fontWeight: '800', fontSize: '1rem',
+                                    background: '#17428f', color: '#fff', fontWeight: '800', fontSize: '1rem',
                                     cursor: isSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                                     transition: 'all 0.2s', boxShadow: '0 10px 20px rgba(0,35,127,0.2)'
                                 }}
@@ -794,7 +794,7 @@ export default function AdminBirthdays() {
                              }}>
                                 <h2 style={{ 
                                     margin: 0,
-                                    color: '#00237f', 
+                                    color: '#17428f', 
                                     fontFamily: "'DucksFiesta', sans-serif", 
                                     fontSize: '44px', // Approximates 11cqw at 400px
                                     textTransform: 'capitalize',

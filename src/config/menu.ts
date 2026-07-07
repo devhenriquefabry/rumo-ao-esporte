@@ -43,6 +43,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
             { to: '/admin/financeiro', label: 'Geral' },
             { to: '/admin/financeiro/gastos', label: 'Gastos' },
             { to: '/admin/plans', label: 'Planos' },
+            { to: '/admin/financeiro/bancos', label: 'Bancos e APIs' },
             { to: '/admin/financeiro/cobrancas', label: 'Cobranças' }
         ]
     },

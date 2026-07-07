@@ -99,7 +99,7 @@ export default function AdminPlanAutoAllocation() {
 
         try {
             // Fetch all registrations for this modality
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'), where('modalidade', '==', modalityId));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'), where('modalidade', '==', modalityId));
             const snap = await getDocs(q);
             const totalDocs = snap.size;
 
@@ -130,7 +130,7 @@ export default function AdminPlanAutoAllocation() {
                 }
 
                 if (matchesType && data.planId !== targetPlanId) {
-                    await updateDoc(doc(db, 'arena_simonesia_2026_registrations', docSnap.id), {
+                    await updateDoc(doc(db, 'rumo_ao_esporte_2026_registrations', docSnap.id), {
                         planId: targetPlanId
                     });
                     updatedCount++;
@@ -154,7 +154,7 @@ export default function AdminPlanAutoAllocation() {
     if (loading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: '15px' }}>
-                <RefreshCw size={40} className="spin" color="#007d2f" />
+                <RefreshCw size={40} className="spin" color="#00a63a" />
                 <p style={{ color: '#666' }}>Carregando configurações...</p>
                 <style>{`
                     .spin { animation: spin 1s linear infinite; }
@@ -173,12 +173,12 @@ export default function AdminPlanAutoAllocation() {
                 >
                     <ArrowLeft size={18} /> Voltar
                 </button>
-                <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#007d2f', fontWeight: '900' }}>ALOCAÇÃO DE PLANOS (POR CATEGORIA)</h1>
+                <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#00a63a', fontWeight: '900' }}>ALOCAÇÃO DE PLANOS (POR CATEGORIA)</h1>
                 <button
                     onClick={handleSave}
                     disabled={saving}
                     style={{
-                        background: '#007d2f', color: '#fff', border: 'none', padding: '10px 24px',
+                        background: '#00a63a', color: '#fff', border: 'none', padding: '10px 24px',
                         borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
                         fontWeight: 'bold', boxShadow: '0 4px 12px rgba(195,34,40,0.2)',
                         opacity: saving ? 0.7 : 1
@@ -219,7 +219,7 @@ export default function AdminPlanAutoAllocation() {
                             border: '1px solid #eee',
                             boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
                         }}>
-                            <h2 style={{ margin: '0 0 20px 0', fontSize: '1.3rem', color: '#007d2f', fontWeight: '900', borderBottom: '2px solid #f9f9f9', paddingBottom: '10px', textTransform: 'uppercase' }}>
+                            <h2 style={{ margin: '0 0 20px 0', fontSize: '1.3rem', color: '#00a63a', fontWeight: '900', borderBottom: '2px solid #f9f9f9', paddingBottom: '10px', textTransform: 'uppercase' }}>
                                 {mod.label}
                             </h2>
 
@@ -258,8 +258,8 @@ export default function AdminPlanAutoAllocation() {
                                                 <button
                                                     onClick={() => handleAutoDistribute(mod.id, sub.id as any)}
                                                     style={{
-                                                        padding: '10px 20px', borderRadius: '10px', border: '1px solid #007d2f', background: '#fff',
-                                                        color: '#007d2f', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem'
+                                                        padding: '10px 20px', borderRadius: '10px', border: '1px solid #00a63a', background: '#fff',
+                                                        color: '#00a63a', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem'
                                                     }}
                                                 >
                                                     Auto-Distribuir
@@ -296,8 +296,8 @@ export default function AdminPlanAutoAllocation() {
                                         <button
                                             onClick={() => handleAutoDistribute(mod.id, 'associate')}
                                             style={{
-                                                padding: '10px 20px', borderRadius: '10px', border: '1px solid #007d2f', background: '#fff',
-                                                color: '#007d2f', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem'
+                                                padding: '10px 20px', borderRadius: '10px', border: '1px solid #00a63a', background: '#fff',
+                                                color: '#00a63a', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem'
                                             }}
                                         >
                                             Auto-Distribuir

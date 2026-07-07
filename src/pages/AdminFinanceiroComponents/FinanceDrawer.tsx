@@ -273,7 +273,7 @@ export function FinanceDrawer({
                         </div>
                         <div style={{ marginTop: '12px' }}>
                             <span style={{
-                                background: '#007d2f',
+                                background: '#00a63a',
                                 color: '#fff',
                                 padding: '6px 14px',
                                 borderRadius: '8px',
@@ -307,7 +307,7 @@ export function FinanceDrawer({
                                         cursor: 'pointer', borderBottom: showMigration ? '1px solid #eee' : 'none'
                                     }}
                                 >
-                                    <h3 style={{ fontSize: '0.85rem', color: '#007d2f', fontWeight: '900', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    <h3 style={{ fontSize: '0.85rem', color: '#00a63a', fontWeight: '900', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                         Migração de Plano / Modalidade
                                     </h3>
                                     {showMigration ? <ChevronUp size={20} color="#999" /> : <ChevronDown size={20} color="#999" />}
@@ -328,9 +328,9 @@ export function FinanceDrawer({
                                                         }}
                                                         style={{
                                                             padding: '8px 12px', borderRadius: '8px', border: '1px solid',
-                                                            borderColor: migrationModality === mod ? '#007d2f' : '#ddd',
+                                                            borderColor: migrationModality === mod ? '#00a63a' : '#ddd',
                                                             background: migrationModality === mod ? '#fff0f0' : '#fff',
-                                                            color: migrationModality === mod ? '#007d2f' : '#666',
+                                                            color: migrationModality === mod ? '#00a63a' : '#666',
                                                             fontWeight: '800', cursor: 'pointer',
                                                             fontSize: '0.75rem', textTransform: 'uppercase',
                                                             minWidth: '80px'
@@ -357,7 +357,7 @@ export function FinanceDrawer({
                                         <button
                                             onClick={onMigrate}
                                             style={{
-                                                padding: '12px', background: '#007d2f', color: '#fff', border: 'none',
+                                                padding: '12px', background: '#00a63a', color: '#fff', border: 'none',
                                                 borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex',
                                                 alignItems: 'center', justifyContent: 'center', gap: '8px'
                                             }}
@@ -379,7 +379,7 @@ export function FinanceDrawer({
                                         cursor: 'pointer', borderBottom: showManualCharge ? '1px solid #eee' : 'none'
                                     }}
                                 >
-                                    <h3 style={{ fontSize: '0.85rem', color: '#007d2f', fontWeight: '900', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    <h3 style={{ fontSize: '0.85rem', color: '#00a63a', fontWeight: '900', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                         Lançamento Manual de Cobrança
                                     </h3>
                                     {showManualCharge ? <ChevronUp size={20} color="#999" /> : <ChevronDown size={20} color="#999" />}
@@ -448,9 +448,9 @@ export function FinanceDrawer({
                                                     onClick={() => setChargeBillingType(type)}
                                                     style={{
                                                         flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid',
-                                                        borderColor: chargeBillingType === type ? '#007d2f' : '#ddd',
+                                                        borderColor: chargeBillingType === type ? '#00a63a' : '#ddd',
                                                         background: chargeBillingType === type ? '#fff0f0' : '#fff',
-                                                        color: chargeBillingType === type ? '#007d2f' : '#666',
+                                                        color: chargeBillingType === type ? '#00a63a' : '#666',
                                                         fontWeight: 'bold', fontSize: '0.75rem'
                                                     }}
                                                 >
@@ -479,23 +479,23 @@ export function FinanceDrawer({
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <h3 style={{ fontSize: '0.85rem', color: '#007d2f', fontWeight: '900', margin: 0, textTransform: 'uppercase' }}>
+                                    <h3 style={{ fontSize: '0.85rem', color: '#00a63a', fontWeight: '900', margin: 0, textTransform: 'uppercase' }}>
                                         Histórico Financeiro
                                     </h3>
                                     <button onClick={() => fetchHistory(registration, true)} disabled={loadingHistory} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
-                                        <RefreshCw size={14} className={loadingHistory ? 'spin' : ''} color="#007d2f" />
+                                        <RefreshCw size={14} className={loadingHistory ? 'spin' : ''} color="#00a63a" />
                                     </button>
                                     {!readOnly && (
                                         <>
                                             <button
                                                 onClick={() => handleDeleteAllPayments(registration)}
-                                                style={{ fontSize: '0.65rem', padding: '4px 8px', borderRadius: '6px', background: '#fff0f0', color: '#007d2f', border: '1px solid #fee2e2', fontWeight: '800', cursor: 'pointer' }}
+                                                style={{ fontSize: '0.65rem', padding: '4px 8px', borderRadius: '6px', background: '#fff0f0', color: '#00a63a', border: '1px solid #fee2e2', fontWeight: '800', cursor: 'pointer' }}
                                             >
                                                 APAGAR TUDO
                                             </button>
                                             <button
                                                 onClick={handleRefaturar}
-                                                style={{ fontSize: '0.65rem', padding: '4px 8px', borderRadius: '6px', background: '#fff', color: '#007d2f', border: '1px solid #007d2f', fontWeight: '800', cursor: 'pointer' }}
+                                                style={{ fontSize: '0.65rem', padding: '4px 8px', borderRadius: '6px', background: '#fff', color: '#00a63a', border: '1px solid #00a63a', fontWeight: '800', cursor: 'pointer' }}
                                             >
                                                 REFATURAR
                                             </button>
@@ -503,8 +503,8 @@ export function FinanceDrawer({
                                     )}
                                 </div>
                                 <div style={{ display: 'flex', background: '#f0f0f0', padding: '2px', borderRadius: '8px' }}>
-                                    <button onClick={() => setActiveTab('plan')} style={{ padding: '6px 12px', fontSize: '0.7rem', fontWeight: 'bold', border: 'none', borderRadius: '6px', background: activeTab === 'plan' ? '#fff' : 'transparent', color: activeTab === 'plan' ? '#007d2f' : '#666', cursor: 'pointer' }}>PLANO</button>
-                                    <button onClick={() => setActiveTab('manual')} style={{ padding: '6px 12px', fontSize: '0.7rem', fontWeight: 'bold', border: 'none', borderRadius: '6px', background: activeTab === 'manual' ? '#fff' : 'transparent', color: activeTab === 'manual' ? '#007d2f' : '#666', cursor: 'pointer' }}>
+                                    <button onClick={() => setActiveTab('plan')} style={{ padding: '6px 12px', fontSize: '0.7rem', fontWeight: 'bold', border: 'none', borderRadius: '6px', background: activeTab === 'plan' ? '#fff' : 'transparent', color: activeTab === 'plan' ? '#00a63a' : '#666', cursor: 'pointer' }}>PLANO</button>
+                                    <button onClick={() => setActiveTab('manual')} style={{ padding: '6px 12px', fontSize: '0.7rem', fontWeight: 'bold', border: 'none', borderRadius: '6px', background: activeTab === 'manual' ? '#fff' : 'transparent', color: activeTab === 'manual' ? '#00a63a' : '#666', cursor: 'pointer' }}>
                                         MANUAL ({paymentHistory.filter((p: any) => p.externalReference?.includes('MANUAL_')).length})
                                     </button>
                                 </div>
@@ -518,7 +518,7 @@ export function FinanceDrawer({
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                     {pending.length > 0 && (
                                         <div>
-                                            <div style={{ padding: '4px 0', fontSize: '0.75rem', color: '#007d2f', textTransform: 'uppercase', fontWeight: 'bold', borderBottom: '1px solid #fee2e2' }}>
+                                            <div style={{ padding: '4px 0', fontSize: '0.75rem', color: '#00a63a', textTransform: 'uppercase', fontWeight: 'bold', borderBottom: '1px solid #fee2e2' }}>
                                                 {pending.length > 1 ? `Cobranças em Aberto (${pending.length})` : 'Fatura Em Aberto'}
                                             </div>
                                             <div style={{ border: '1px solid #fee2e2', borderRadius: '12px', overflow: 'hidden', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -574,7 +574,7 @@ export function FinanceDrawer({
                     }}>
                         <div style={{ padding: '18px 22px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
                             <div>
-                                <div style={{ color: '#007d2f', fontWeight: 900, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                <div style={{ color: '#00a63a', fontWeight: 900, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {pricingAction.type === 'refaturar' ? 'Refaturar aluno' : 'Migrar e gerar faturas'}
                                 </div>
                                 <h3 style={{ margin: '5px 0 0', fontSize: '1.05rem', color: '#111' }}>
@@ -609,9 +609,9 @@ export function FinanceDrawer({
                                     onClick={() => setPricingMode(mode)}
                                     style={{
                                         width: '100%', padding: '13px 14px', borderRadius: '8px',
-                                        border: `1px solid ${pricingMode === mode ? '#007d2f' : '#ddd'}`,
+                                        border: `1px solid ${pricingMode === mode ? '#00a63a' : '#ddd'}`,
                                         background: pricingMode === mode ? '#fff0f0' : '#fff',
-                                        color: pricingMode === mode ? '#007d2f' : '#333',
+                                        color: pricingMode === mode ? '#00a63a' : '#333',
                                         cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
                                         alignItems: 'center', gap: '12px', textAlign: 'left'
                                     }}
@@ -648,7 +648,7 @@ export function FinanceDrawer({
                             </button>
                             <button
                                 onClick={handleConfirmPricingAction}
-                                style={{ flex: 1.4, padding: '12px', borderRadius: '8px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
+                                style={{ flex: 1.4, padding: '12px', borderRadius: '8px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: 900, cursor: 'pointer' }}
                             >
                                 Gerar faturas
                             </button>

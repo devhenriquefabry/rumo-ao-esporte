@@ -117,7 +117,7 @@ const RescissionInput = ({
                         style={{
                             padding: '8px 12px',
                             border: 'none',
-                            background: type === 'fixed' ? '#007d2f' : '#f5f5f5',
+                            background: type === 'fixed' ? '#00a63a' : '#f5f5f5',
                             color: type === 'fixed' ? '#fff' : '#666',
                             fontWeight: 'bold',
                             fontSize: '0.8rem',
@@ -132,7 +132,7 @@ const RescissionInput = ({
                         style={{
                             padding: '8px 12px',
                             border: 'none',
-                            background: type === 'percentage' ? '#007d2f' : '#f5f5f5',
+                            background: type === 'percentage' ? '#00a63a' : '#f5f5f5',
                             color: type === 'percentage' ? '#fff' : '#666',
                             fontWeight: 'bold',
                             fontSize: '0.8rem',
@@ -177,7 +177,7 @@ const PricingSection = ({
     onChange: (d: PricingRule) => void
 }) => (
     <div style={{ background: '#f9f9f9', padding: '15px', borderRadius: '10px', border: '1px solid #eee' }}>
-        <h4 style={{ margin: '0 0 15px 0', color: '#007d2f', textTransform: 'uppercase', fontSize: '0.9rem' }}>{title}</h4>
+        <h4 style={{ margin: '0 0 15px 0', color: '#00a63a', textTransform: 'uppercase', fontSize: '0.9rem' }}>{title}</h4>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
             <CurrencyInput
@@ -249,7 +249,7 @@ export default function AdminPlans() {
 
     const fetchPlanCounts = async () => {
         try {
-            const snapshot = await getDocs(collection(db, 'arena_simonesia_2026_registrations'));
+            const snapshot = await getDocs(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const counts: Record<string, number> = {};
 
             snapshot.docs.forEach(doc => {
@@ -346,7 +346,7 @@ export default function AdminPlans() {
                     <button
                         onClick={() => navigate('/admin/plans/auto-allocation')}
                         style={{
-                            padding: '12px 20px', background: '#fff', color: '#007d2f', border: '2px dashed #007d2f',
+                            padding: '12px 20px', background: '#fff', color: '#00a63a', border: '2px dashed #00a63a',
                             borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
                         }}
                     >
@@ -355,7 +355,7 @@ export default function AdminPlans() {
                     <button
                         onClick={() => { resetForm(); setShowModal(true); }}
                         style={{
-                            padding: '12px 20px', background: '#007d2f', color: '#fff', border: 'none',
+                            padding: '12px 20px', background: '#00a63a', color: '#fff', border: 'none',
                             borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
                         }}
                     >
@@ -384,7 +384,7 @@ export default function AdminPlans() {
                                     <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
                                         <span style={{
                                             display: 'inline-block', padding: '4px 8px', borderRadius: '4px',
-                                            background: '#fff0f0', color: '#007d2f', fontSize: '0.7rem', fontWeight: 'bold',
+                                            background: '#fff0f0', color: '#00a63a', fontSize: '0.7rem', fontWeight: 'bold',
                                             textTransform: 'uppercase'
                                         }}>
                                             {plan.modalidade}
@@ -413,7 +413,7 @@ export default function AdminPlans() {
                                     <button onClick={() => handleEdit(plan)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
                                         <Edit2 size={18} />
                                     </button>
-                                    <button onClick={() => handleDelete(plan.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#007d2f' }}>
+                                    <button onClick={() => handleDelete(plan.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#00a63a' }}>
                                         <Trash2 size={18} />
                                     </button>
                                 </div>
@@ -469,7 +469,7 @@ export default function AdminPlans() {
                                 alignItems: 'center',
                                 gap: '6px'
                             }}>
-                                <User size={16} color="#007d2f" />
+                                <User size={16} color="#00a63a" />
                                 <span>Alunos utilizando este plano:</span>
                                 <strong style={{ color: '#111' }}>{planCounts[plan.id] || 0}</strong>
                             </div>
@@ -586,7 +586,7 @@ export default function AdminPlans() {
                                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '15px', borderRadius: '8px', background: '#f5f5f5', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
                                     Cancelar
                                 </button>
-                                <button type="submit" style={{ flex: 1, padding: '15px', borderRadius: '8px', background: '#007d2f', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
+                                <button type="submit" style={{ flex: 1, padding: '15px', borderRadius: '8px', background: '#00a63a', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
                                     Salvar Plano
                                 </button>
                             </div>

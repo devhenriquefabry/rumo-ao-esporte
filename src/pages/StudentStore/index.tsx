@@ -19,7 +19,7 @@ export default function StudentStore() {
         if (!user) return;
         try {
             const q = query(
-                collection(db, 'uba_store_orders'),
+                collection(db, 'rae_store_orders'),
                 where('customerEmail', '==', user.email),
                 orderBy('createdAt', 'desc')
             );
@@ -45,7 +45,7 @@ export default function StudentStore() {
                 }
 
                 // Fetch active products
-                const q = query(collection(db, 'uba_store_products'), where('active', '==', true));
+                const q = query(collection(db, 'rae_store_products'), where('active', '==', true));
                 const snap = await getDocs(q);
                 const fetchedProducts: StoreProduct[] = [];
                 snap.forEach(doc => {
@@ -105,8 +105,8 @@ export default function StudentStore() {
                         padding: '10px 18px',
                         borderRadius: '10px',
                         border: 'none',
-                        background: activeTab === 'store' ? '#00237f' : '#fff',
-                        color: activeTab === 'store' ? '#fff' : '#00237f',
+                        background: activeTab === 'store' ? '#17428f' : '#fff',
+                        color: activeTab === 'store' ? '#fff' : '#17428f',
                         fontWeight: 'bold',
                         fontSize: '0.9rem',
                         cursor: 'pointer',
@@ -125,8 +125,8 @@ export default function StudentStore() {
                         padding: '10px 18px',
                         borderRadius: '10px',
                         border: 'none',
-                        background: activeTab === 'orders' ? '#00237f' : '#fff',
-                        color: activeTab === 'orders' ? '#fff' : '#00237f',
+                        background: activeTab === 'orders' ? '#17428f' : '#fff',
+                        color: activeTab === 'orders' ? '#fff' : '#17428f',
                         fontWeight: 'bold',
                         fontSize: '0.9rem',
                         cursor: 'pointer',
@@ -145,7 +145,7 @@ export default function StudentStore() {
                 <>
                     {/* Header / Hero */}
                     <div style={{
-                        background: 'linear-gradient(135deg, #00237f 0%, #00154d 100%)',
+                        background: 'linear-gradient(135deg, #17428f 0%, #09245c 100%)',
                         borderRadius: '16px',
                         padding: '20px 20px',
                         color: '#fff',
@@ -316,7 +316,7 @@ export default function StudentStore() {
                                         </div>
 
                                         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', color: '#00237f' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', color: '#17428f' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '700' }}>R$</span>
                                                 <span style={{ fontSize: '1.4rem', fontWeight: '900', letterSpacing: '-0.5px' }}>{product.price.toFixed(2)}</span>
                                             </div>
@@ -325,7 +325,7 @@ export default function StudentStore() {
                                                 disabled={product.stock <= 0}
                                                 style={{
                                                     width: '100%',
-                                                    background: product.stock > 0 ? 'linear-gradient(135deg, #007d2f 0%, #a81d22 100%)' : '#f1f5f9',
+                                                    background: product.stock > 0 ? 'linear-gradient(135deg, #00a63a 0%, #a81d22 100%)' : '#f1f5f9',
                                                     color: product.stock > 0 ? '#fff' : '#94a3b8',
                                                     border: 'none',
                                                     padding: '10px',
@@ -345,7 +345,7 @@ export default function StudentStore() {
                                                 onMouseOver={(e) => {
                                                     if (product.stock > 0) {
                                                         e.currentTarget.style.transform = 'translateY(-1px)';
-                                                        e.currentTarget.style.boxShadow = '0 5px 12px rgba(0, 125, 47, 0.3)';
+                                                        e.currentTarget.style.boxShadow = '0 5px 12px rgba(0, 166, 58, 0.28)';
                                                     }
                                                 }}
                                                 onMouseOut={(e) => {
@@ -375,7 +375,7 @@ export default function StudentStore() {
             ) : (
                 /* Orders View */
                 <div>
-                    <h2 style={{ color: '#00237f', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{ color: '#17428f', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Package /> Histórico de Pedidos
                     </h2>
 
@@ -386,7 +386,7 @@ export default function StudentStore() {
                             <p style={{ color: '#666', marginTop: '10px' }}>Seus pedidos aparecerão aqui assim que você realizar uma compra.</p>
                             <button
                                 onClick={() => setActiveTab('store')}
-                                style={{ marginTop: '20px', background: '#007d2f', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                style={{ marginTop: '20px', background: '#00a63a', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
                             >
                                 IR PARA A LOJA
                             </button>

@@ -22,7 +22,7 @@ export default function AdminExport() {
         setSuccess('');
 
         try {
-            const querySnapshot = await getDocs(collection(db, "arena_simonesia_2026_registrations"));
+            const querySnapshot = await getDocs(collection(db, "rumo_ao_esporte_2026_registrations"));
             let rawData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
 
             // Apply Modality Filter
@@ -109,11 +109,11 @@ export default function AdminExport() {
             // Generate Excel
             const worksheet = XLSX.utils.json_to_sheet(flatData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Inscrições Arena Simonésia 2026");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inscrições Rumo ao Esporte 2026");
 
             // File Name with Date
             const dateStr = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `Inscricoes_Arena_Simonesia_2026_${dateStr}.xlsx`);
+            XLSX.writeFile(workbook, `Inscricoes_Rumo_ao_Esporte_2026_${dateStr}.xlsx`);
 
             setSuccess(`Arquivo gerado com sucesso! (${flatData.length} registros de alunos)`);
 
@@ -153,10 +153,10 @@ export default function AdminExport() {
 
             const worksheet = XLSX.utils.json_to_sheet(flatData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Financeiro Arena Simonésia 2026");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Financeiro Rumo ao Esporte 2026");
 
             const dateStr = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `Financeiro_Arena_Simonesia_2026_${dateStr}.xlsx`);
+            XLSX.writeFile(workbook, `Financeiro_Rumo_ao_Esporte_2026_${dateStr}.xlsx`);
 
             setSuccess(`Relatório financeiro gerado! (${flatData.length} registros)`);
 

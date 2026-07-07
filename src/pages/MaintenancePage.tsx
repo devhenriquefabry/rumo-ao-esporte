@@ -28,14 +28,14 @@ export default function MaintenancePage({ title }: MaintenancePageProps) {
                     marginBottom: '20px'
                 }}
             />
-            <h1 style={{ color: '#00237f', margin: '0 0 10px 0', fontSize: '1.8rem', fontWeight: 'bold' }}>
+            <h1 style={{ color: '#17428f', margin: '0 0 10px 0', fontSize: '1.8rem', fontWeight: 'bold' }}>
                 {title ? title.toUpperCase() : 'SISTEMA EM MANUTENÇÃO'}
             </h1>
             <p style={{ color: '#666', fontSize: '1.1rem', maxWidth: '400px', lineHeight: '1.5' }}>
                 Pedimos desculpas pelo transtorno. Nossa equipe está realizando atualizações importantes para melhorar sua experiência.
             </p>
             <div style={{ marginTop: '30px', padding: '10px 20px', background: '#f5f5f5', borderRadius: '30px', color: '#888', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                ARENA SIMONÉSIA
+                RUMO AO ESPORTE
             </div>
         </div>
     );

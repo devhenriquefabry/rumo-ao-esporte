@@ -12,7 +12,6 @@ interface ListViewProps {
     plans: Plan[];
     onNavigate: (regId: string) => void;
     onResendApproval: (item: Student) => void;
-    activeModality: string | null;
     filterStatus?: string;
     selectionEnabled?: boolean;
     selectedIds?: string[];
@@ -29,7 +28,6 @@ export const ListView: React.FC<ListViewProps> = ({
     plans,
     onNavigate,
     onResendApproval,
-    activeModality,
     filterStatus,
     selectionEnabled = false,
     selectedIds = [],
@@ -46,22 +44,20 @@ export const ListView: React.FC<ListViewProps> = ({
         }
     };
 
-    if (loading) return <div style={{ display: 'flex', justifyContent: 'center', height: '200px', alignItems: 'center' }}><div className="spin" style={{ width: '30px', height: '30px', border: '3px solid #f3f3f3', borderTop: '3px solid #007d2f', borderRadius: '50%' }}></div></div>;
-
-    if (!activeModality && filterStatus !== 'desativados') return <div style={{ padding: '40px', textAlign: 'center' }}><img src="/logo-dashboard.png" style={{ maxWidth: '500px', width: '80%', opacity: 0.2 }} /></div>;
+    if (loading) return <div style={{ display: 'flex', justifyContent: 'center', height: '200px', alignItems: 'center' }}><div className="spin" style={{ width: '30px', height: '30px', border: '3px solid #f3f3f3', borderTop: '3px solid #00a63a', borderRadius: '50%' }}></div></div>;
 
     if (students.length === 0) return <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>Nenhum registro encontrado.</div>;
 
     return (
         <div onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '10px' : '0 25px 20px 25px', WebkitOverflowScrolling: 'touch' }}>
             {!isMobile && selectionEnabled && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderBottom: 'none', color: '#007d2f', fontWeight: 800 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderBottom: 'none', color: '#00a63a', fontWeight: 800 }}>
                     <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                         <input
                             type="checkbox"
                             checked={allVisibleSelected}
                             onChange={onToggleSelectAll}
-                            style={{ width: '16px', height: '16px', accentColor: '#007d2f' }}
+                            style={{ width: '16px', height: '16px', accentColor: '#00a63a' }}
                         />
                         Selecionar todos os cadastros filtrados
                     </label>
@@ -79,7 +75,7 @@ export const ListView: React.FC<ListViewProps> = ({
                                 padding: '10px',
                                 border: '1px solid #d1d5db',
                                 background: allVisibleSelected ? '#e9f8ef' : '#fff',
-                                color: '#007d2f',
+                                color: '#00a63a',
                                 fontWeight: 800,
                                 borderRadius: '4px'
                             }}

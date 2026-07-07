@@ -1,22 +1,40 @@
-﻿/**
+/**
  * Cloudflare Worker: Proxy para Evolution API v2 + Armazenamento de Imagens + Fila de Mensagens
  */
 
 const EVOLUTION_URL = "https://mcu-nightrun-whatsapp.fly.dev";
 const ASAAS_URL = "https://api.asaas.com/v3";
-const INSTANCE_NAME = "uba_instance";
+const CORA_STAGE_URL = "https://matls-clients.api.stage.cora.com.br";
+const CORA_PRODUCTION_URL = "https://matls-clients.api.cora.com.br";
+const INSTANCE_NAME = "rae_instance";
 const METHODS_WITH_BODY = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-const REGISTRATIONS_COLLECTION = "arena_simonesia_2026_registrations";
+const REGISTRATIONS_COLLECTION = "rumo_ao_esporte_2026_registrations";
 const FINANCIAL_PAYMENTS_COLLECTION = "financial_payments";
+const PAYMENT_PROVIDERS = {
+  asaas: {
+    id: "asaas",
+    name: "Asaas",
+    logo: "/asaas-logo.svg",
+    environments: ["production"],
+    capabilities: ["customers", "pix", "boleto", "credit_card", "carnet", "list", "status", "cancel", "cash_receive", "balance"]
+  },
+  cora: {
+    id: "cora",
+    name: "Cora",
+    logo: "/cora-logo.svg",
+    environments: ["stage", "production"],
+    capabilities: ["pix", "boleto", "carnet", "list", "status", "cancel", "stage_pay", "balance"]
+  }
+};
 
 const OPENAPI_SPEC = {
   openapi: "3.0.0",
   info: {
-    title: "Portal Supremo Arena SimonÃ©sia 2026",
-    description: "Este portal Ã© a central tÃ©cnica definitiva do ecossistema Arena SimonÃ©sia 2026. Ele integra a documentaÃ§Ã£o de Backend (Cloudflare Workers), PersistÃªncia (Firestore) e Frontend (React Portals). Abaixo vocÃª encontrarÃ¡ o mapeamento de APIs, rotas de navegaÃ§Ã£o do usuÃ¡rio e algoritmos de sincronizaÃ§Ã£o financeira. Esta Ã© a Ãºnica fonte de verdade para a engenharia do projeto.",
+    title: "Portal Supremo Rumo ao Esporte 2026",
+    description: "Este portal Ã© a central tÃ©cnica definitiva do ecossistema Rumo ao Esporte 2026. Ele integra a documentaÃ§Ã£o de Backend (Cloudflare Workers), PersistÃªncia (Firestore) e Frontend (React Portals). Abaixo vocÃª encontrarÃ¡ o mapeamento de APIs, rotas de navegaÃ§Ã£o do usuÃ¡rio e algoritmos de sincronizaÃ§Ã£o financeira. Esta Ã© a Ãºnica fonte de verdade para a engenharia do projeto.",
     version: "1.3.0"
   },
-  servers: [{ url: "https://arenasimonesia-whatsapp-proxy.thayrufino2.workers.dev", description: "ProduÃ§Ã£o" }],
+  servers: [{ url: "https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev", description: "ProduÃ§Ã£o" }],
   tags: [
     { name: "Sistemas & Infraestrutura", description: "Endpoints do Worker para WhatsApp, processamento de mÃ­dias e logÃ­stica de fila." },
     { name: "Portal do Administrador", description: "Interfaces e rotas de gestÃ£o (Dashboard, Turmas, Financeiro, ConfiguraÃ§Ãµes)." },
@@ -96,7 +114,7 @@ const OPENAPI_SPEC = {
     schemas: {
       RegistrationDoc: {
         type: "object",
-        description: "Modelo de dados mestre no Firestore (arena_simonesia_2026_registrations).",
+        description: "Modelo de dados mestre no Firestore (rumo_ao_esporte_2026_registrations).",
         properties: {
           responsavel: { type: "object", description: "Dados do titular financeiro." },
           status: { type: "string", enum: ["pago", "pendente", "atrasado"], description: "Status calculado via Deep Sync." },
@@ -122,7 +140,7 @@ const SWAGGER_HTML = (url) => `
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Manual Supremo | Arena SimonÃ©sia 2026</title>
+  <title>Manual Supremo | Rumo ao Esporte 2026</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />
   <style>
     body { background: #f1f5f9; margin: 0; font-family: 'Inter', system-ui, sans-serif; }
@@ -192,6 +210,141 @@ export default {
       });
     }
 
+    if ((path === "/send-whatsapp" || path === "/api/whatsapp/send") && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const msg = {
+          phone: body.phone || body.number,
+          text: body.text || body.message || body.caption || "",
+          imageUrl: body.imageUrl || body.mediaUrl || ""
+        };
+
+        if (!msg.phone || !msg.text) {
+          return jsonResponse({ success: false, error: "phone e message/text são obrigatórios." }, 400, corsHeaders);
+        }
+
+        const result = await processMessage(msg, env);
+        await logToFirestore(msg, result, env).catch((err) => console.error("Erro ao salvar log:", err));
+        return jsonResponse({ success: result.success, ...result }, result.success ? 200 : 502, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/api/whatsapp/status" && request.method === "GET") {
+      try {
+        const data = await evolutionJson(env, `/instance/connectionState/${INSTANCE_NAME}`);
+        const state = data?.instance?.state || data?.state || data?.connectionState || data?.status || "unknown";
+        return jsonResponse({ success: true, state, status: state, raw: data }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, state: "error", error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/api/whatsapp/qr" && request.method === "GET") {
+      try {
+        const data = await evolutionJson(env, `/instance/connect/${INSTANCE_NAME}`);
+        const qr = data?.base64 || data?.qrcode || data?.qrCode || data?.code || "";
+        return jsonResponse({ success: true, qr, qrCode: qr, ...data }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/api/whatsapp/logout" && request.method === "POST") {
+      try {
+        const data = await evolutionJson(env, `/instance/logout/${INSTANCE_NAME}`, { method: "DELETE" });
+        return jsonResponse({ success: true, ...data }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/messaging/instances" && request.method === "GET") {
+      try {
+        const instances = await listEvolutionInstances(env);
+        return jsonResponse({ success: true, instances }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/messaging/instances" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const instanceName = body.instanceName;
+        if (!instanceName) return jsonResponse({ success: false, error: "instanceName é obrigatório." }, 400, corsHeaders);
+        const instance = await createEvolutionInstance(env, instanceName);
+        const connection = await evolutionJson(env, `/instance/connect/${encodeURIComponent(instanceName)}`);
+        return jsonResponse({ success: true, instance, connection }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path.startsWith("/messaging/instances/")) {
+      try {
+        const parts = path.split("/").filter(Boolean);
+        const instanceName = decodeURIComponent(parts[2] || "");
+        const action = parts[3] || "";
+        if (!instanceName) return jsonResponse({ success: false, error: "instanceName é obrigatório." }, 400, corsHeaders);
+
+        if (action === "connect" && request.method === "GET") {
+          const connection = await evolutionJson(env, `/instance/connect/${encodeURIComponent(instanceName)}`);
+          return jsonResponse({ success: true, connection }, 200, corsHeaders);
+        }
+        if (action === "status" && request.method === "GET") {
+          const connection = await evolutionJson(env, `/instance/connectionState/${encodeURIComponent(instanceName)}`);
+          return jsonResponse({ success: true, connection }, 200, corsHeaders);
+        }
+        if (action === "restart" && request.method === "PUT") {
+          const connection = await evolutionJson(env, `/instance/restart/${encodeURIComponent(instanceName)}`, { method: "PUT" });
+          return jsonResponse({ success: true, connection }, 200, corsHeaders);
+        }
+        if (action === "logout" && request.method === "DELETE") {
+          const connection = await evolutionJson(env, `/instance/logout/${encodeURIComponent(instanceName)}`, { method: "DELETE" });
+          return jsonResponse({ success: true, connection }, 200, corsHeaders);
+        }
+        if (!action && request.method === "DELETE") {
+          const deleted = await evolutionJson(env, `/instance/delete/${encodeURIComponent(instanceName)}`, { method: "DELETE" });
+          return jsonResponse({ success: true, deleted }, 200, corsHeaders);
+        }
+
+        return jsonResponse({ success: false, error: "Rota de mensageria não suportada." }, 404, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/update-student-credentials" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const result = await updateStudentCredentials(env, body);
+        return jsonResponse({ success: true, ...result }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 400, corsHeaders);
+      }
+    }
+
+    if (path === "/update-teacher-credentials" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const result = await updateTeacherCredentials(env, body);
+        return jsonResponse({ success: true, ...result }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 400, corsHeaders);
+      }
+    }
+
+    if (path === "/sync-student-payments" && request.method === "GET") {
+      try {
+        const result = await syncStudentPayments(env, url.searchParams.get("registrationId"), url.searchParams.get("cpf"));
+        return jsonResponse({ success: true, ...result }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 400, corsHeaders);
+      }
+    }
+
     if (path === "/asaas/webhook" && request.method === "POST") {
       try {
         if (env.ASAAS_WEBHOOK_TOKEN) {
@@ -240,7 +393,7 @@ export default {
           const id = crypto.randomUUID();
           // mq:pending:{timestamp}:{batchId}:{index}
           const key = `mq:pending:${timestamp}:${batchId}:${i.toString().padStart(4, '0')}`;
-          await env.UBA_STORAGE.put(key, JSON.stringify({
+          await env.RAE_STORAGE.put(key, JSON.stringify({
             ...msg,
             enqueuedAt: new Date().toISOString()
           }));
@@ -259,22 +412,22 @@ export default {
 
     // --- ENDPOINTS DE GESTÃƒO DE FILA ---
     if (path === "/queue/list" && request.method === "GET") {
-      const list = await env.UBA_STORAGE.list({ prefix: "mq:pending:", limit: 100 });
+      const list = await env.RAE_STORAGE.list({ prefix: "mq:pending:", limit: 100 });
       const items = [];
       for (const key of list.keys) {
-        const val = await env.UBA_STORAGE.get(key.name);
+        const val = await env.RAE_STORAGE.get(key.name);
         if (val) items.push({ key: key.name, ...JSON.parse(val) });
       }
-      const paused = await env.UBA_STORAGE.get("mq:paused") === "true";
+      const paused = await env.RAE_STORAGE.get("mq:paused") === "true";
       return new Response(JSON.stringify({ success: true, items, paused }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
     if (path === "/queue/clear" && request.method === "POST") {
-      const list = await env.UBA_STORAGE.list({ prefix: "mq:pending:" });
+      const list = await env.RAE_STORAGE.list({ prefix: "mq:pending:" });
       for (const key of list.keys) {
-        await env.UBA_STORAGE.delete(key.name);
+        await env.RAE_STORAGE.delete(key.name);
       }
       return new Response(JSON.stringify({ success: true, message: "Fila limpa com sucesso" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -282,9 +435,9 @@ export default {
     }
 
     if (path === "/queue/toggle-pause" && request.method === "POST") {
-      const current = await env.UBA_STORAGE.get("mq:paused");
+      const current = await env.RAE_STORAGE.get("mq:paused");
       const next = current === "true" ? "false" : "true";
-      await env.UBA_STORAGE.put("mq:paused", next);
+      await env.RAE_STORAGE.put("mq:paused", next);
       return new Response(JSON.stringify({ success: true, paused: next === "true" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
@@ -376,7 +529,7 @@ export default {
         const id = `${folder}_${crypto.randomUUID()}`;
         const mime = file.type || "image/jpeg";
 
-        await env.UBA_STORAGE.put(`img:${id}`, body, {
+        await env.RAE_STORAGE.put(`img:${id}`, body, {
           metadata: { contentType: mime }
         });
 
@@ -411,7 +564,7 @@ export default {
         const id = customId || crypto.randomUUID();
         const mime = contentType.split(";")[0] || "image/jpeg";
 
-        await env.UBA_STORAGE.put(`img:${id}`, body, {
+        await env.RAE_STORAGE.put(`img:${id}`, body, {
           metadata: { contentType: mime }
         });
 
@@ -430,7 +583,7 @@ export default {
     // --- ENDPOINT DE VISUALIZAÃ‡ÃƒO ---
     if (path.startsWith("/view/")) {
       const id = path.split("/view/")[1];
-      const { value, metadata } = await env.UBA_STORAGE.getWithMetadata(`img:${id}`, { type: "arrayBuffer" });
+      const { value, metadata } = await env.RAE_STORAGE.getWithMetadata(`img:${id}`, { type: "arrayBuffer" });
 
       if (!value) {
         return new Response("Not Found", { status: 404 });
@@ -445,9 +598,61 @@ export default {
       });
     }
 
-    // --- ENDPOINTS ASAAS / FINANCEIRO ---
+    // --- ENDPOINTS DE PROVEDORES FINANCEIROS ---
+    if (path === "/payment-providers" && request.method === "GET") {
+      try {
+        return jsonResponse({
+          success: true,
+          defaultProvider: resolvePaymentProvider(request, url, null, env),
+          providers: getPaymentProviderStatus(env)
+        }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/payment-providers/test" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const provider = normalizeProvider(body.provider || "asaas");
+        if (!provider) return jsonResponse({ success: false, error: "provider inválido." }, 400, corsHeaders);
+        const result = await testPaymentProvider(env, provider, body.environment || "stage", body.action || "auth");
+        return jsonResponse({ success: true, provider, ...result }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    if (path === "/payment-providers/cora/stage-pay" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        if (String(body.invoiceId || body.id || "").startsWith("test_inv_")) {
+          const payment = await markSandboxPaymentAsPaid(env, body.invoiceId || body.id, body);
+          return jsonResponse({ success: true, provider: "cora", environment: "stage", sandbox: true, payment }, 200, corsHeaders);
+        }
+        const result = await coraStagePayInvoice(env, body.invoiceId || body.id);
+        return jsonResponse({ success: true, ...result }, 200, corsHeaders);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
+      }
+    }
+
+    // --- ENDPOINTS ASAAS / CORA / FINANCEIRO ---
     if (path.startsWith("/customers-by-cpf/") && request.method === "GET") {
       try {
+        const provider = resolvePaymentProvider(request, url, null, env);
+        if (provider === "cora") {
+          const cpf = path.split("/customers-by-cpf/")[1]?.replace(/\D/g, "");
+          if (isCoraStageSandbox(url, null, env)) {
+            const payments = await listSandboxPayments(env, { document: cpf });
+            if (!payments.length) return jsonResponse({ success: false, error: "Cliente nao encontrado no sandbox Cora", customers: [] }, 404, corsHeaders);
+            return jsonResponse({ success: true, customer: buildSandboxCustomer(cpf, payments[0]), customers: [buildSandboxCustomer(cpf, payments[0])] }, 200, corsHeaders);
+          }
+          const invoices = await coraListInvoices(env, { search: cpf, environment: resolveCoraEnvironment(url.searchParams.get("environment"), env) });
+          const list = invoices.data || invoices.items || [];
+          if (!list.length) return jsonResponse({ success: false, error: "Cliente não encontrado na Cora", customers: [] }, 404, corsHeaders);
+          return jsonResponse({ success: true, customer: normalizeCoraCustomerFromInvoice(list[0], cpf), customers: list.map(item => normalizeCoraCustomerFromInvoice(item, cpf)) }, 200, corsHeaders);
+        }
         const cpf = path.split("/customers-by-cpf/")[1]?.replace(/\D/g, "");
         const customers = await asaasJson(env, `/customers?cpfCnpj=${encodeURIComponent(cpf || "")}`);
         const list = customers.data || [];
@@ -465,15 +670,24 @@ export default {
     if (path === "/create-payment" && request.method === "POST") {
       try {
         const payload = await request.json();
+        const provider = resolvePaymentProvider(request, url, payload, env);
+        if (provider === "cora") {
+          if (isCoraStageSandbox(url, payload, env)) {
+            const payment = await createSandboxPayment(env, payload);
+            return jsonResponse({ success: true, provider, environment: "stage", sandbox: true, payment }, 200, corsHeaders);
+          }
+          const payment = await createCoraPayment(env, payload);
+          return jsonResponse({ success: true, provider, payment }, 200, corsHeaders);
+        }
+
         const customer = payload.customer || await ensureAsaasCustomer(env, payload);
         const paymentPayload = buildAsaasPaymentPayload(payload, customer);
         const payment = await asaasJson(env, "/payments", {
           method: "POST",
           body: JSON.stringify(paymentPayload)
         });
-
         const enrichedPayment = await enrichPixPayment(env, payment);
-        return jsonResponse({ success: true, payment: enrichedPayment }, 200, corsHeaders);
+        return jsonResponse({ success: true, provider, payment: enrichedPayment }, 200, corsHeaders);
       } catch (err) {
         return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
       }
@@ -482,9 +696,18 @@ export default {
     if (path === "/generate-carnet" && request.method === "POST") {
       try {
         const payload = await request.json();
+        const provider = resolvePaymentProvider(request, url, payload, env);
+        if (provider === "cora") {
+          if (isCoraStageSandbox(url, payload, env)) {
+            const payments = await createSandboxCarnetPayments(env, payload);
+            return jsonResponse({ success: true, provider, environment: "stage", sandbox: true, payments }, 200, corsHeaders);
+          }
+          const payments = await createCoraCarnetPayments(env, payload);
+          return jsonResponse({ success: true, provider, payments }, 200, corsHeaders);
+        }
         const customer = payload.customer || await ensureAsaasCustomer(env, payload);
         const payments = await createCarnetPayments(env, payload, customer);
-        return jsonResponse({ success: true, payments }, 200, corsHeaders);
+        return jsonResponse({ success: true, provider, payments }, 200, corsHeaders);
       } catch (err) {
         return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
       }
@@ -492,10 +715,19 @@ export default {
 
     if (path === "/payment-status" && request.method === "GET") {
       try {
+        const provider = resolvePaymentProvider(request, url, null, env);
         const paymentId = url.searchParams.get("paymentId");
         if (!paymentId) return jsonResponse({ success: false, error: "paymentId obrigatÃ³rio" }, 400, corsHeaders);
+        if (paymentId.startsWith("test_inv_")) {
+          const payment = await getSandboxPayment(env, paymentId);
+          return jsonResponse({ success: true, provider: "cora", environment: "stage", sandbox: true, payment }, 200, corsHeaders);
+        }
+        if (provider === "cora" || paymentId.startsWith("inv_")) {
+          const payment = await coraGetPayment(env, paymentId, resolveCoraEnvironment(url.searchParams.get("environment"), env));
+          return jsonResponse({ success: true, provider: "cora", payment }, 200, corsHeaders);
+        }
         const payment = await asaasJson(env, `/payments/${encodeURIComponent(paymentId)}`);
-        return jsonResponse({ success: true, payment }, 200, corsHeaders);
+        return jsonResponse({ success: true, provider, payment }, 200, corsHeaders);
       } catch (err) {
         return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
       }
@@ -503,8 +735,13 @@ export default {
 
     if (path === "/finance/balance" && request.method === "GET") {
       try {
+        const provider = resolvePaymentProvider(request, url, null, env);
+        if (provider === "cora") {
+          const balance = await coraBalance(env, resolveCoraEnvironment(url.searchParams.get("environment"), env));
+          return jsonResponse({ success: true, provider, ...balance }, 200, corsHeaders);
+        }
         const balance = await asaasJson(env, "/finance/balance");
-        return jsonResponse({ success: true, ...balance }, 200, corsHeaders);
+        return jsonResponse({ success: true, provider, ...balance }, 200, corsHeaders);
       } catch (err) {
         return jsonResponse({ success: false, error: err.message }, 500, corsHeaders);
       }
@@ -512,6 +749,31 @@ export default {
 
     if (path === "/payments" && request.method === "GET") {
       try {
+        const provider = resolvePaymentProvider(request, url, null, env);
+        if (provider === "cora") {
+          if (isCoraStageSandbox(url, null, env)) {
+            const payments = await listSandboxPayments(env, {
+              customer: url.searchParams.get("customer"),
+              search: url.searchParams.get("search"),
+              state: url.searchParams.get("status") || url.searchParams.get("state")
+            });
+            return jsonResponse({ provider, environment: "stage", sandbox: true, data: payments, raw: { totalItems: payments.length, items: payments } }, 200, corsHeaders);
+          }
+          const invoices = await coraListInvoices(env, {
+            environment: resolveCoraEnvironment(url.searchParams.get("environment"), env),
+            search: url.searchParams.get("customer") || url.searchParams.get("search"),
+            start: url.searchParams.get("start"),
+            end: url.searchParams.get("end"),
+            state: url.searchParams.get("status") || url.searchParams.get("state"),
+            page: url.searchParams.get("page") || "1",
+            perPage: url.searchParams.get("limit") || url.searchParams.get("perPage") || "50"
+          });
+          return jsonResponse({
+            provider,
+            data: (invoices.data || invoices.items || invoices.invoices || []).map(normalizeCoraPayment),
+            raw: invoices
+          }, 200, corsHeaders);
+        }
         const paymentList = await asaasJson(env, `/payments${url.search || ""}`);
         return jsonResponse(paymentList, 200, corsHeaders);
       } catch (err) {
@@ -530,6 +792,19 @@ export default {
         }
 
         if (action === "receive-in-cash" && request.method === "POST") {
+          if (paymentId.startsWith("test_inv_")) {
+            const body = await request.json();
+            const payment = await markSandboxPaymentAsPaid(env, paymentId, body);
+            return jsonResponse({ success: true, provider: "cora", environment: "stage", sandbox: true, payment }, 200, corsHeaders);
+          }
+          if (paymentId.startsWith("inv_")) {
+            const body = await request.json();
+            if (body.stagePay === true) {
+              const paid = await coraStagePayInvoice(env, paymentId);
+              return jsonResponse({ success: true, provider: "cora", payment: paid.payment || paid }, 200, corsHeaders);
+            }
+            return jsonResponse({ success: false, provider: "cora", error: "Baixa manual na Cora não é equivalente ao Asaas. Em stage, envie { stagePay: true } para simular pagamento." }, 422, corsHeaders);
+          }
           const body = await request.json();
           const paid = await asaasJson(env, `/payments/${encodeURIComponent(paymentId)}/receiveInCash`, {
             method: "POST",
@@ -543,11 +818,27 @@ export default {
         }
 
         if (request.method === "GET") {
+          if (paymentId.startsWith("test_inv_")) {
+            const payment = await getSandboxPayment(env, paymentId);
+            return jsonResponse({ success: true, provider: "cora", environment: "stage", sandbox: true, payment }, 200, corsHeaders);
+          }
+          if (paymentId.startsWith("inv_")) {
+            const payment = await coraGetPayment(env, paymentId, resolveCoraEnvironment(url.searchParams.get("environment"), env));
+            return jsonResponse({ success: true, provider: "cora", payment }, 200, corsHeaders);
+          }
           const payment = await asaasJson(env, `/payments/${encodeURIComponent(paymentId)}`);
           return jsonResponse({ success: true, payment }, 200, corsHeaders);
         }
 
         if (request.method === "PUT") {
+          if (paymentId.startsWith("test_inv_")) {
+            const body = await request.json();
+            const payment = await updateSandboxPayment(env, paymentId, body);
+            return jsonResponse({ success: true, provider: "cora", environment: "stage", sandbox: true, payment }, 200, corsHeaders);
+          }
+          if (paymentId.startsWith("inv_")) {
+            return jsonResponse({ success: false, provider: "cora", error: "Edição de fatura Cora não foi habilitada neste adaptador. Cancele e gere uma nova cobrança para preservar a lógica atual." }, 422, corsHeaders);
+          }
           const body = await request.json();
           const updated = await asaasJson(env, `/payments/${encodeURIComponent(paymentId)}`, {
             method: "PUT",
@@ -557,6 +848,14 @@ export default {
         }
 
         if (request.method === "DELETE") {
+          if (paymentId.startsWith("test_inv_")) {
+            const deleted = await deleteSandboxPayment(env, paymentId);
+            return jsonResponse({ success: true, provider: "cora", environment: "stage", sandbox: true, deleted }, 200, corsHeaders);
+          }
+          if (paymentId.startsWith("inv_")) {
+            const deleted = await coraCancelPayment(env, paymentId, resolveCoraEnvironment(url.searchParams.get("environment"), env));
+            return jsonResponse({ success: true, provider: "cora", deleted }, 200, corsHeaders);
+          }
           const deleted = await asaasJson(env, `/payments/${encodeURIComponent(paymentId)}`, {
             method: "DELETE"
           });
@@ -632,6 +931,367 @@ function jsonResponse(data, status, corsHeaders) {
   });
 }
 
+function normalizeProvider(value) {
+  const provider = String(value || "").trim().toLowerCase();
+  return PAYMENT_PROVIDERS[provider] ? provider : null;
+}
+
+function resolvePaymentProvider(request, url, payload, env) {
+  return normalizeProvider(
+    payload?.provider ||
+    payload?.paymentProvider ||
+    payload?.gateway ||
+    url.searchParams.get("provider") ||
+    request.headers.get("X-Payment-Provider") ||
+    env.PAYMENT_PROVIDER
+  ) || "asaas";
+}
+
+function resolveCoraEnvironment(value, env) {
+  const selected = String(value || env.CORA_ENVIRONMENT || env.CORA_DEFAULT_ENVIRONMENT || "stage").toLowerCase();
+  return selected === "production" || selected === "prod" ? "production" : "stage";
+}
+
+function isCoraStageSandbox(url, payload, env) {
+  return resolveCoraEnvironment(payload?.environment || url.searchParams.get("environment"), env) === "stage" &&
+    (
+      payload?.financialTestMode === true ||
+      payload?.testMode === true ||
+      url.searchParams.get("financialTestMode") === "true" ||
+      url.searchParams.get("testMode") === "true"
+    );
+}
+
+function sandboxPaymentKey(id) {
+  return `payment:sandbox:cora:${id}`;
+}
+
+function sandboxPaymentListKey(id) {
+  return `payment:sandbox:cora:index:${id}`;
+}
+
+function buildSandboxCustomer(document, payment = {}) {
+  const clean = String(document || payment.customerDocument || payment.responsibleCpf || "").replace(/\D/g, "");
+  return {
+    id: `cora_test_${clean || "customer"}`,
+    name: payment.customerName || payment.responsibleName || "Cliente Teste Cora",
+    cpfCnpj: clean,
+    email: payment.customerEmail || payment.responsibleEmail || ""
+  };
+}
+
+function buildSandboxPayment(payload, amount, description, dueDate, suffix = "") {
+  const value = payload.amount !== undefined ? currencyFromCents(payload.amount) : normalizeCurrencyValue(amount);
+  const id = `test_inv_${crypto.randomUUID()}`;
+  const document = String(payload.responsibleCpf || payload.cpf || payload.document || "").replace(/\D/g, "");
+  const now = new Date().toISOString();
+  return {
+    id,
+    provider: "cora",
+    environment: "stage",
+    sandbox: true,
+    customer: `cora_test_${document || "customer"}`,
+    customerName: payload.responsibleName || payload.name || "Cliente Teste Cora",
+    customerDocument: document,
+    customerEmail: payload.responsibleEmail || payload.email || "",
+    value,
+    netValue: value,
+    dueDate,
+    status: "PENDING",
+    description: description || payload.description || "Cobranca teste Cora Stage",
+    billingType: String(payload.billingType || "PIX").toUpperCase() === "BOLETO" ? "BOLETO" : "PIX",
+    invoiceUrl: `${payload.workerPublicUrl || ""}/sandbox/cora/payments/${id}`,
+    bankSlipUrl: null,
+    pixQrCode: `00020101021226880014br.gov.bcb.pix2566sandbox.rumoaoesporte.local/${id}520400005303986540${value.toFixed(2)}5802BR5917RUMO AO ESPORTE6009SAO PAULO62070503***6304TEST`,
+    pixQrCodeUrl: null,
+    externalReference: String(suffix ? `${payload.externalReference || payload.registrationId || "RAE_TEST"}_${suffix}` : payload.externalReference || payload.registrationId || `RAE_TEST_${Date.now()}`).slice(0, 80),
+    dateCreated: now,
+    paymentDate: null,
+    raw: {
+      status: "SANDBOX",
+      message: "Pagamento criado no sandbox financeiro Cora Stage para testes completos do sistema."
+    }
+  };
+}
+
+async function saveSandboxPayment(env, payment) {
+  await env.RAE_STORAGE.put(sandboxPaymentKey(payment.id), JSON.stringify(payment));
+  await env.RAE_STORAGE.put(sandboxPaymentListKey(payment.id), JSON.stringify({
+    id: payment.id,
+    customer: payment.customer,
+    customerDocument: payment.customerDocument,
+    externalReference: payment.externalReference
+  }));
+  return payment;
+}
+
+async function createSandboxPayment(env, payload) {
+  const dueDate = payload.dueDate || new Date().toISOString().split("T")[0];
+  const payment = buildSandboxPayment(env ? { ...payload, workerPublicUrl: env.WORKER_PUBLIC_URL } : payload, payload.amount ?? payload.value, payload.description, dueDate);
+  return saveSandboxPayment(env, payment);
+}
+
+async function createSandboxCarnetPayments(env, payload) {
+  const payments = [];
+  const childName = payload.childName ? ` - ${payload.childName}` : "";
+  const modality = payload.modalidade ? ` (${payload.modalidade})` : "";
+  const paymentDay = Number(payload.paymentDay || 10);
+  const today = new Date();
+  const formatDueDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  if (payload.matriculaValue && Number(payload.matriculaValue) > 0) {
+    payments.push(await createSandboxPayment(env, {
+      ...payload,
+      amount: payload.matriculaValue,
+      dueDate: formatDueDate(today),
+      description: `Matricula${childName}${modality}`,
+      externalReference: `${payload.registrationId || "RAE"}_MATRICULA_${Date.now()}`
+    }));
+  }
+
+  const mensalidadeValue = Number(payload.mensalidadeValue || 0);
+  if (mensalidadeValue > 0) {
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+      const dueDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, Math.min(paymentDay, 28));
+      if (dueDate < today) dueDate.setDate(today.getDate());
+      const monthLabel = dueDate.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
+      payments.push(await createSandboxPayment(env, {
+        ...payload,
+        amount: mensalidadeValue,
+        dueDate: formatDueDate(dueDate),
+        description: `Mensalidade ${monthLabel}${childName}${modality}`,
+        externalReference: `${payload.registrationId || "RAE"}_${monthOffset + 1}_${Date.now()}`
+      }));
+    }
+  }
+  return payments;
+}
+
+async function getSandboxPayment(env, id) {
+  const data = await env.RAE_STORAGE.get(sandboxPaymentKey(id), "json");
+  if (!data) throw new Error("Fatura sandbox nao encontrada.");
+  return data;
+}
+
+async function listSandboxPayments(env, filters = {}) {
+  const list = await env.RAE_STORAGE.list({ prefix: "payment:sandbox:cora:index:" });
+  const payments = [];
+  const wanted = String(filters.customer || filters.search || filters.document || "").replace(/^cora_test_/, "").replace(/\D/g, "");
+  const state = String(filters.state || "").toUpperCase();
+
+  for (const key of list.keys) {
+    const index = await env.RAE_STORAGE.get(key.name, "json");
+    if (!index?.id) continue;
+    if (wanted && !String(index.customerDocument || "").includes(wanted)) continue;
+    const payment = await getSandboxPayment(env, index.id);
+    if (state && payment.status !== state) continue;
+    payments.push(payment);
+  }
+  return payments.sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)));
+}
+
+async function updateSandboxPayment(env, id, body = {}) {
+  const payment = await getSandboxPayment(env, id);
+  const update = normalizePaymentUpdate(body);
+  const next = {
+    ...payment,
+    description: update.description ?? payment.description,
+    dueDate: update.dueDate ?? payment.dueDate,
+    value: update.value ?? payment.value,
+    netValue: update.value ?? payment.netValue,
+    discount: update.discount ?? payment.discount,
+    fine: update.fine ?? payment.fine,
+    interest: update.interest ?? payment.interest,
+    lastUpdate: new Date().toISOString()
+  };
+  return saveSandboxPayment(env, next);
+}
+
+async function markSandboxPaymentAsPaid(env, id, body = {}) {
+  const payment = await getSandboxPayment(env, id);
+  const next = {
+    ...payment,
+    status: "RECEIVED",
+    paymentDate: body.paymentDate || new Date().toISOString().split("T")[0],
+    value: body.value !== undefined ? normalizeCurrencyValue(body.value) : payment.value,
+    lastUpdate: new Date().toISOString()
+  };
+  next.netValue = next.value;
+  return saveSandboxPayment(env, next);
+}
+
+async function deleteSandboxPayment(env, id) {
+  const payment = await getSandboxPayment(env, id);
+  await env.RAE_STORAGE.delete(sandboxPaymentKey(id));
+  await env.RAE_STORAGE.delete(sandboxPaymentListKey(id));
+  return { ...payment, deleted: true, status: "DELETED" };
+}
+
+function getPaymentProviderStatus(env) {
+  return Object.values(PAYMENT_PROVIDERS).map((provider) => {
+    if (provider.id === "asaas") {
+      return {
+        ...provider,
+        configured: Boolean(env.ASAAS_API_KEY),
+        environments: [{ id: "production", configured: Boolean(env.ASAAS_API_KEY) }]
+      };
+    }
+
+    return {
+      ...provider,
+      configured: isCoraEnvironmentConfigured(env, "stage") || isCoraEnvironmentConfigured(env, "production"),
+      environments: [getCoraEnvironmentStatus(env, "stage"), getCoraEnvironmentStatus(env, "production")]
+    };
+  });
+}
+
+function getCoraEnvironmentStatus(env, environment) {
+  return {
+    id: environment,
+    configured: isCoraEnvironmentConfigured(env, environment),
+    clientId: maskSecret(getCoraClientId(env, environment)),
+    hasClientId: Boolean(getCoraClientId(env, environment)),
+    hasCertificateBinding: Boolean(getCoraFetcher(env, environment))
+  };
+}
+
+function isCoraEnvironmentConfigured(env, environment) {
+  return Boolean(getCoraClientId(env, environment) && getCoraFetcher(env, environment));
+}
+
+function getCoraClientId(env, environment) {
+  return environment === "production"
+    ? env.CORA_PRODUCTION_CLIENT_ID || env.CORA_CLIENT_ID
+    : env.CORA_STAGE_CLIENT_ID || env.CORA_CLIENT_ID;
+}
+
+function getCoraFetcher(env, environment) {
+  return environment === "production"
+    ? env.CORA_PRODUCTION_CERT || env.CORA_CERT
+    : env.CORA_STAGE_CERT || env.CORA_CERT;
+}
+
+function getCoraBaseUrl(environment) {
+  return environment === "production" ? CORA_PRODUCTION_URL : CORA_STAGE_URL;
+}
+
+function maskSecret(value) {
+  const str = String(value || "");
+  if (!str) return "";
+  if (str.length <= 8) return "********";
+  return `${str.slice(0, 4)}...${str.slice(-4)}`;
+}
+
+async function testPaymentProvider(env, provider, environment, action) {
+  if (provider === "asaas") {
+    if (!env.ASAAS_API_KEY) throw new Error("ASAAS_API_KEY não configurada no Worker.");
+    const result = await asaasJson(env, "/finance/balance");
+    return { environment: "production", configured: true, message: "Asaas respondeu com sucesso.", result };
+  }
+
+  const coraEnv = resolveCoraEnvironment(environment, env);
+  const status = getCoraEnvironmentStatus(env, coraEnv);
+  if (!status.configured) {
+    return {
+      environment: coraEnv,
+      configured: false,
+      message: "Cora ainda precisa de client-id e binding mTLS do certificado neste ambiente.",
+      missing: {
+        clientId: !status.hasClientId,
+        certificateBinding: !status.hasCertificateBinding
+      }
+    };
+  }
+
+  const token = await getCoraAccessToken(env, coraEnv, true);
+  if (action === "balance") {
+    const balance = await coraBalance(env, coraEnv);
+    return { environment: coraEnv, configured: true, message: "Cora autenticou e retornou saldo.", token: tokenSummary(token), result: balance };
+  }
+
+  return { environment: coraEnv, configured: true, message: "Cora autenticou com sucesso.", token: tokenSummary(token) };
+}
+
+function tokenSummary(token) {
+  return {
+    token_type: token.token_type || "Bearer",
+    expires_in: token.expires_in,
+    scope: token.scope || "",
+    access_token: maskSecret(token.access_token)
+  };
+}
+
+async function getCoraAccessToken(env, environment = "stage", forceRefresh = false) {
+  const clientId = getCoraClientId(env, environment);
+  const fetcher = getCoraFetcher(env, environment);
+  if (!clientId) throw new Error(`CORA_${environment === "production" ? "PRODUCTION" : "STAGE"}_CLIENT_ID não configurado.`);
+  if (!fetcher?.fetch) throw new Error(`Binding mTLS CORA_${environment === "production" ? "PRODUCTION" : "STAGE"}_CERT não configurado no Worker.`);
+
+  const cacheKey = `cora:token:${environment}:${clientId}`;
+  if (!forceRefresh && env.RAE_STORAGE) {
+    const cached = await env.RAE_STORAGE.get(cacheKey, "json").catch(() => null);
+    if (cached?.access_token && cached.expiresAt && cached.expiresAt > Date.now() + 60000) return cached;
+  }
+
+  const response = await fetcher.fetch(`${getCoraBaseUrl(environment)}/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "client_credentials", client_id: clientId }).toString()
+  });
+
+  const data = await parseJsonResponse(response);
+  if (!response.ok) throw new Error(getApiErrorMessage(data, `Cora token retornou ${response.status}`));
+
+  const token = {
+    ...data,
+    expiresAt: Date.now() + Math.max(Number(data.expires_in || 3600) - 120, 60) * 1000
+  };
+
+  if (env.RAE_STORAGE) {
+    await env.RAE_STORAGE.put(cacheKey, JSON.stringify(token), {
+      expirationTtl: Math.max(Number(data.expires_in || 3600) - 120, 60)
+    }).catch(() => null);
+  }
+
+  return token;
+}
+
+async function coraJson(env, path, options = {}, environment = "stage") {
+  const fetcher = getCoraFetcher(env, environment);
+  if (!fetcher?.fetch) throw new Error(`Binding mTLS Cora não configurado para ${environment}.`);
+  const token = await getCoraAccessToken(env, environment);
+  const response = await fetcher.fetch(`${getCoraBaseUrl(environment)}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token.access_token}`,
+      ...(options.headers || {})
+    }
+  });
+  const data = await parseJsonResponse(response);
+  if (!response.ok) throw new Error(getApiErrorMessage(data, `Cora retornou ${response.status}`));
+  return data;
+}
+
+async function parseJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch (err) {
+    return { raw: text };
+  }
+}
+
+function getApiErrorMessage(data, fallback) {
+  return data.errors?.[0]?.description || data.errors?.[0]?.message || data.error_description || data.message || data.error || data.detail || fallback;
+}
+
 async function asaasJson(env, path, options = {}) {
   const apiKey = env.ASAAS_API_KEY;
   if (!apiKey) throw new Error("ASAAS_API_KEY nÃ£o configurada no Worker.");
@@ -640,7 +1300,7 @@ async function asaasJson(env, path, options = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "User-Agent": "Arena-Simonesia-System/1.0",
+      "User-Agent": "Rumo-Ao-Esporte-System/1.0",
       "access_token": apiKey,
       ...(options.headers || {})
     }
@@ -662,16 +1322,159 @@ async function asaasJson(env, path, options = {}) {
   return data;
 }
 
+async function evolutionJson(env, path, options = {}) {
+  const response = await fetch(`${EVOLUTION_URL}${path}`, {
+    ...options,
+    method: options.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": env.EVOLUTION_API_KEY || "",
+      ...(options.headers || {})
+    }
+  });
+
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (err) {
+    data = { raw: text };
+  }
+
+  if (!response.ok) {
+    throw new Error(data.message || data.error || `Evolution retornou ${response.status}`);
+  }
+
+  return data;
+}
+
+async function listEvolutionInstances(env) {
+  const data = await evolutionJson(env, "/instance/fetchInstances");
+  const items = Array.isArray(data) ? data : (data.instances || data.data || []);
+  return items.map((item) => ({
+    id: item.id || item.name || item.instanceName || item.instance?.instanceName || "",
+    name: item.name || item.instanceName || item.instance?.instanceName || "",
+    connectionStatus: item.connectionStatus || item.state || item.instance?.state || item.status || "unknown",
+    owner: item.owner || item.profileName || "",
+    profileName: item.profileName || item.instance?.profileName || "",
+    profilePictureUrl: item.profilePictureUrl || item.profilePicUrl || ""
+  })).filter((item) => item.name);
+}
+
+async function createEvolutionInstance(env, instanceName) {
+  const data = await evolutionJson(env, "/instance/create", {
+    method: "POST",
+    body: JSON.stringify({
+      instanceName,
+      token: env.EVOLUTION_API_KEY || undefined,
+      qrcode: true,
+      integration: "WHATSAPP-BAILEYS"
+    })
+  });
+
+  return {
+    id: data.id || data.instance?.instanceName || instanceName,
+    name: data.name || data.instanceName || data.instance?.instanceName || instanceName,
+    connectionStatus: data.connectionStatus || data.state || data.instance?.state || "created",
+    owner: data.owner || "",
+    profileName: data.profileName || "",
+    profilePictureUrl: data.profilePictureUrl || ""
+  };
+}
+
+async function updateStudentCredentials(env, body) {
+  if (!body.registrationId) throw new Error("registrationId é obrigatório.");
+  if (!body.newEmail && !body.newPassword) throw new Error("Informe newEmail ou newPassword.");
+
+  const registration = await getFirestoreDocument(env, REGISTRATIONS_COLLECTION, body.registrationId);
+  if (!registration) throw new Error("Cadastro não encontrado.");
+
+  const updates = {};
+  if (body.newEmail) {
+    updates.responsavel = {
+      ...(registration.responsavel || {}),
+      email: String(body.newEmail).trim().toLowerCase()
+    };
+  }
+  if (body.newPassword) updates.senha = String(body.newPassword);
+
+  await patchFirestoreDocument(env, REGISTRATIONS_COLLECTION, body.registrationId, updates);
+  return {
+    authUpdated: false,
+    firestoreUpdated: true,
+    note: "Firebase Auth exige credencial Admin/service account; este Worker atualizou o Firestore."
+  };
+}
+
+async function updateTeacherCredentials(env, body) {
+  if (!body.teacherId) throw new Error("teacherId é obrigatório.");
+  if (!body.newEmail && !body.newPassword) throw new Error("Informe newEmail ou newPassword.");
+
+  const updates = {};
+  if (body.newEmail) updates.email = String(body.newEmail).trim().toLowerCase();
+  if (body.newPassword) updates.senha = String(body.newPassword);
+
+  await patchFirestoreDocument(env, "teachers", body.teacherId, updates);
+  return {
+    authUpdated: false,
+    firestoreUpdated: true,
+    note: "Firebase Auth exige credencial Admin/service account; este Worker atualizou o Firestore."
+  };
+}
+
+async function syncStudentPayments(env, registrationId, cpf) {
+  if (!registrationId) throw new Error("registrationId é obrigatório.");
+
+  const registration = await getFirestoreDocument(env, REGISTRATIONS_COLLECTION, registrationId);
+  const cleanCpf = String(cpf || registration?.responsavel?.cpf || "").replace(/\D/g, "");
+  if (!cleanCpf) throw new Error("CPF não informado.");
+
+  const customers = await asaasJson(env, `/customers?cpfCnpj=${encodeURIComponent(cleanCpf)}`);
+  const customer = customers.data?.[0];
+  if (!customer?.id) {
+    return { synced: 0, customerFound: false };
+  }
+
+  const paymentsData = await asaasJson(env, `/payments?customer=${encodeURIComponent(customer.id)}&limit=100`);
+  const payments = paymentsData.data || [];
+
+  for (const payment of payments) {
+    await savePaymentFromWebhook(env, payment, registrationId, "MANUAL_SYNC");
+  }
+
+  const savedPayments = await listPaymentsByStudent(env, registrationId);
+  const statusData = calculateFinancialStatusFromPayments(savedPayments);
+  await updateRegistrationFinancialSummary(env, registrationId, statusData);
+
+  return {
+    synced: payments.length,
+    customerFound: true,
+    customerId: customer.id,
+    status: statusData.status
+  };
+}
+
 function normalizeCurrencyValue(value) {
   const number = Number(value || 0);
   if (!Number.isFinite(number)) return 0;
   return number > 1000 ? Math.round(number) / 100 : number;
 }
 
+function currencyFromCents(value) {
+  const number = Number(value || 0);
+  if (!Number.isFinite(number)) return 0;
+  return Math.round(number) / 100;
+}
+
+function normalizeAmountOrValue(payload) {
+  if (payload.amount !== undefined) return currencyFromCents(payload.amount);
+  return normalizeCurrencyValue(payload.value);
+}
+
 function normalizePaymentUpdate(body) {
   const update = { ...body };
   if (update.amount !== undefined && update.value === undefined) {
-    update.value = normalizeCurrencyValue(update.amount);
+    update.value = currencyFromCents(update.amount);
     delete update.amount;
   }
   if (update.value !== undefined) update.value = normalizeCurrencyValue(update.value);
@@ -694,7 +1497,7 @@ async function ensureAsaasCustomer(env, payload) {
   const customer = await asaasJson(env, "/customers", {
     method: "POST",
     body: JSON.stringify({
-      name: payload.responsibleName || payload.name || "Respons\u00e1vel Arena Simon\u00e9sia",
+      name: payload.responsibleName || payload.name || "Respons\u00e1vel Rumo ao Esporte",
       cpfCnpj: cpf || undefined,
       email: payload.responsibleEmail || payload.email || undefined,
       mobilePhone: normalizePhone(payload.responsiblePhone || payload.phone),
@@ -709,9 +1512,9 @@ function buildAsaasPaymentPayload(payload, customer) {
   const payment = {
     customer,
     billingType: payload.billingType || "PIX",
-    value: normalizeCurrencyValue(payload.amount ?? payload.value),
+    value: normalizeAmountOrValue(payload),
     dueDate: payload.dueDate || new Date().toISOString().split("T")[0],
-    description: payload.description || "Cobran\u00e7a Arena Simon\u00e9sia",
+    description: payload.description || "Cobran\u00e7a Rumo ao Esporte",
     externalReference: payload.externalReference || payload.registrationId || undefined
   };
 
@@ -719,7 +1522,7 @@ function buildAsaasPaymentPayload(payload, customer) {
   if (payload.fine) payment.fine = payload.fine;
   if (payload.interest) payment.interest = payload.interest;
   if (payload.installmentCount) payment.installmentCount = payload.installmentCount;
-  if (payload.installmentValue) payment.installmentValue = normalizeCurrencyValue(payload.installmentValue);
+  if (payload.installmentValue) payment.installmentValue = currencyFromCents(payload.installmentValue);
 
   return payment;
 }
@@ -764,10 +1567,10 @@ async function createCarnetPayments(env, payload, customer) {
       body: JSON.stringify({
         customer,
         billingType: payload.billingType || "PIX",
-        value: normalizeCurrencyValue(payload.matriculaValue),
+        value: currencyFromCents(payload.matriculaValue),
         dueDate: formatDueDate(dueDate),
         description: `MatrÃ­cula${childName}${modality}`,
-        externalReference: `${payload.registrationId || "UBA"}_MATRICULA_${Date.now()}`
+        externalReference: `${payload.registrationId || "RAE"}_MATRICULA_${Date.now()}`
       })
     });
     payments.push(await enrichPixPayment(env, payment));
@@ -783,10 +1586,10 @@ async function createCarnetPayments(env, payload, customer) {
         body: JSON.stringify({
           customer,
           billingType: payload.billingType || "PIX",
-          value: normalizeCurrencyValue(mensalidadeValue),
+          value: currencyFromCents(mensalidadeValue),
           dueDate: formatDueDate(dueDate),
           description: `Mensalidade ${monthLabel}${childName}${modality}`,
-          externalReference: `${payload.registrationId || "UBA"}_${monthOffset + 1}_${Date.now()}`
+          externalReference: `${payload.registrationId || "RAE"}_${monthOffset + 1}_${Date.now()}`
         })
       });
       payments.push(await enrichPixPayment(env, payment));
@@ -794,6 +1597,239 @@ async function createCarnetPayments(env, payload, customer) {
   }
 
   return payments;
+}
+
+function centsFromCurrency(value) {
+  const number = Number(value || 0);
+  if (!Number.isFinite(number)) return 0;
+  return number > 1000 ? Math.round(number) : Math.round(number * 100);
+}
+
+function centsFromAmountOrValue(payload, amount) {
+  if (payload.amount !== undefined) return Math.round(Number(amount || 0));
+  return centsFromCurrency(amount);
+}
+
+function documentType(identity) {
+  return String(identity || "").replace(/\D/g, "").length > 11 ? "CNPJ" : "CPF";
+}
+
+function buildCoraCustomer(payload) {
+  const identity = String(payload.responsibleCpf || payload.cpf || payload.document || "").replace(/\D/g, "");
+  const address = payload.address || payload.responsibleAddress || {};
+  return {
+    name: payload.responsibleName || payload.name || "Responsável Rumo ao Esporte",
+    email: payload.responsibleEmail || payload.email || "financeiro@rumoaoesporte.com.br",
+    document: {
+      identity,
+      type: documentType(identity)
+    },
+    address: {
+      street: address.street || address.logradouro || "Rua não informada",
+      number: String(address.number || address.numero || "S/N"),
+      district: address.district || address.bairro || "Centro",
+      city: address.city || address.cidade || "Cidade não informada",
+      state: address.state || address.uf || "SP",
+      complement: address.complement || address.complemento || "N/A",
+      zip_code: String(address.zipCode || address.cep || "00000000").replace(/\D/g, "")
+    }
+  };
+}
+
+function buildCoraPaymentForms(payload) {
+  const billingType = String(payload.billingType || "PIX").toUpperCase();
+  if (billingType === "CREDIT_CARD") throw new Error("A Cora não oferece cartão de crédito neste adaptador. Use PIX ou BOLETO.");
+  if (billingType === "BOLETO") return ["BANK_SLIP", "PIX"];
+  return ["PIX"];
+}
+
+function buildCoraInvoicePayload(payload, amount, description, codeSuffix = "") {
+  const codeBase = payload.externalReference || payload.registrationId || `RAE_${Date.now()}`;
+  const dueDate = payload.dueDate || new Date().toISOString().split("T")[0];
+  const paymentTerms = { due_date: dueDate };
+  if (payload.fine?.value || payload.fine?.amount) paymentTerms.fine = { amount: centsFromCurrency(payload.fine.amount ?? payload.fine.value) };
+  if (payload.interest?.value || payload.interest?.rate) paymentTerms.interest = { rate: Number(payload.interest.rate ?? payload.interest.value) };
+  if (payload.discount?.value) paymentTerms.discount = { type: payload.discount.type || "PERCENT", value: Number(payload.discount.value) };
+
+  return {
+    code: String(codeSuffix ? `${codeBase}_${codeSuffix}` : codeBase).slice(0, 60),
+    customer: buildCoraCustomer(payload),
+    services: [{
+      name: description || payload.description || "Cobrança Rumo ao Esporte",
+      description: description || payload.description || "Cobrança Rumo ao Esporte",
+      amount: centsFromAmountOrValue(payload, amount)
+    }],
+    payment_terms: paymentTerms,
+    payment_forms: buildCoraPaymentForms(payload)
+  };
+}
+
+async function createCoraPayment(env, payload) {
+  const environment = resolveCoraEnvironment(payload.environment, env);
+  const invoicePayload = buildCoraInvoicePayload(payload, payload.amount ?? payload.value, payload.description);
+  const invoice = await coraJson(env, "/v2/invoices/", {
+    method: "POST",
+    headers: { "Idempotency-Key": payload.idempotencyKey || crypto.randomUUID() },
+    body: JSON.stringify(invoicePayload)
+  }, environment);
+  return normalizeCoraPayment(invoice);
+}
+
+async function createCoraCarnetPayments(env, payload) {
+  const payments = [];
+  const childName = payload.childName ? ` - ${payload.childName}` : "";
+  const modality = payload.modalidade ? ` (${payload.modalidade})` : "";
+  const today = new Date();
+  const paymentDay = Number(payload.paymentDay || 10);
+
+  const formatDueDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  if (payload.matriculaValue && Number(payload.matriculaValue) > 0) {
+    const dueDate = new Date(today);
+    payments.push(await createCoraPayment(env, {
+      ...payload,
+      amount: payload.matriculaValue,
+      dueDate: formatDueDate(dueDate),
+      description: `Matrícula${childName}${modality}`,
+      externalReference: `${payload.registrationId || "RAE"}_MATRICULA_${Date.now()}`
+    }));
+  }
+
+  const mensalidadeValue = Number(payload.mensalidadeValue || 0);
+  if (mensalidadeValue > 0) {
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+      const dueDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, Math.min(paymentDay, 28));
+      if (dueDate < today) dueDate.setDate(today.getDate());
+      const monthLabel = dueDate.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
+      payments.push(await createCoraPayment(env, {
+        ...payload,
+        amount: mensalidadeValue,
+        dueDate: formatDueDate(dueDate),
+        description: `Mensalidade ${monthLabel}${childName}${modality}`,
+        externalReference: `${payload.registrationId || "RAE"}_${monthOffset + 1}_${Date.now()}`
+      }));
+    }
+  }
+
+  return payments;
+}
+
+async function coraGetPayment(env, paymentId, environment = "stage") {
+  const invoice = await coraJson(env, `/v2/invoices/${encodeURIComponent(paymentId)}`, { method: "GET" }, environment);
+  return normalizeCoraPayment(invoice);
+}
+
+async function coraListInvoices(env, params = {}) {
+  const environment = resolveCoraEnvironment(params.environment, env);
+  const query = new URLSearchParams();
+  if (params.start) query.set("start", params.start);
+  if (params.end) query.set("end", params.end);
+  if (params.state) query.set("state", params.state);
+  if (params.search) query.set("search", String(params.search).replace(/^cus_/, ""));
+  query.set("page", params.page || "1");
+  query.set("perPage", params.perPage || "50");
+  return coraJson(env, `/v2/invoices/?${query.toString()}`, { method: "GET" }, environment);
+}
+
+async function coraCancelPayment(env, paymentId, environment = "stage") {
+  return coraJson(env, `/v2/invoices/${encodeURIComponent(paymentId)}`, {
+    method: "DELETE",
+    headers: { "Idempotency-Key": crypto.randomUUID() }
+  }, environment);
+}
+
+async function coraStagePayInvoice(env, invoiceId) {
+  if (!invoiceId) throw new Error("invoiceId é obrigatório.");
+  const paid = await coraJson(env, "/v2/invoices/pay", {
+    method: "POST",
+    headers: { "Idempotency-Key": crypto.randomUUID() },
+    body: JSON.stringify({ id: invoiceId })
+  }, "stage");
+  return { payment: normalizeCoraPayment(paid), raw: paid };
+}
+
+async function coraBalance(env, environment = "stage") {
+  const balance = await coraJson(env, "/third-party/account/balance", { method: "GET" }, environment);
+  return normalizeCoraBalance(balance);
+}
+
+function normalizeCoraBalance(balance) {
+  const available = balance.available || balance.available_amount || balance.amount || balance.balance || 0;
+  return {
+    balance: currencyFromCoraAmount(available),
+    raw: balance
+  };
+}
+
+function normalizeCoraCustomerFromInvoice(invoice, fallbackCpf = "") {
+  const customer = invoice.customer || invoice.payer || {};
+  const doc = customer.document?.identity || customer.document || fallbackCpf;
+  return {
+    id: `cora_${String(doc || customer.name || "customer").replace(/\W/g, "")}`,
+    name: customer.name || "Cliente Cora",
+    cpfCnpj: doc,
+    email: customer.email || ""
+  };
+}
+
+function normalizeCoraStatus(status) {
+  const state = String(status || "").toUpperCase();
+  const map = {
+    PAID: "RECEIVED",
+    PAYMENT_CONFIRMED: "RECEIVED",
+    OPEN: "PENDING",
+    DRAFT: "PENDING",
+    LATE: "OVERDUE",
+    OVERDUE: "OVERDUE",
+    CANCELED: "DELETED",
+    CANCELLED: "DELETED"
+  };
+  return map[state] || state || "PENDING";
+}
+
+function firstDefined(...values) {
+  return values.find(value => value !== undefined && value !== null && value !== "");
+}
+
+function currencyFromCoraAmount(amount) {
+  if (typeof amount === "string" && amount.includes(".")) return Number(amount);
+  if (typeof amount === "string" && amount.includes(",")) return Number(amount.replace(".", "").replace(",", "."));
+  const number = Number(amount || 0);
+  if (!Number.isFinite(number)) return 0;
+  return number / 100;
+}
+
+function normalizeCoraPayment(invoice) {
+  const amount = firstDefined(invoice.total_amount, invoice.totalAmount, invoice.amount, invoice.services?.[0]?.amount, 0);
+  const paymentOptions = invoice.payment_options || invoice.paymentOptions || invoice.payments || {};
+  const pix = paymentOptions.pix || invoice.pix || {};
+  const bankSlip = paymentOptions.bank_slip || paymentOptions.bankSlip || invoice.bank_slip || invoice.bankSlip || {};
+  const forms = invoice.payment_forms || invoice.paymentForms || [];
+
+  return {
+    ...invoice,
+    provider: "cora",
+    id: invoice.id || invoice.invoice_id || invoice.invoiceId,
+    customer: invoice.customer?.document?.identity || invoice.customer?.document || invoice.customer?.name || null,
+    value: currencyFromCoraAmount(amount),
+    netValue: currencyFromCoraAmount(amount),
+    dueDate: invoice.payment_terms?.due_date || invoice.paymentTerms?.dueDate || invoice.due_date || invoice.dueDate,
+    status: normalizeCoraStatus(invoice.status || invoice.state),
+    description: invoice.services?.[0]?.description || invoice.services?.[0]?.name || invoice.service?.description || invoice.code || "Cobrança Cora",
+    billingType: forms.includes("BANK_SLIP") ? "BOLETO" : "PIX",
+    invoiceUrl: firstDefined(invoice.invoice_url, invoice.invoiceUrl, invoice.url, bankSlip.url, bankSlip.pdf_url, pix.url),
+    bankSlipUrl: firstDefined(bankSlip.url, bankSlip.pdf_url, invoice.invoice_url, invoice.url),
+    pixQrCode: firstDefined(pix.emv, pix.payload, pix.copy_paste, invoice.pixQrCode),
+    pixQrCodeUrl: firstDefined(pix.encoded_image, pix.encodedImage, pix.image, invoice.pixQrCodeUrl),
+    externalReference: invoice.code,
+    dateCreated: invoice.created_at || invoice.createdAt || new Date().toISOString(),
+    paymentDate: invoice.paid_at || invoice.paidAt || invoice.payment_date || invoice.paymentDate || null
+  };
 }
 
 async function handleFinancialAutomationFlow(env) {
@@ -810,11 +1846,11 @@ async function handleFinancialAutomationFlow(env) {
 
     // 1. Processamento DiÃ¡rio (respeitando finAutoSendTime)
     const sendTime = f.finAutoSendTime?.stringValue || "09:00";
-    const lastDailyRun = await env.UBA_STORAGE.get(`fin_daily_run:${todayStr}`);
+    const lastDailyRun = await env.RAE_STORAGE.get(`fin_daily_run:${todayStr}`);
     
     if (currentTimeStr >= sendTime && !lastDailyRun) {
       await processFinancialAutomation(env, todayStr, false, f);
-      await env.UBA_STORAGE.put(`fin_daily_run:${todayStr}`, "done");
+      await env.RAE_STORAGE.put(`fin_daily_run:${todayStr}`, "done");
     }
 
     // 2. Processamento de Teste Agendado
@@ -973,7 +2009,7 @@ async function processFinancialAutomation(env, virtualTodayStr, isTestForce = fa
     }
 
     // 3. Busca InformaÃ§Ãµes das MatrÃ­culas para pegar telefone e nome
-    const res = await fetch(`https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/arena_simonesia_2026_registrations?key=${env.FIREBASE_API_KEY}&pageSize=500`);
+    const res = await fetch(`https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/rumo_ao_esporte_2026_registrations?key=${env.FIREBASE_API_KEY}&pageSize=500`);
     if (!res.ok) return 0;
     const data = await res.json();
     const docs = data.documents || [];
@@ -1006,7 +2042,7 @@ async function processFinancialAutomation(env, virtualTodayStr, isTestForce = fa
         ? `fin_test_sent:${p.paymentId}:${p.ruleMatched}:${virtualTodayStr}`
         : `fin_sent:${p.paymentId}:${p.ruleMatched}`;
         
-      const alreadySent = await env.UBA_STORAGE.get(kvKey);
+      const alreadySent = await env.RAE_STORAGE.get(kvKey);
       if (alreadySent && !isTestForce) continue; 
 
       // DestinatÃ¡rio
@@ -1016,7 +2052,7 @@ async function processFinancialAutomation(env, virtualTodayStr, isTestForce = fa
 
       // Texto da Mensagem
       let message = "";
-      const manualMsg = "\n\nPara regularizar seu pagamento, por favor, entre em contato via WhatsApp com a secretaria da Arena Simon\u00e9sia ou utilize a Chave PIX da escola.";
+      const manualMsg = "\n\nPara regularizar seu pagamento, por favor, entre em contato via WhatsApp com a secretaria do Rumo ao Esporte ou utilize a Chave PIX da escola.";
       const paymentInfo = p.invoiceUrl ? "" : manualMsg;
 
       if (p.ruleMatched === "BEFORE") {
@@ -1047,7 +2083,7 @@ async function processFinancialAutomation(env, virtualTodayStr, isTestForce = fa
 
       try {
         await queueMessage(msgPayload, env);
-        await env.UBA_STORAGE.put(kvKey, "true", { expirationTtl: 86400 * 30 }); // Protege por 30 dias na chave
+        await env.RAE_STORAGE.put(kvKey, "true", { expirationTtl: 86400 * 30 }); // Protege por 30 dias na chave
         countSent++;
       } catch (e) {
         console.error(`Erro ao enfileirar fin auto para ${studentName}:`, e);
@@ -1065,17 +2101,17 @@ async function processFinancialAutomation(env, virtualTodayStr, isTestForce = fa
  * Processa mensagens na fila KV
  */
 async function processQueue(env) {
-  const isPaused = await env.UBA_STORAGE.get("mq:paused") === "true";
+  const isPaused = await env.RAE_STORAGE.get("mq:paused") === "true";
   if (isPaused) {
     console.log("[Queue] Processamento pausado manualmente.");
     return;
   }
 
-  const list = await env.UBA_STORAGE.list({ prefix: "mq:pending:", limit: 20 });
+  const list = await env.RAE_STORAGE.list({ prefix: "mq:pending:", limit: 20 });
   if (list.keys.length === 0) return;
 
   for (const key of list.keys) {
-    const msgData = await env.UBA_STORAGE.get(key.name);
+    const msgData = await env.RAE_STORAGE.get(key.name);
     if (!msgData) continue;
 
     const msg = JSON.parse(msgData);
@@ -1083,7 +2119,7 @@ async function processQueue(env) {
     try {
       const result = await processMessage(msg, env);
       await logToFirestore(msg, result, env);
-      await env.UBA_STORAGE.delete(key.name);
+      await env.RAE_STORAGE.delete(key.name);
       await new Promise(r => setTimeout(r, 5000));
     } catch (err) {
       console.error(`Erro ao processar ${key.name}:`, err);
@@ -1117,16 +2153,16 @@ async function processBirthdays(env, force = false) {
     const currentTimeStr = spTime.toISOString().split('T')[1].substring(0, 5); // "09:01"
 
     // 3. Evita re-execuÃ§Ã£o no mesmo dia (A menos que seja force)
-    const lastRun = await env.UBA_STORAGE.get("last_birthday_run");
+    const lastRun = await env.RAE_STORAGE.get("last_birthday_run");
     if (lastRun === todayStr && !force) return 0;
 
     // 4. Se chegou o horÃ¡rio (A menos que seja force)
     if (currentTimeStr >= sendTime || force) {
       console.log(`Iniciando automaÃ§Ã£o de aniversÃ¡rios para ${todayStr}... (Modo Teste: ${testMode}, Force: ${force})`);
-      if (!force) await env.UBA_STORAGE.put("last_birthday_run", todayStr); // Marca como rodado apenas no fluxo auto
+      if (!force) await env.RAE_STORAGE.put("last_birthday_run", todayStr); // Marca como rodado apenas no fluxo auto
 
       // 5. Busca todos os alunos (limitando a 300 registros para seguranÃ§a)
-      const registrationsRes = await fetch(`https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/arena_simonesia_2026_registrations?key=${env.FIREBASE_API_KEY}&pageSize=300`);
+      const registrationsRes = await fetch(`https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/rumo_ao_esporte_2026_registrations?key=${env.FIREBASE_API_KEY}&pageSize=300`);
       if (!registrationsRes.ok) return;
       const registrations = await registrationsRes.json();
       
@@ -1159,11 +2195,11 @@ async function processBirthdays(env, force = false) {
       console.log(`Encontrados ${bdayStudents.length} aniversariantes hoje.`);
 
       // 6. Dispara Mensagens
-      const workerUrl = "https://arenasimonesia-whatsapp-proxy.thayrufino2.workers.dev";
+      const workerUrl = env.WORKER_PUBLIC_URL || "https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev";
       
       for (const student of bdayStudents) {
         const firstName = student.name.split(' ')[0];
-        const baseText = `Parab\u00e9ns ${firstName}!\n\nA Arena Simon\u00e9sia deseja a voc\u00ea um dia repleto de alegria, sa\u00fade e muitas conquistas. Que este novo ciclo seja brilhante!\n\nFeliz anivers\u00e1rio!`;
+        const baseText = `Parab\u00e9ns ${firstName}!\n\nO Rumo ao Esporte deseja a voc\u00ea um dia repleto de alegria, sa\u00fade e muitas conquistas. Que este novo ciclo seja brilhante!\n\nFeliz anivers\u00e1rio!`;
         
         const destino = testMode ? testPhone : student.phone;
         const textoFinal = testMode 
@@ -1172,7 +2208,7 @@ async function processBirthdays(env, force = false) {
 
         // Tenta localizar o cartÃ£o prÃ©-renderizado (enviado pelo frontend)
         const customCardId = `bday_card_${student.id.replace(/-/g, '_')}`;
-        const hasCustom = await env.UBA_STORAGE.get(`img:${customCardId}`);
+        const hasCustom = await env.RAE_STORAGE.get(`img:${customCardId}`);
         
         // Determina a imagem final (Precedence: Custom Card -> Student Photo -> Default Image)
         let finalImageUrl = defaultImage;
@@ -1209,7 +2245,7 @@ async function queueMessage(msg, env) {
   const timestamp = Date.now();
   const random = crypto.randomUUID().substring(0, 8);
   const key = `mq:pending:${timestamp}:${random}`;
-  await env.UBA_STORAGE.put(key, JSON.stringify({
+  await env.RAE_STORAGE.put(key, JSON.stringify({
     ...msg,
     enqueuedAt: new Date().toISOString()
   }));

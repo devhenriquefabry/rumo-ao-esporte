@@ -14,7 +14,7 @@ export default function AdminSimuladorPage() {
         const fetchData = async () => {
             try {
                 const [regSnap, fetchedPlans] = await Promise.all([
-                    getDocs(collection(db, "arena_simonesia_2026_registrations")),
+                    getDocs(collection(db, "rumo_ao_esporte_2026_registrations")),
                     planService.getPlans()
                 ]);
                 setRegistrations(regSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
@@ -32,7 +32,7 @@ export default function AdminSimuladorPage() {
         return (
             <PageContainer>
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-                    <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #eee', borderTop: '4px solid #007d2f', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #eee', borderTop: '4px solid #00a63a', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                 </div>
             </PageContainer>
         );

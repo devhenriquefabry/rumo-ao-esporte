@@ -78,12 +78,12 @@ const LoadingOverlay = ({ message, progress }: { message: string, progress: numb
                 <div style={{ position: 'relative', marginBottom: '15px' }}>
                     <Loader2
                         size={48}
-                        color="#007d2f"
+                        color="#00a63a"
                         className="spin-animation"
                     />
                 </div>
                 <span style={{
-                    color: '#007d2f',
+                    color: '#00a63a',
                     fontWeight: 'bold',
                     fontSize: '1.1rem',
                     letterSpacing: '0.5px',
@@ -95,7 +95,7 @@ const LoadingOverlay = ({ message, progress }: { message: string, progress: numb
                 {progress > 0 && (
                     <div style={{ width: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div style={{ width: '100%', height: '8px', background: '#eee', borderRadius: '4px', overflow: 'hidden' }}>
-                            <div style={{ width: `${progress}%`, height: '100%', background: '#007d2f', transition: 'width 0.1s linear' }} />
+                            <div style={{ width: `${progress}%`, height: '100%', background: '#00a63a', transition: 'width 0.1s linear' }} />
                         </div>
                         <span style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px', fontWeight: 'bold' }}>{Math.round(progress)}%</span>
                     </div>

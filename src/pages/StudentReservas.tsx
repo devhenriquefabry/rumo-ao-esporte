@@ -84,14 +84,14 @@ export default function StudentReservas() {
                             </div>
 
                             <div style={{ padding: '20px' }}>
-                                <h3 style={{ margin: '0 0 10px 0', color: '#00237f', fontSize: '1.1rem' }}>{location.name}</h3>
+                                <h3 style={{ margin: '0 0 10px 0', color: '#17428f', fontSize: '1.1rem' }}>{location.name}</h3>
                                 <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '0.9rem', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                     {location.description}
                                 </p>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#555', fontSize: '0.85rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <Clock size={16} color="#007d2f" />
+                                        <Clock size={16} color="#00a63a" />
                                         <span>Ver Horários</span>
                                     </div>
                                 </div>
@@ -103,7 +103,7 @@ export default function StudentReservas() {
                                     background: '#f8f9fa',
                                     border: '1px solid #e9ecef',
                                     borderRadius: '8px',
-                                    color: '#00237f',
+                                    color: '#17428f',
                                     fontWeight: 'bold',
                                     display: 'flex',
                                     alignItems: 'center',

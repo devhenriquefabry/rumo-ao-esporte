@@ -19,6 +19,7 @@ export default function AdminLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
     const [collapsed, setCollapsed] = useState(false);
+    const [showAdvancedFinanceMenu, setShowAdvancedFinanceMenu] = useState(false);
 
     const { isAllowed, user, loading: permissionsLoading } = useAdminPermissions();
 
@@ -47,7 +48,7 @@ export default function AdminLayout() {
         // Compute Birthday Badge
         const fetchBirthdays = async () => {
             try {
-                const q = query(collection(db, "arena_simonesia_2026_registrations"));
+                const q = query(collection(db, "rumo_ao_esporte_2026_registrations"));
                 const snap = await getDocs(q);
                 let bCount = 0;
                 let aCount = 0;
@@ -107,22 +108,35 @@ export default function AdminLayout() {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const localAuth = localStorage.getItem('uba_admin_auth');
+            const localAuth = localStorage.getItem('rae_admin_auth');
             if (!localAuth) navigate('/admin/login');
         };
         checkAuth();
     }, [navigate]);
 
+    useEffect(() => {
+        const handleAdvancedMenuShortcut = (event: KeyboardEvent) => {
+            if (!event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
+            if (event.code !== 'Quote' && event.key !== "'") return;
+
+            event.preventDefault();
+            setShowAdvancedFinanceMenu((current) => !current);
+        };
+
+        window.addEventListener('keydown', handleAdvancedMenuShortcut);
+        return () => window.removeEventListener('keydown', handleAdvancedMenuShortcut);
+    }, []);
+
     const handleLogout = async () => {
         await signOut(auth);
-        localStorage.removeItem('uba_admin_auth');
+        localStorage.removeItem('rae_admin_auth');
         navigate('/admin/login');
     };
 
     if (permissionsLoading) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f5f7fa', color: '#666', flexDirection: 'column', gap: '15px' }}>
-                <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #eee', borderTop: '4px solid #007d2f', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)', color: '#63708a', flexDirection: 'column', gap: '15px' }}>
+                <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #dce7f3', borderTop: '4px solid #00a63a', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                 <span style={{ fontWeight: 'bold' }}>Verificando permissões...</span>
             </div>
         );
@@ -143,12 +157,12 @@ export default function AdminLayout() {
             return <Navigate to={firstAllowed.path} replace />;
         } else {
             return (
-                <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f7fa', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ background: '#fff', padding: '40px', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', textAlign: 'center', maxWidth: '500px' }}>
-                        <div style={{ background: '#fff5f5', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-                            <Lock size={40} color="#007d2f" />
+                <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: '#fff', padding: '40px', borderRadius: '8px', boxShadow: '0 18px 50px rgba(9,36,92,0.16)', textAlign: 'center', maxWidth: '500px', border: '1px solid #dce7f3' }}>
+                        <div style={{ background: '#eef8ff', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
+                            <Lock size={40} color="#00a63a" />
                         </div>
-                        <h2 style={{ color: '#007d2f', margin: '0 0 10px 0' }}>Acesso Restrito</h2>
+                        <h2 style={{ color: '#00a63a', margin: '0 0 10px 0' }}>Acesso Restrito</h2>
                         <p style={{ color: '#666', lineHeight: '1.6' }}>
                             Sua conta não possui permissão para acessar nenhuma área do sistema.
                             <br />Contate o administrador.
@@ -163,7 +177,7 @@ export default function AdminLayout() {
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f7fa', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)', flexDirection: 'column' }}>
 
             {/* Global QR Scanner Modal */}
             <GlobalScannerModal
@@ -203,7 +217,13 @@ export default function AdminLayout() {
                         if (item.path === '/admin/aniversariantes') badgeValue = birthdayCount;
 
                         // Filter subitems based on permissions
-                        const allowedSubItems = item.subItems?.filter(sub => isAllowed(sub.to)) || [];
+                        const allowedSubItems = item.subItems?.filter(sub => {
+                            if (sub.to === '/admin/financeiro/bancos' && !showAdvancedFinanceMenu) {
+                                return false;
+                            }
+
+                            return isAllowed(sub.to);
+                        }) || [];
 
                         // Handle subItems badges (e.g. Pendentes, Cadastrados, Desativados)
                         const subItemsWithBadges = allowedSubItems.map(sub => {

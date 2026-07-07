@@ -65,7 +65,7 @@ export default function TeacherCard({
             {/* Status bar - colorida no topo */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
-                background: teacher.active ? '#4caf50' : '#007d2f'
+                background: teacher.active ? '#4caf50' : '#00a63a'
             }} />
 
             {/* Faixa DESATIVADO - reta no topo */}
@@ -75,7 +75,7 @@ export default function TeacherCard({
                     top: '4px',
                     left: 0,
                     right: 0,
-                    background: '#007d2f',
+                    background: '#00a63a',
                     color: '#fff',
                     padding: '6px 15px',
                     fontWeight: '900',
@@ -120,7 +120,7 @@ export default function TeacherCard({
                             {readOnly ? <User size={16} /> : <Edit size={16} />}
                         </button>
                         {!readOnly && (
-                            <button onClick={onDelete} style={{ background: '#fff5f5', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#007d2f', transition: 'background 0.2s' }}><Trash2 size={16} /></button>
+                            <button onClick={onDelete} style={{ background: '#eef8ff', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#00a63a', transition: 'background 0.2s' }}><Trash2 size={16} /></button>
                         )}
                     </div>
                 </div>
@@ -203,9 +203,9 @@ export default function TeacherCard({
                             gap: '6px',
                             padding: '8px',
                             background: teacher.active ? '#fff' : '#4caf50',
-                            color: teacher.active ? '#007d2f' : '#fff',
+                            color: teacher.active ? '#00a63a' : '#fff',
                             borderRadius: '8px',
-                            border: teacher.active ? '1.5px solid #007d2f' : 'none',
+                            border: teacher.active ? '1.5px solid #00a63a' : 'none',
                             fontWeight: '900',
                             fontSize: '0.8rem',
                             cursor: 'pointer',
@@ -214,7 +214,7 @@ export default function TeacherCard({
                         }}
                         onMouseEnter={(e) => {
                             if (teacher.active) {
-                                e.currentTarget.style.background = '#fff5f5';
+                                e.currentTarget.style.background = '#eef8ff';
                             } else {
                                 e.currentTarget.style.transform = 'translateY(-2px)';
                             }

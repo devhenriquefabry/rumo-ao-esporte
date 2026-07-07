@@ -95,7 +95,7 @@ export default function AdminEvolutionMessages() {
       setError('');
       setMessage('');
       await saveMessagingSettings(settings);
-      setMessage('Configurações salvas para o sistema da Arena Simonésia.');
+      setMessage('Configurações salvas para o sistema da Rumo ao Esporte.');
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Erro ao salvar configurações.');
     } finally {
@@ -122,7 +122,7 @@ export default function AdminEvolutionMessages() {
       <header className="evolution-message-header">
         <div>
           <h1>Mensagens Evolution</h1>
-          <p>Controle de instâncias e gatilhos de WhatsApp da Arena Simonésia.</p>
+          <p>Controle de instâncias e gatilhos de WhatsApp da Rumo ao Esporte.</p>
         </div>
         <button type="button" className="message-refresh-button" onClick={() => void refreshInstances()} disabled={refreshing} title="Atualizar instâncias">
           <RefreshCw className={refreshing ? 'spin' : ''} size={19} />

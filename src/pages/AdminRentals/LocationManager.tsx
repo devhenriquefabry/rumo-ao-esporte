@@ -84,7 +84,7 @@ const LocationManager: React.FC = () => {
                 <button
                     onClick={openNew}
                     style={{
-                        backgroundColor: '#00237f', color: '#fff', border: 'none', padding: '10px 20px',
+                        backgroundColor: '#17428f', color: '#fff', border: 'none', padding: '10px 20px',
                         borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
                         fontWeight: 'bold'
                     }}

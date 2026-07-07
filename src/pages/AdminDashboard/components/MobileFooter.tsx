@@ -44,7 +44,7 @@ export const MobileFooter: React.FC<MobileFooterProps> = ({
                     justifyContent: 'center',
                     gap: '8px',
                     padding: '12px',
-                    background: '#007d2f',
+                    background: '#00a63a',
                     border: 'none',
                     borderRadius: '8px',
                     color: '#fff',

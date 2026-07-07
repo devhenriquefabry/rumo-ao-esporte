@@ -103,7 +103,7 @@ export default function ContractEditor({
                 setPlans(allPlans);
 
                 if (mode === 'student' && registrationId && !initialData) {
-                    const docRef = doc(db, 'arena_simonesia_2026_registrations', registrationId);
+                    const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', registrationId);
                     const snap = await getDoc(docRef);
                     if (snap.exists()) {
                         const regData = snap.data() as ContractData;
@@ -135,7 +135,7 @@ export default function ContractEditor({
                         }
                     }
                 } else if (mode === 'template') {
-                    const docRef = doc(db, 'uba_settings', 'contract_template');
+                    const docRef = doc(db, 'rae_settings', 'contract_template');
                     const snap = await getDoc(docRef);
                     if (snap.exists()) {
                         setTemplateHtml(snap.data().html);
@@ -162,7 +162,7 @@ export default function ContractEditor({
 
             if (mode === 'template') {
                 // Save as global template
-                const docRef = doc(db, 'uba_settings', 'contract_template');
+                const docRef = doc(db, 'rae_settings', 'contract_template');
                 await setDoc(docRef, {
                     html: contractHTML,
                     updatedAt: new Date()
@@ -178,7 +178,7 @@ export default function ContractEditor({
                     signatureData: signatureData || undefined
                 };
 
-                const docRef = doc(db, 'arena_simonesia_2026_registrations', registrationId);
+                const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', registrationId);
                 await updateDoc(docRef, { alunos: updatedAlunos });
 
                 setData(prev => prev ? { ...prev, alunos: updatedAlunos } : null);
@@ -354,7 +354,7 @@ export default function ContractEditor({
                     <button
                         onClick={handlePrint}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '8px', background: '#007d2f', color: '#fff', border: 'none',
+                            display: 'flex', alignItems: 'center', gap: '8px', background: '#00a63a', color: '#fff', border: 'none',
                             padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'
                         }}
                     >
@@ -421,12 +421,12 @@ export default function ContractEditor({
                 ) : (
                     <>
                         <div style={{ textAlign: 'center', marginBottom: '20px' }} {...editableProps}>
-                            <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ height: '80px', marginBottom: '10px' }} contentEditable={false} />
+                            <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ height: '80px', marginBottom: '10px' }} contentEditable={false} />
                             <h2 style={{ fontSize: '14pt', fontWeight: 'bold', textTransform: 'uppercase', margin: '10px 0' }}>Itens de Contrato de Prestação de Serviços Educacionais e Esportivos – Escolinha de Futebol</h2>
                         </div>
 
                         <p style={{ textIndent: '30px', marginBottom: '15px' }} {...editableProps}>
-                            Pelo presente instrumento particular, de um lado, <strong>ARENA SIMONÉSIA</strong>, escola de esportes situada em Minas Gerais, doravante denominada <strong>CONTRATADA</strong>, e, de outro lado, <strong>{displayData.responsavel.nome.toUpperCase()}</strong>, brasileiro(a), portador(a) do CPF nº <strong>{displayData.responsavel.cpf}</strong>, residente e domiciliado(a) à {displayData.responsavel.endereco.rua}, nº {displayData.responsavel.endereco.numero}, Bairro {displayData.responsavel.endereco.bairro}, {displayData.responsavel.endereco.cidade}/{displayData.responsavel.endereco.uf}, doravante denominado(a) <strong>CONTRATANTE</strong>, na qualidade de representante legal do(a) aluno(a) <strong>{displayStudent.nome.toUpperCase()}</strong>, doravante denominado(a) <strong>ALUNO(A)</strong>, resolvem firmar o presente Contrato de Prestação de Serviços Educacionais e Esportivos, que se regerá pelas cláusulas e condições a seguir descritas.
+                            Pelo presente instrumento particular, de um lado, <strong>RUMO AO ESPORTE</strong>, escola de esportes situada em Minas Gerais, doravante denominada <strong>CONTRATADA</strong>, e, de outro lado, <strong>{displayData.responsavel.nome.toUpperCase()}</strong>, brasileiro(a), portador(a) do CPF nº <strong>{displayData.responsavel.cpf}</strong>, residente e domiciliado(a) à {displayData.responsavel.endereco.rua}, nº {displayData.responsavel.endereco.numero}, Bairro {displayData.responsavel.endereco.bairro}, {displayData.responsavel.endereco.cidade}/{displayData.responsavel.endereco.uf}, doravante denominado(a) <strong>CONTRATANTE</strong>, na qualidade de representante legal do(a) aluno(a) <strong>{displayStudent.nome.toUpperCase()}</strong>, doravante denominado(a) <strong>ALUNO(A)</strong>, resolvem firmar o presente Contrato de Prestação de Serviços Educacionais e Esportivos, que se regerá pelas cláusulas e condições a seguir descritas.
                         </p>
 
                         <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 1 – DO OBJETO</h3>
@@ -534,7 +534,7 @@ export default function ContractEditor({
                                 <div style={{ height: '62px', marginBottom: '4px' }}></div>
                                 <div style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>
                                     <strong>CONTRATADA</strong><br />
-                                    ARENA SIMONÉSIA
+                                    RUMO AO ESPORTE
                                 </div>
                             </div>
                             <div style={{ flex: 1, textAlign: 'center' }}>
@@ -563,7 +563,7 @@ export default function ContractEditor({
                         <div style={{ border: '1px solid #000', padding: '20px' }} {...editableProps}>
                             <h3 style={{ textAlign: 'center', fontSize: '14pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>
                                 ANEXO I – FICHA DE INSCRIÇÃO DO ALUNO<br />
-                                ARENA SIMONÉSIA
+                                RUMO AO ESPORTE
                             </h3>
 
                             <div style={{ marginBottom: '20px' }}>
@@ -597,7 +597,7 @@ export default function ContractEditor({
                             <div style={{ marginBottom: '20px' }}>
                                 <strong>TERMO DE COMPROMISSO:</strong><br />
                                 <p style={{ fontSize: '10pt', marginTop: '5px' }}>
-                                    Declaro que as informações acima prestadas são verdadeiras, e que li e estou de acordo com as cláusulas do Contrato de Prestação de Serviços Educacionais e Esportivos, firmado com a ARENA SIMONÉSIA, do qual esta ficha é parte integrante.
+                                    Declaro que as informações acima prestadas são verdadeiras, e que li e estou de acordo com as cláusulas do Contrato de Prestação de Serviços Educacionais e Esportivos, firmado com a RUMO AO ESPORTE, do qual esta ficha é parte integrante.
                                 </p>
                                 <p style={{ fontSize: '10pt', marginTop: '5px' }}>
                                     Autorizo o uso da imagem do aluno em materiais institucionais e promocionais, conforme previsto em contrato.

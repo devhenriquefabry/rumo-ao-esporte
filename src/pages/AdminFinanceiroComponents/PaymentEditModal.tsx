@@ -156,7 +156,7 @@ export function PaymentEditModal({ isOpen, payment, onClose, onSave }: PaymentEd
                             disabled={isSaving}
                             style={{
                                 flex: 1, padding: '14px', borderRadius: '12px', border: 'none',
-                                background: '#007d2f', color: '#fff', fontWeight: '700', cursor: 'pointer',
+                                background: '#00a63a', color: '#fff', fontWeight: '700', cursor: 'pointer',
                                 boxShadow: '0 4px 12px rgba(0, 125, 47, 0.2)',
                                 opacity: isSaving ? 0.7 : 1
                             }}

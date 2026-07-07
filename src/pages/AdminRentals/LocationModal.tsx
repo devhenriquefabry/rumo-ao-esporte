@@ -180,7 +180,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, onSave, 
                     <X size={24} color="#666" />
                 </button>
 
-                <h2 style={{ marginTop: 0, marginBottom: '24px', color: '#00237f', fontSize: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                <h2 style={{ marginTop: 0, marginBottom: '24px', color: '#17428f', fontSize: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                     {initialData ? 'Editar Local' : 'Novo Local'}
                 </h2>
 
@@ -215,7 +215,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, onSave, 
                                 cursor: 'pointer', color: '#666', fontSize: '13px', background: '#fafafa',
                                 transition: 'all 0.2s'
                             }}
-                                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#00237f'}
+                                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#17428f'}
                                 onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ccc'}
                             >
                                 {uploading ? <div className="loader">...</div> : <><Upload size={24} style={{ marginBottom: '5px' }} /> Adicionar</>}
@@ -232,7 +232,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, onSave, 
                                 value={name} onChange={e => setName(e.target.value)}
                                 required placeholder="Ex: Quadra de Areia 1"
                                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem', outline: 'none', transition: 'border 0.2s' }}
-                                onFocus={(e) => e.target.style.borderColor = '#00237f'}
+                                onFocus={(e) => e.target.style.borderColor = '#17428f'}
                                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
                             />
                         </div>
@@ -275,7 +275,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, onSave, 
                                 return (
                                     <div key={day} style={{
                                         background: '#fff', borderRadius: '8px', padding: '12px',
-                                        border: slots.length > 0 ? '1px solid #00237f' : '1px solid #e0e0e0',
+                                        border: slots.length > 0 ? '1px solid #17428f' : '1px solid #e0e0e0',
                                         opacity: slots.length > 0 ? 1 : 0.8
                                     }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -360,7 +360,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose, onSave, 
                             type="submit" disabled={loading}
                             style={{
                                 padding: '12px 24px', borderRadius: '8px', border: 'none',
-                                background: 'linear-gradient(135deg, #00237f 0%, #0033cc 100%)',
+                                background: 'linear-gradient(135deg, #17428f 0%, #0033cc 100%)',
                                 color: '#fff', cursor: 'pointer', fontWeight: 'bold',
                                 boxShadow: '0 4px 10px rgba(0,35,127,0.2)',
                                 opacity: loading ? 0.7 : 1,

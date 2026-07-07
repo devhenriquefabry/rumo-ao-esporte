@@ -236,7 +236,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                     background: '#f8fafc'
                 }}>
                     <div>
-                        <h2 style={{ margin: 0, color: '#007d2f', fontSize: '1.4rem', fontWeight: '800' }}>
+                        <h2 style={{ margin: 0, color: '#00a63a', fontSize: '1.4rem', fontWeight: '800' }}>
                             EM ATRASO E PENDENTE
                         </h2>
                         <p style={{ margin: '5px 0 0', color: '#64748b', fontSize: '0.9rem' }}>
@@ -247,8 +247,8 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                         <button 
                             onClick={() => setIsBatchModalOpen(true)}
                             style={{
-                                background: '#fff', border: '1px solid #007d2f', padding: '10px 15px',
-                                borderRadius: '12px', cursor: 'pointer', color: '#007d2f',
+                                background: '#fff', border: '1px solid #00a63a', padding: '10px 15px',
+                                borderRadius: '12px', cursor: 'pointer', color: '#00a63a',
                                 fontWeight: 'bold', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px'
                             }}
                         >
@@ -275,7 +275,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                             padding: '30px', maxWidth: '400px', width: '100%', textAlign: 'center',
                             boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
                         }}>
-                            <div style={{ color: '#007d2f', marginBottom: '15px' }}>
+                            <div style={{ color: '#00a63a', marginBottom: '15px' }}>
                                 <Settings size={48} />
                             </div>
                             <h3 style={{ margin: '0 0 10px', fontWeight: '800' }}>Ações em Lote</h3>
@@ -295,7 +295,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                         <div style={{
                                             height: '100%',
                                             width: `${(batchProgress.results.length / batchProgress.total) * 100}%`,
-                                            background: 'linear-gradient(90deg, #007d2f, #e05555)',
+                                            background: 'linear-gradient(90deg, #00a63a, #e05555)',
                                             borderRadius: '99px',
                                             transition: 'width 0.4s ease'
                                         }} />
@@ -307,7 +307,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                             <div key={idx} style={{
                                                 display: 'flex', alignItems: 'center', gap: '8px',
                                                 padding: '6px 10px', borderRadius: '8px', fontSize: '0.8rem',
-                                                background: r.success ? '#f0fdf4' : '#fff5f5',
+                                                background: r.success ? '#f0fdf4' : '#eef8ff',
                                                 border: `1px solid ${r.success ? '#bbf7d0' : '#fecaca'}`
                                             }}>
                                                 {/* Avatar do aluno */}
@@ -404,8 +404,8 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                             </div></>
                             )}
 
-                            <div style={{ background: '#fff9f9', border: '1px dashed #007d2f', borderRadius: '12px', padding: '15px', marginBottom: '25px', textAlign: 'left' }}>
-                                <p style={{ fontSize: '0.8rem', color: '#007d2f', fontWeight: 'bold', margin: '0 0 5px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <div style={{ background: '#fff9f9', border: '1px dashed #00a63a', borderRadius: '12px', padding: '15px', marginBottom: '25px', textAlign: 'left' }}>
+                                <p style={{ fontSize: '0.8rem', color: '#00a63a', fontWeight: 'bold', margin: '0 0 5px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <AlertCircle size={14} /> O que vai acontecer?
                                 </p>
                                 <p style={{ fontSize: '0.75rem', color: '#666', margin: 0, lineHeight: '1.4' }}>
@@ -418,7 +418,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                 disabled={sending}
                                 style={{
                                     width: '100%', padding: '15px', borderRadius: '14px', border: 'none',
-                                    background: sending ? '#ccc' : '#007d2f', color: '#fff', fontWeight: '800',
+                                    background: sending ? '#ccc' : '#00a63a', color: '#fff', fontWeight: '800',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                                     cursor: sending ? 'not-allowed' : 'pointer', marginBottom: '10px'
                                 }}
@@ -431,8 +431,8 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                 onClick={() => handleSendBatchMessages(true)}
                                 disabled={sending}
                                 style={{
-                                    width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #007d2f',
-                                    background: '#fff', color: '#007d2f', fontWeight: '700',
+                                    width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #00a63a',
+                                    background: '#fff', color: '#00a63a', fontWeight: '700',
                                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                                 }}
                             >
@@ -501,7 +501,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                     disabled={sending}
                                     style={{
                                         padding: '15px', borderRadius: '12px', border: 'none',
-                                        background: '#007d2f', color: '#fff', fontWeight: '800',
+                                        background: '#00a63a', color: '#fff', fontWeight: '800',
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                                     }}
                                 >
@@ -513,8 +513,8 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                     onClick={() => handleSendSingleMessage(true)}
                                     disabled={sending}
                                     style={{
-                                        padding: '12px', borderRadius: '12px', border: '1px solid #007d2f',
-                                        background: '#fff', color: '#007d2f', fontWeight: '700',
+                                        padding: '12px', borderRadius: '12px', border: '1px solid #00a63a',
+                                        background: '#fff', color: '#00a63a', fontWeight: '700',
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                                     }}
                                 >
@@ -590,7 +590,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                                 onClick={() => onSelectStudent(student)}
                                                 style={{ 
                                                     background: 'none', border: 'none', padding: 0, 
-                                                    color: '#007d2f', fontWeight: '800', cursor: 'pointer',
+                                                    color: '#00a63a', fontWeight: '800', cursor: 'pointer',
                                                     fontSize: '0.95rem', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px'
                                                 }}
                                             >
@@ -624,7 +624,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                             </td>
                                         )}
                                         <td style={{ padding: '15px 10px' }}>
-                                            <div style={{ fontWeight: '800', color: '#007d2f' }}>
+                                            <div style={{ fontWeight: '800', color: '#00a63a' }}>
                                                 {fmt(student.financialPendingAmount || 0)}
                                             </div>
                                         </td>
@@ -634,7 +634,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                                     href={student.financialInvoiceUrl} 
                                                     target="_blank" 
                                                     rel="noreferrer"
-                                                    style={{ color: '#007d2f', display: 'inline-flex', alignItems: 'center' }}
+                                                    style={{ color: '#00a63a', display: 'inline-flex', alignItems: 'center' }}
                                                     title="Ver Fatura"
                                                 >
                                                     <ExternalLink size={18} />
@@ -652,7 +652,7 @@ export const OverdueStudentsModal: React.FC<OverdueStudentsModalProps> = ({
                                                     setIsSingleChargeModalOpen(true);
                                                 }}
                                                 style={{
-                                                    background: '#007d2f', color: '#fff', border: 'none',
+                                                    background: '#00a63a', color: '#fff', border: 'none',
                                                     padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',
                                                     fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px',
                                                     margin: '0 auto', boxShadow: '0 2px 4px rgba(0, 125, 47, 0.2)'

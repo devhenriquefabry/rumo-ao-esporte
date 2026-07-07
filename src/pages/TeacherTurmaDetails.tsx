@@ -32,8 +32,8 @@ export default function TeacherTurmaDetails() {
                     if (!snapTeacher.empty) {
                         const teacherData = snapTeacher.docs[0].data();
                         if (teacherData.active === false) {
-                            localStorage.removeItem('uba_teacher_name');
-                            localStorage.removeItem('uba_teacher_role');
+                            localStorage.removeItem('rae_teacher_name');
+                            localStorage.removeItem('rae_teacher_role');
                             await auth.signOut();
                             alert("Seu acesso de professor foi desativado. Entre em contato com a secretaria.");
                             navigate('/aluno/login');
@@ -64,7 +64,7 @@ export default function TeacherTurmaDetails() {
             }
             setTurma({ id: turmaDoc.id, ...turmaDoc.data() });
 
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'), orderBy('responsavel.nome'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'), orderBy('responsavel.nome'));
             const snap = await getDocs(q);
 
             const list: any[] = [];
@@ -133,7 +133,7 @@ export default function TeacherTurmaDetails() {
         docPDF.setTextColor(255, 255, 255);
         docPDF.setFontSize(22);
         docPDF.setFont('helvetica', 'bold');
-        docPDF.text("LISTA DE CHAMADA - Arena Simonésia 2026", pageWidth / 2, 25, { align: 'center' });
+        docPDF.text("LISTA DE CHAMADA - Rumo ao Esporte 2026", pageWidth / 2, 25, { align: 'center' });
 
         docPDF.setFontSize(10);
         docPDF.setFont('helvetica', 'normal');
@@ -214,7 +214,7 @@ export default function TeacherTurmaDetails() {
         const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
 
         try {
-            await addDoc(collection(db, 'arena_simonesia_2026_chamadas'), {
+            await addDoc(collection(db, 'rumo_ao_esporte_2026_chamadas'), {
                 date: Timestamp.now(),
                 data: today,
                 dataIso: new Date().toISOString(),
@@ -253,7 +253,7 @@ export default function TeacherTurmaDetails() {
                 <button
                     onClick={handlePrintList}
                     className="native-button native-button-secondary"
-                    style={{ background: '#007d2f', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}
+                    style={{ background: '#00a63a', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}
                 >
                     <Download size={18} /> Baixar Lista (PDF)
                 </button>
@@ -291,8 +291,8 @@ export default function TeacherTurmaDetails() {
                         `}
                     </style>
 
-                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', marginBottom: '20px', borderLeft: '4px solid #007d2f', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                        <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#007d2f' }}>{turma.nome}</h1>
+                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', marginBottom: '20px', borderLeft: '4px solid #00a63a', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                        <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#00a63a' }}>{turma.nome}</h1>
                         <div style={{ display: 'flex', gap: '20px', marginTop: '10px', color: '#555', fontSize: '0.9rem' }}>
                             <div><strong>Dias:</strong> {turma.dias?.join(', ')}</div>
                             <div><strong>Horário:</strong> {turma.horario}</div>
@@ -407,7 +407,7 @@ function AttendanceModal({ students, onClose, onSave }: any) {
             >
                 <div style={{ padding: '20px 25px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfcfc' }}>
                     <div>
-                        <h3 style={{ margin: 0, color: '#007d2f', fontSize: '1.2rem', fontWeight: '900' }}>Realizar Chamada</h3>
+                        <h3 style={{ margin: 0, color: '#00a63a', fontSize: '1.2rem', fontWeight: '900' }}>Realizar Chamada</h3>
                         <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '2px' }}>{new Date().toLocaleDateString('pt-BR')}</div>
                     </div>
                     <button onClick={onClose} style={{ background: '#f0f0f0', border: 'none', borderRadius: '0', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -481,7 +481,7 @@ function AttendanceModal({ students, onClose, onSave }: any) {
                     <button
                         onClick={() => onSave(selected)}
                         className="native-button native-button-primary"
-                        style={{ width: '100%', height: '55px', fontSize: '1.1rem', borderRadius: '0', boxShadow: '0 4px 12px rgba(0, 125, 47, 0.3)' }}
+                        style={{ width: '100%', height: '55px', fontSize: '1.1rem', borderRadius: '0', boxShadow: '0 4px 12px rgba(0, 166, 58, 0.28)' }}
                     >
                         FINALIZAR CHAMADA ({selected.length})
                     </button>

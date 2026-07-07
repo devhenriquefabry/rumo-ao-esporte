@@ -172,7 +172,7 @@ export const GlobalScannerModal: React.FC<GlobalScannerModalProps> = ({ modalDat
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <div style={{
                                             width: '40px', height: '40px', borderRadius: '10px',
-                                            background: '#007d2f', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            background: '#00a63a', display: 'flex', alignItems: 'center', justifyContent: 'center'
                                         }}>
                                             <Tag size={18} color="#fff" />
                                         </div>
@@ -305,7 +305,7 @@ export const GlobalScannerModal: React.FC<GlobalScannerModalProps> = ({ modalDat
                         marginBottom: '16px'
                     }}>
                         <h3 style={{
-                            fontSize: '0.85rem', color: '#007d2f', fontWeight: '900', margin: 0,
+                            fontSize: '0.85rem', color: '#00a63a', fontWeight: '900', margin: 0,
                             textTransform: 'uppercase', letterSpacing: '0.5px'
                         }}>
                             Histórico Financeiro
@@ -337,7 +337,7 @@ export const GlobalScannerModal: React.FC<GlobalScannerModalProps> = ({ modalDat
                                     {currentPayment && (
                                         <div>
                                             <div style={{
-                                                padding: '10px 16px', fontSize: '0.75rem', color: '#007d2f',
+                                                padding: '10px 16px', fontSize: '0.75rem', color: '#00a63a',
                                                 textTransform: 'uppercase', fontWeight: 'bold',
                                                 background: '#fff0f0', borderBottom: '1px solid #fee2e2'
                                             }}>

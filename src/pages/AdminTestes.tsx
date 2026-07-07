@@ -242,7 +242,7 @@ export default function AdminTestes() {
                             </select>
                         </div>
                         {paymentMethod === 'CREDIT_CARD' && <p style={{ fontSize: '0.8rem', color: 'red' }}>Atenção: Teste de cartão enviará dados INVÁLIDOS propositalmente.</p>}
-                        <button type="submit" disabled={loadingPayment} style={{ padding: '12px', background: '#007d2f', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        <button type="submit" disabled={loadingPayment} style={{ padding: '12px', background: '#00a63a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
                             {loadingPayment ? 'Processando...' : 'Criar Pagamento Teste'}
                         </button>
                     </form>

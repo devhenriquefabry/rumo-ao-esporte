@@ -80,8 +80,8 @@ const INITIAL_DATA: SchoolSystemRequest = {
   escola: {
     logoUrl: '',
     palette: {
-      primary: '#007d2f',
-      secondary: '#00451d',
+      primary: '#00a63a',
+      secondary: '#06376d',
       accent: '#f8f9fa'
     },
     nome: '',

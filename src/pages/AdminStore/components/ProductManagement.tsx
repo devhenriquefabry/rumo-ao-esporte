@@ -10,9 +10,9 @@ const CHIP_STYLE = (active?: boolean): React.CSSProperties => ({
     display: 'inline-flex', alignItems: 'center', gap: '4px',
     padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold',
     cursor: 'pointer', transition: 'all 0.15s',
-    background: active ? '#00237f' : '#f1f5f9',
+    background: active ? '#17428f' : '#f1f5f9',
     color: active ? '#fff' : '#475569',
-    border: active ? '1px solid #00237f' : '1px solid #e2e8f0',
+    border: active ? '1px solid #17428f' : '1px solid #e2e8f0',
 });
 
 const INPUT_STYLE: React.CSSProperties = {
@@ -79,7 +79,7 @@ export default function ProductManagement() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const q = query(collection(db, 'uba_store_products'));
+            const q = query(collection(db, 'rae_store_products'));
             const snap = await getDocs(q);
             const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as StoreProduct));
             setProducts(data);
@@ -221,7 +221,7 @@ export default function ProductManagement() {
                     const compressed = await compressImage(selectedFile);
                     const fileFormData = new FormData();
                     fileFormData.append('file', compressed, selectedFile.name);
-                    fileFormData.append('folder', 'uba_store_products');
+                    fileFormData.append('folder', 'rae_store_products');
                     const workerUrl = import.meta.env.VITE_WORKER_URL;
                     const res = await fetch(`${workerUrl}/images/upload`, { method: 'POST', body: fileFormData });
                     if (!res.ok) throw new Error('Falha no upload da imagem');
@@ -262,12 +262,12 @@ export default function ProductManagement() {
             };
 
             if (editingProduct?.id) {
-                await setDoc(doc(db, 'uba_store_products', editingProduct.id), productData, { merge: true });
+                await setDoc(doc(db, 'rae_store_products', editingProduct.id), productData, { merge: true });
                 showAlert('Produto atualizado com sucesso!', 'success');
             } else {
                 const uniqueId = `prod_${Date.now()}`;
                 productData.createdAt = new Date().toISOString();
-                await setDoc(doc(db, 'uba_store_products', uniqueId), productData);
+                await setDoc(doc(db, 'rae_store_products', uniqueId), productData);
                 showAlert('Produto criado com sucesso!', 'success');
             }
 
@@ -284,7 +284,7 @@ export default function ProductManagement() {
     const handleDelete = async (id: string, name: string) => {
         showConfirm(`Tem certeza que deseja excluir o produto "${name}"?`, async () => {
             try {
-                await deleteDoc(doc(db, 'uba_store_products', id));
+                await deleteDoc(doc(db, 'rae_store_products', id));
                 showAlert('Produto excluído com sucesso.', 'success');
                 fetchProducts();
             } catch (error) {
@@ -296,10 +296,10 @@ export default function ProductManagement() {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ margin: 0, color: '#00237f', fontSize: '1.2rem' }}>Produtos Cadastrados</h2>
+                <h2 style={{ margin: 0, color: '#17428f', fontSize: '1.2rem' }}>Produtos Cadastrados</h2>
                 <button
                     onClick={() => handleOpenModal()}
-                    style={{ background: '#007d2f', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                    style={{ background: '#00a63a', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
                 >
                     <Plus size={18} /> NOVO PRODUTO
                 </button>
@@ -354,7 +354,7 @@ export default function ProductManagement() {
                                         Estoque: {product.stock}
                                     </span>
                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button onClick={() => handleOpenModal(product)} style={{ background: '#f5f7fa', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#00237f' }}>
+                                        <button onClick={() => handleOpenModal(product)} style={{ background: '#f5f7fa', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#17428f' }}>
                                             <Edit2 size={16} />
                                         </button>
                                         <button onClick={() => handleDelete(product.id!, product.name)} style={{ background: '#ffebee', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#c62828' }}>
@@ -373,7 +373,7 @@ export default function ProductManagement() {
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
                     <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '540px', maxHeight: '90vh', overflowY: 'auto' }}>
                         <div style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#fff', zIndex: 10 }}>
-                            <h3 style={{ margin: 0, color: '#00237f' }}>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h3>
+                            <h3 style={{ margin: 0, color: '#17428f' }}>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h3>
                             <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
@@ -394,7 +394,7 @@ export default function ProductManagement() {
                                     )}
                                     {uploading && (
                                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <Loader className="animate-spin" color="#00237f" />
+                                            <Loader className="animate-spin" color="#17428f" />
                                         </div>
                                     )}
                                 </div>
@@ -437,7 +437,7 @@ export default function ProductManagement() {
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         {/* Toggle visual */}
-                                        <div style={{ width: '40px', height: '22px', borderRadius: '11px', background: hasSizes ? '#00237f' : '#cbd5e1', position: 'relative', transition: 'all 0.2s', flexShrink: 0 }}>
+                                        <div style={{ width: '40px', height: '22px', borderRadius: '11px', background: hasSizes ? '#17428f' : '#cbd5e1', position: 'relative', transition: 'all 0.2s', flexShrink: 0 }}>
                                             <div style={{ position: 'absolute', top: '3px', left: hasSizes ? '21px' : '3px', width: '16px', height: '16px', borderRadius: '50%', background: '#fff', transition: 'all 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
                                         </div>
                                         <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#333' }}>Este produto tem tamanhos?</span>
@@ -469,7 +469,7 @@ export default function ProductManagement() {
                                                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSize(); } }}
                                                 style={{ ...INPUT_STYLE, flex: 1 }}
                                             />
-                                            <button type="button" onClick={addSize} style={{ padding: '10px 14px', background: '#00237f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <button type="button" onClick={addSize} style={{ padding: '10px 14px', background: '#17428f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <Plus size={16} />
                                             </button>
                                         </div>
@@ -486,7 +486,7 @@ export default function ProductManagement() {
                                 {variations.map((v, idx) => (
                                     <div key={idx} style={{ background: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '12px', marginBottom: '10px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <span style={{ fontWeight: 'bold', color: '#00237f', fontSize: '0.9rem' }}>{v.name}</span>
+                                            <span style={{ fontWeight: 'bold', color: '#17428f', fontSize: '0.9rem' }}>{v.name}</span>
                                             <button type="button" onClick={() => removeVariation(idx)} style={{ background: '#ffebee', border: 'none', borderRadius: '6px', padding: '4px', cursor: 'pointer', color: '#c62828', display: 'flex' }}>
                                                 <Trash2 size={14} />
                                             </button>
@@ -513,7 +513,7 @@ export default function ProductManagement() {
                                                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addVariationOption(idx); } }}
                                                 style={{ ...INPUT_STYLE, flex: 1, fontSize: '0.85rem' }}
                                             />
-                                            <button type="button" onClick={() => addVariationOption(idx)} style={{ padding: '8px 12px', background: '#00237f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                            <button type="button" onClick={() => addVariationOption(idx)} style={{ padding: '8px 12px', background: '#17428f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                                 <Plus size={14} />
                                             </button>
                                         </div>
@@ -530,7 +530,7 @@ export default function ProductManagement() {
                                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addVariation(); } }}
                                         style={{ ...INPUT_STYLE, flex: 1, fontSize: '0.85rem' }}
                                     />
-                                    <button type="button" onClick={addVariation} style={{ padding: '10px 14px', background: '#007d2f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                    <button type="button" onClick={addVariation} style={{ padding: '10px 14px', background: '#00a63a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                                         <Plus size={16} /> Variação
                                     </button>
                                 </div>
@@ -611,7 +611,7 @@ export default function ProductManagement() {
                             {/* ── Botões ───────────────────────────────────────── */}
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', position: 'sticky', bottom: 0, background: '#fff', paddingTop: '10px' }}>
                                 <button type="button" onClick={() => setIsModalOpen(false)} style={{ padding: '12px 20px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', fontWeight: 'bold', cursor: 'pointer', color: '#666' }}>Cancelar</button>
-                                <button type="submit" disabled={uploading} style={{ padding: '12px 20px', borderRadius: '8px', border: 'none', background: uploading ? '#ccc' : '#007d2f', fontWeight: 'bold', cursor: uploading ? 'not-allowed' : 'pointer', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <button type="submit" disabled={uploading} style={{ padding: '12px 20px', borderRadius: '8px', border: 'none', background: uploading ? '#ccc' : '#00a63a', fontWeight: 'bold', cursor: uploading ? 'not-allowed' : 'pointer', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     {uploading ? <Loader className="animate-spin" size={18} /> : <Check size={18} />}
                                     {uploading ? 'SALVANDO...' : 'SALVAR PRODUTO'}
                                 </button>

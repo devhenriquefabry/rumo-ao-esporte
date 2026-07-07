@@ -25,7 +25,7 @@ export default function TeacherFormModal({ isOpen, editingId, formData, setFormD
         }}>
             <div className="native-card" style={{ width: '100%', maxWidth: '550px', margin: 0, animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)', padding: '35px', borderRadius: '25px', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                    <h2 style={{ margin: 0, color: '#007d2f', fontSize: '1.6rem', fontWeight: '900' }}>
+                    <h2 style={{ margin: 0, color: '#00a63a', fontSize: '1.6rem', fontWeight: '900' }}>
                         {readOnly ? 'Detalhes do Professor' : (editingId ? 'Editar Professor' : 'Novo Professor')}
                     </h2>
                 </div>
@@ -57,7 +57,7 @@ export default function TeacherFormModal({ isOpen, editingId, formData, setFormD
                                 disabled={readOnly}
                             />
                             <div style={{ marginTop: '6px', fontSize: '0.75rem', color: '#999', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#007d2f' }} /> Usado para acesso ao Portal do Professor.
+                                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00a63a' }} /> Usado para acesso ao Portal do Professor.
                             </div>
                         </div>
                         <div>
@@ -75,7 +75,7 @@ export default function TeacherFormModal({ isOpen, editingId, formData, setFormD
                                 />
                             </div>
                             <div style={{ marginTop: '6px', fontSize: '0.75rem', color: '#999', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#007d2f' }} /> Padrão: arena2026
+                                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00a63a' }} /> Padrão: rumo2026
                             </div>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -110,7 +110,7 @@ export default function TeacherFormModal({ isOpen, editingId, formData, setFormD
                             id="activeCheck"
                             checked={formData.active}
                             onChange={e => setFormData({ ...formData, active: e.target.checked })}
-                            style={{ width: '22px', height: '22px', cursor: 'pointer', accentColor: '#007d2f' }}
+                            style={{ width: '22px', height: '22px', cursor: 'pointer', accentColor: '#00a63a' }}
                             disabled={readOnly}
                         />
                         <label htmlFor="activeCheck" style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', color: '#333' }}>Manter cadastro ativo</label>
@@ -121,7 +121,7 @@ export default function TeacherFormModal({ isOpen, editingId, formData, setFormD
                             {readOnly ? 'FECHAR' : 'CANCELAR'}
                         </button>
                         {!readOnly && (
-                            <button type="submit" style={{ flex: 1, height: '55px', borderRadius: '15px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: '900', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 6px 15px rgba(0, 125, 47, 0.3)' }}>SALVAR</button>
+                            <button type="submit" style={{ flex: 1, height: '55px', borderRadius: '15px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: '900', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 6px 15px rgba(0, 166, 58, 0.28)' }}>SALVAR</button>
                         )}
                     </div>
                 </form>

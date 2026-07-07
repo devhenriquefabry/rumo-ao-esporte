@@ -163,7 +163,7 @@ export function useConvocacaoImageGenerator() {
 
                         // Confronto (Time da Casa em Vermelho, restante em Preto) - Proporcional e Maior
                         ctx.font = `900 ${canvasH * 0.032}px "Montserrat", sans-serif`;
-                        const casaName = (convocacao.casaNome || 'Arena Simonésia').toUpperCase();
+                        const casaName = (convocacao.casaNome || 'Rumo ao Esporte').toUpperCase();
                         const rivalName = (convocacao.rivalNome || 'RIVAL').toUpperCase();
 
 
@@ -224,7 +224,7 @@ export function useConvocacaoImageGenerator() {
 
                         // Confronto (Time da Casa em Vermelho, restante em Preto) - Proporcional e Maior
                         ctx.font = `900 ${canvasH * 0.024}px "Montserrat", sans-serif`;
-                        const casaNameIndiv = (convocacao.casaNome || 'Arena Simonésia').toUpperCase();
+                        const casaNameIndiv = (convocacao.casaNome || 'Rumo ao Esporte').toUpperCase();
                         const rivalNameIndiv = (convocacao.rivalNome || 'RIVAL').toUpperCase();
 
 
@@ -371,7 +371,7 @@ export function useConvocacaoImageGenerator() {
 
                 } else {
                     // ============================================
-                    // LAYOUT GERAL (Arena Simonésia)
+                    // LAYOUT GERAL (Rumo ao Esporte)
                     // ============================================
                     const bannerWidth = canvasW * 0.12;
                     const contentLeft = bannerWidth + (canvasW * 0.04);

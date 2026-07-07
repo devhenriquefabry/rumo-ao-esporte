@@ -25,7 +25,7 @@ export default function AdminEmployees() {
         nome: '',
         email: '',
         active: true,
-        senha: 'arena2026',
+        senha: 'rumo2026',
         role: 'employee',
         permissions: { canEdit: false, allowedRoutes: [] }
     });
@@ -93,7 +93,7 @@ export default function AdminEmployees() {
             nome: '',
             email: '',
             active: true,
-            senha: 'arena2026',
+            senha: 'rumo2026',
             role: 'employee',
             permissions: { canEdit: false, allowedRoutes: [] }
         });
@@ -133,7 +133,7 @@ export default function AdminEmployees() {
                 <button
                     onClick={() => { resetForm(); setShowModal(true); }}
                     style={{
-                        padding: '12px 24px', background: '#007d2f', color: '#fff', border: 'none',
+                        padding: '12px 24px', background: '#00a63a', color: '#fff', border: 'none',
                         borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px',
                         boxShadow: '0 4px 12px rgba(0, 125, 47, 0.2)'
                     }}
@@ -153,7 +153,7 @@ export default function AdminEmployees() {
                         width: '100%', padding: '15px 15px 15px 50px', borderRadius: '15px', border: '1px solid #eee', fontSize: '1rem',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.02)', outline: 'none', transition: 'all 0.2s'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#007d2f'}
+                    onFocus={(e) => e.target.style.borderColor = '#00a63a'}
                     onBlur={(e) => e.target.style.borderColor = '#eee'}
                 />
             </div>
@@ -176,7 +176,7 @@ export default function AdminEmployees() {
                                     style={{
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px',
                                         fontSize: '0.8rem', fontWeight: 'bold', padding: '5px 10px', borderRadius: '20px',
-                                        background: emp.active ? '#e6fffa' : '#fff5f5', color: emp.active ? '#2ecc71' : '#e74c3c'
+                                        background: emp.active ? '#e6fffa' : '#eef8ff', color: emp.active ? '#2ecc71' : '#e74c3c'
                                     }}
                                 >
                                     {emp.active ? <CheckCircle size={14} /> : <XCircle size={14} />}
@@ -189,7 +189,7 @@ export default function AdminEmployees() {
                                     flex: 1, background: '#f8f9fa', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px',
                                     fontSize: '0.85rem', color: '#555', border: '1px solid #eee'
                                 }}>
-                                    {emp.permissions?.canEdit ? <Lock size={16} color="#2ecc71" /> : <Eye size={16} color="#007d2f" />}
+                                    {emp.permissions?.canEdit ? <Lock size={16} color="#2ecc71" /> : <Eye size={16} color="#00a63a" />}
                                     {emp.permissions?.canEdit ? 'Editor (Total)' : 'Somente Leitura'}
                                 </div>
                             </div>
@@ -218,7 +218,7 @@ export default function AdminEmployees() {
                                 </button>
                                 <button
                                     onClick={() => handleDelete(emp.id)}
-                                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: '#fff0f0', color: '#007d2f', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: '#fff0f0', color: '#00a63a', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 >
                                     <Trash2 size={16} /> Remover
                                 </button>

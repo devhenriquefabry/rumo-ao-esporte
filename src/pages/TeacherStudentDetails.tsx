@@ -20,7 +20,7 @@ export default function TeacherStudentDetails() {
         const fetchDoc = async () => {
             if (!id) return;
             try {
-                const docRef = doc(db, 'arena_simonesia_2026_registrations', id);
+                const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
                 const snap = await getDoc(docRef);
                 if (snap.exists()) {
                     setData(snap.data());
@@ -65,7 +65,7 @@ export default function TeacherStudentDetails() {
                     )}
                 </div>
 
-                <h1 style={{ color: '#007d2f', margin: '0 0 10px 0', fontSize: '1.8rem', textTransform: 'uppercase' }}>{aluno.nome}</h1>
+                <h1 style={{ color: '#00a63a', margin: '0 0 10px 0', fontSize: '1.8rem', textTransform: 'uppercase' }}>{aluno.nome}</h1>
 
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#f5f5f5', padding: '8px 15px', borderRadius: '20px' }}>
                     <Calendar size={16} color="#666" />
@@ -73,7 +73,7 @@ export default function TeacherStudentDetails() {
                 </div>
 
                 <div style={{ marginTop: '30px', textAlign: 'left' }}>
-                    <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', color: '#00237f', marginBottom: '20px' }}>Dados do Aluno</h3>
+                    <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', color: '#17428f', marginBottom: '20px' }}>Dados do Aluno</h3>
 
                     <div style={{ display: 'grid', gap: '15px' }}>
                         <div className="info-row">
@@ -83,7 +83,7 @@ export default function TeacherStudentDetails() {
                             <strong>RG:</strong> <span>{aluno.rg || '-'}</span>
                         </div>
                         <div className="info-row">
-                            <strong>Nº Camisa:</strong> <span style={{ fontWeight: 'bold', color: '#007d2f' }}>{aluno.camisa || '-'}</span>
+                            <strong>Nº Camisa:</strong> <span style={{ fontWeight: 'bold', color: '#00a63a' }}>{aluno.camisa || '-'}</span>
                         </div>
                         {aluno.medicamentos && (
                             <div className="info-row warning-box">
@@ -97,7 +97,7 @@ export default function TeacherStudentDetails() {
                         )}
                     </div>
 
-                    <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', color: '#00237f', margin: '30px 0 20px' }}>Responsáveis</h3>
+                    <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', color: '#17428f', margin: '30px 0 20px' }}>Responsáveis</h3>
                     <div style={{ display: 'grid', gap: '15px' }}>
                         <div className="info-row">
                             <Shield size={16} /> <strong>{data.responsavel.nome}</strong> (Financeiro)

@@ -12,7 +12,7 @@ export default function StudentWhatsApp() {
 
         const redirect = setTimeout(() => {
             const phone = '553235314777';
-            const text = 'Olá, sou aluno da Arena Simonésia e gostaria de tirar uma dúvida.';
+            const text = 'Olá, sou aluno da Rumo ao Esporte e gostaria de tirar uma dúvida.';
             window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
         }, 3000);
 
@@ -42,7 +42,7 @@ export default function StudentWhatsApp() {
                     <MessageCircle size={40} />
                 </div>
 
-                <h2 style={{ color: '#00237f', margin: '0 0 10px 0' }}>Fale Conosco</h2>
+                <h2 style={{ color: '#17428f', margin: '0 0 10px 0' }}>Fale Conosco</h2>
                 <p style={{ color: '#666', fontSize: '1.1rem', maxWidth: '400px', margin: '0 0 30px 0' }}>
                     Você está sendo redirecionado para o WhatsApp da Secretaria...
                 </p>
@@ -50,7 +50,7 @@ export default function StudentWhatsApp() {
                 <div style={{
                     fontSize: '2rem',
                     fontWeight: 'bold',
-                    color: '#007d2f'
+                    color: '#00a63a'
                 }}>
                     {seconds}
                 </div>

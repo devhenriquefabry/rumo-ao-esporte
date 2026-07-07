@@ -27,7 +27,7 @@ export default function AdminConvocacaoList() {
     const [tecnicoName, setTecnicoName] = useState('');
     const [rivalNome, setRivalNome] = useState('');
     const [rivalLogo, setRivalLogo] = useState('');
-    const [casaNome, setCasaNome] = useState('Arena Simonésia');
+    const [casaNome, setCasaNome] = useState('Rumo ao Esporte');
     const [casaLogo, setCasaLogo] = useState('');
     const [showNumbers, setShowNumbers] = useState(true);
 
@@ -85,7 +85,7 @@ export default function AdminConvocacaoList() {
     const fetchConvocacoes = async () => {
         try {
             setLoading(true, 'Carregando Convocações...');
-            const q = query(collection(db, 'arena_simonesia_2026_convocacoes'), orderBy('dataUnix', 'desc'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_convocacoes'), orderBy('dataUnix', 'desc'));
             const snap = await getDocs(q);
             const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Convocacao));
             setConvocacoes(data);
@@ -102,7 +102,7 @@ export default function AdminConvocacaoList() {
         setTecnicoName('');
         setRivalNome('');
         setRivalLogo('');
-        setCasaNome('Arena Simonésia');
+        setCasaNome('Rumo ao Esporte');
         setCasaLogo('');
         setShowNumbers(true);
         setUseDataJogo(false);
@@ -221,7 +221,7 @@ export default function AdminConvocacaoList() {
                 tecnico: useTecnico ? tecnicoName.trim() : '',
                 rivalNome: useRivalInfo ? rivalNome.trim() : '',
                 rivalLogo: useRivalInfo ? (rivalLogo || '') : '',
-                casaNome: useCasaInfo ? casaNome.trim() : 'Arena Simonésia',
+                casaNome: useCasaInfo ? casaNome.trim() : 'Rumo ao Esporte',
                 casaLogo: useCasaInfo ? (casaLogo || '') : '',
                 showNumbers,
                 showDataJogo: useDataJogo,
@@ -229,7 +229,7 @@ export default function AdminConvocacaoList() {
                 jogadores: selectedJogadores
             };
 
-            await addDoc(collection(db, 'arena_simonesia_2026_convocacoes'), novaConvocacao);
+            await addDoc(collection(db, 'rumo_ao_esporte_2026_convocacoes'), novaConvocacao);
 
             showAlert('Convocação criada com sucesso!', 'success');
             closeModal();
@@ -285,7 +285,7 @@ export default function AdminConvocacaoList() {
                 gap: '20px'
             }}>
                 <div>
-                    <h1 style={{ fontSize: isMobile ? '1.5rem' : '1.8rem', color: '#007d2f', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h1 style={{ fontSize: isMobile ? '1.5rem' : '1.8rem', color: '#00a63a', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Trophy size={isMobile ? 24 : 28} /> CONVOCAÇÕES
                     </h1>
                     <p style={{ color: '#666', margin: '5px 0 0 0', fontSize: isMobile ? '0.85rem' : '1rem' }}>Gerencie escalações para as partidas</p>
@@ -294,7 +294,7 @@ export default function AdminConvocacaoList() {
                     onClick={handleOpenModal}
                     style={{
                         width: isMobile ? '100%' : 'auto',
-                        background: '#007d2f', color: '#fff', border: 'none', padding: '12px 24px',
+                        background: '#00a63a', color: '#fff', border: 'none', padding: '12px 24px',
                         borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex',
                         alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(195,34,40,0.3)'
                     }}
@@ -314,7 +314,7 @@ export default function AdminConvocacaoList() {
                             cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                             display: 'flex', flexDirection: 'column', gap: '10px'
                         }}
-                        onMouseOver={e => e.currentTarget.style.borderColor = '#007d2f'}
+                        onMouseOver={e => e.currentTarget.style.borderColor = '#00a63a'}
                         onMouseOut={e => e.currentTarget.style.borderColor = '#eee'}
                     >
                         <h3 style={{ margin: 0, color: '#333', fontSize: '1.2rem', fontWeight: '800' }}>{conv.jogo}</h3>
@@ -326,14 +326,14 @@ export default function AdminConvocacaoList() {
                                 <Users size={16} /> {conv.jogadores.length} Atletas
                             </span>
                         </div>
-                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', color: '#007d2f', fontWeight: 'bold', alignItems: 'center', gap: '5px' }}>
+                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', color: '#00a63a', fontWeight: 'bold', alignItems: 'center', gap: '5px' }}>
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedConvocacaoForImage(conv);
                                     setIsImageModalOpen(true);
                                 }}
-                                style={{ background: 'none', border: 'none', color: '#007d2f', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', padding: '5px' }}
+                                style={{ background: 'none', border: 'none', color: '#00a63a', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', padding: '5px' }}
                                 title="Baixar Imagem"
                             >
                                 <ImageIcon size={18} />
@@ -396,7 +396,7 @@ export default function AdminConvocacaoList() {
                                             />
                                             <span style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                backgroundColor: useDataJogo ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s'
+                                                backgroundColor: useDataJogo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
                                             }}></span>
                                             <span style={{
                                                 position: 'absolute', height: '14px', width: '14px', left: useDataJogo ? '23px' : '3px', bottom: '3px',
@@ -431,7 +431,7 @@ export default function AdminConvocacaoList() {
                                                 />
                                                 <span style={{
                                                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                    backgroundColor: useTecnico ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s'
+                                                    backgroundColor: useTecnico ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
                                                 }}></span>
                                                 <span style={{
                                                     position: 'absolute', height: '14px', width: '14px', left: useTecnico ? '23px' : '3px', bottom: '3px',
@@ -473,7 +473,7 @@ export default function AdminConvocacaoList() {
                                         />
                                         <span style={{
                                             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                            backgroundColor: showNumbers ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s'
+                                            backgroundColor: showNumbers ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
                                         }}></span>
                                         <span style={{
                                             position: 'absolute', height: '14px', width: '14px', left: showNumbers ? '23px' : '3px', bottom: '3px',
@@ -484,7 +484,7 @@ export default function AdminConvocacaoList() {
 
                                 <div style={{ background: useCasaInfo ? '#fff1f0' : '#f5f5f5', padding: '15px', borderRadius: '12px', border: useCasaInfo ? '1px solid #ffccc7' : '1px solid #eee', transition: 'all 0.3s' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: useCasaInfo ? '15px' : '0' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '800', color: useCasaInfo ? '#007d2f' : '#666' }}>INFORMAÇÕES DO TIME DA CASA</label>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: '800', color: useCasaInfo ? '#00a63a' : '#666' }}>INFORMAÇÕES DO TIME DA CASA</label>
                                         <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
                                             <input
                                                 type="checkbox"
@@ -492,7 +492,7 @@ export default function AdminConvocacaoList() {
                                                 onChange={e => {
                                                     setUseCasaInfo(e.target.checked);
                                                     if (!e.target.checked) {
-                                                        setCasaNome('Arena Simonésia');
+                                                        setCasaNome('Rumo ao Esporte');
                                                         setCasaLogo('');
                                                     }
                                                 }}
@@ -500,7 +500,7 @@ export default function AdminConvocacaoList() {
                                             />
                                             <span style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                backgroundColor: useCasaInfo ? '#007d2f' : '#ccc', borderRadius: '34px', transition: '.4s'
+                                                backgroundColor: useCasaInfo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
                                             }}></span>
                                             <span style={{
                                                 position: 'absolute', height: '14px', width: '14px', left: useCasaInfo ? '23px' : '3px', bottom: '3px',
@@ -511,13 +511,13 @@ export default function AdminConvocacaoList() {
                                     {useCasaInfo && (
                                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                                             <div>
-                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#007d2f', marginBottom: '8px' }}>NOME DO TIME</label>
+                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#00a63a', marginBottom: '8px' }}>NOME DO TIME</label>
                                                 <div style={{ position: 'relative' }}>
                                                     <input
                                                         type="text"
                                                         value={casaNome}
                                                         onChange={e => setCasaNome(e.target.value)}
-                                                        placeholder="Ex: Arena Simonésia"
+                                                        placeholder="Ex: Rumo ao Esporte"
                                                         style={{ width: '100%', padding: '12px', paddingRight: '40px', border: '2px solid #ffccc7', borderRadius: '8px', outline: 'none', boxSizing: 'border-box' }}
                                                         autoFocus
                                                     />
@@ -532,7 +532,7 @@ export default function AdminConvocacaoList() {
                                                 </div>
                                             </div>
                                             <div>
-                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#007d2f', marginBottom: '8px' }}>LOGO</label>
+                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#00a63a', marginBottom: '8px' }}>LOGO</label>
                                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                                     <input
                                                         type="file"
@@ -702,7 +702,7 @@ export default function AdminConvocacaoList() {
                                             <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafafa', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
                                                     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                                        <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#007d2f', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.nome}</span>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#00a63a', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.nome}</span>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                             <span style={{ fontSize: '0.75rem', color: '#888' }}>{t.turma}</span>
                                                             {!t.numero && (
@@ -710,7 +710,7 @@ export default function AdminConvocacaoList() {
                                                                     to={`/admin/details/${t.regId}`}
                                                                     style={{
                                                                         fontSize: '0.7rem',
-                                                                        color: '#007d2f',
+                                                                        color: '#00a63a',
                                                                         fontWeight: 'bold',
                                                                         background: '#fff1f0',
                                                                         padding: '2px 6px',
@@ -731,7 +731,7 @@ export default function AdminConvocacaoList() {
                                                             width: '45px',
                                                             padding: '6px 4px',
                                                             textAlign: 'center',
-                                                            border: '2px solid #007d2f',
+                                                            border: '2px solid #00a63a',
                                                             borderRadius: '6px',
                                                             fontSize: '0.9rem',
                                                             fontWeight: 'bold',
@@ -814,7 +814,7 @@ export default function AdminConvocacaoList() {
                                 <button onClick={closeModal} style={{ width: isMobile ? '100%' : 'auto', padding: '10px 20px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', fontWeight: 'bold', color: '#666', cursor: 'pointer' }}>
                                     CANCELAR
                                 </button>
-                                <button onClick={handleSaveConvocacao} style={{ width: isMobile ? '100%' : 'auto', padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#007d2f', fontWeight: 'bold', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                <button onClick={handleSaveConvocacao} style={{ width: isMobile ? '100%' : 'auto', padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#00a63a', fontWeight: 'bold', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                                     SALVAR CONVOCAÇÃO
                                 </button>
                             </div>

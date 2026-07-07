@@ -148,7 +148,7 @@ export default function AdminTurmaDetails() {
             const t = turmaDoc.data();
             setTurma({ id: turmaDoc.id, ...t } as Turma);
 
-            const studentsQuery = query(collection(db, "arena_simonesia_2026_registrations"), orderBy("createdAt", "desc"));
+            const studentsQuery = query(collection(db, "rumo_ao_esporte_2026_registrations"), orderBy("createdAt", "desc"));
             const studentsSnapshot = await getDocs(studentsQuery);
 
             const studentList: Student[] = [];
@@ -216,7 +216,7 @@ export default function AdminTurmaDetails() {
             setSearchYear('');
             setSelectedFilter(null); // Reset filter
             setSelectedStudentIds(new Set());
-            const q = query(collection(db, "arena_simonesia_2026_registrations"), orderBy("createdAt", "desc"));
+            const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             const list: (Student & { faixa?: string })[] = [];
 
@@ -300,7 +300,7 @@ export default function AdminTurmaDetails() {
             });
 
             const promises = Object.entries(regGroups).map(async ([rid, indices]) => {
-                const regRef = doc(db, 'arena_simonesia_2026_registrations', rid);
+                const regRef = doc(db, 'rumo_ao_esporte_2026_registrations', rid);
                 const regSnap = await getDoc(regRef);
                 if (regSnap.exists()) {
                     const regData = regSnap.data();
@@ -339,7 +339,7 @@ export default function AdminTurmaDetails() {
             try {
                 const [rid, idxStr] = student.id.split('-');
                 const idx = parseInt(idxStr);
-                const regRef = doc(db, 'arena_simonesia_2026_registrations', rid);
+                const regRef = doc(db, 'rumo_ao_esporte_2026_registrations', rid);
                 const regSnap = await getDoc(regRef);
 
                 if (regSnap.exists()) {
@@ -400,7 +400,7 @@ export default function AdminTurmaDetails() {
         // Logo
         try {
             const img = new Image();
-            img.src = '/arena-logo-transparent.png';
+            img.src = '/rumo-ao-esporte-logo.png';
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
@@ -568,7 +568,7 @@ export default function AdminTurmaDetails() {
             setIsTransferring(true);
             const [rid, idxStr] = movingStudent.id.split('-');
             const idx = parseInt(idxStr);
-            const regRef = doc(db, 'arena_simonesia_2026_registrations', rid);
+            const regRef = doc(db, 'rumo_ao_esporte_2026_registrations', rid);
             const regSnap = await getDoc(regRef);
 
             if (regSnap.exists()) {
@@ -647,7 +647,7 @@ export default function AdminTurmaDetails() {
         if (teacherObj.active === false) {
             showConfirm(
                 <div style={{ textAlign: 'left' }}>
-                    <h3 style={{ color: '#007d2f', marginTop: 0 }}>Professor Desativado</h3>
+                    <h3 style={{ color: '#00a63a', marginTop: 0 }}>Professor Desativado</h3>
                     <p>O professor <strong>{teacherObj.name}</strong> está desativado no sistema.</p>
                     <p>Deseja ativá-lo primeiro para que ele consiga acessar a turma?</p>
                 </div>,
@@ -681,9 +681,9 @@ export default function AdminTurmaDetails() {
             <style>
                 {`
                     @keyframes borderPulse {
-                        0% { border-color: #007d2f; box-shadow: 0 0 0px rgba(0, 125, 47, 0); }
-                        50% { border-color: #ef4444; box-shadow: 0 0 15px rgba(0, 125, 47, 0.4); }
-                        100% { border-color: #007d2f; box-shadow: 0 0 0px rgba(0, 125, 47, 0); }
+                        0% { border-color: #00a63a; box-shadow: 0 0 0px rgba(0, 125, 47, 0); }
+                        50% { border-color: #ef4444; box-shadow: 0 0 15px rgba(0, 166, 58, 0.34); }
+                        100% { border-color: #00a63a; box-shadow: 0 0 0px rgba(0, 125, 47, 0); }
                     }
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -802,7 +802,7 @@ export default function AdminTurmaDetails() {
                             <button
                                 onClick={generateStudentList}
                                 className="mobile-full-width-btn"
-                                style={{ background: '#007d2f', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', justifyContent: 'center' }}
+                                style={{ background: '#00a63a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', justifyContent: 'center' }}
                             >
                                 <Printer size={18} /> Imprimir Alunos
                             </button>
@@ -825,7 +825,7 @@ export default function AdminTurmaDetails() {
                                     });
                                 }}
                                 className="mobile-full-width-btn"
-                                style={{ background: '#fff', color: '#007d2f', border: '1px solid #007d2f', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
+                                style={{ background: '#fff', color: '#00a63a', border: '1px solid #00a63a', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
                             >
                                 <Edit2 size={18} /> Editar Turma
                             </button>
@@ -862,25 +862,25 @@ export default function AdminTurmaDetails() {
                 {!isEditing ? (
                     <>
                         <h1 className="turma-title" style={{ fontSize: '3rem', fontWeight: '900', color: '#333', margin: '0 0 10px 0' }}>{turma.horario}</h1>
-                        <h2 style={{ fontSize: '1.5rem', color: '#007d2f', margin: '0 0 20px 0', textTransform: 'uppercase' }}>{turma.nome}</h2>
+                        <h2 style={{ fontSize: '1.5rem', color: '#00a63a', margin: '0 0 20px 0', textTransform: 'uppercase' }}>{turma.nome}</h2>
 
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#666' }}>
-                                <Calendar size={20} color="#007d2f" />
+                                <Calendar size={20} color="#00a63a" />
                                 <strong>Dias:</strong> {turma.dias?.join(', ') || '-'}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#666' }}>
-                                <User size={20} color="#007d2f" />
+                                <User size={20} color="#00a63a" />
                                 <strong>Professor:</strong> {turma.responsavel || '-'}
                                 <button
                                     onClick={() => setShowTeacherModal(true)}
-                                    style={{ background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px', padding: '2px 8px', fontSize: '0.7rem', cursor: 'pointer', color: '#007d2f', fontWeight: 'bold', marginLeft: '5px' }}
+                                    style={{ background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px', padding: '2px 8px', fontSize: '0.7rem', cursor: 'pointer', color: '#00a63a', fontWeight: 'bold', marginLeft: '5px' }}
                                 >
                                     ALTERAR
                                 </button>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#666' }}>
-                                <Users size={20} color="#007d2f" />
+                                <Users size={20} color="#00a63a" />
                                 <strong>Alunos:</strong> {students.length}
                             </div>
                         </div>
@@ -942,7 +942,7 @@ export default function AdminTurmaDetails() {
                                             padding: '8px 15px',
                                             borderRadius: '20px',
                                             border: '1px solid #ddd',
-                                            background: editData.dias?.includes(dia) ? '#007d2f' : '#fff',
+                                            background: editData.dias?.includes(dia) ? '#00a63a' : '#fff',
                                             color: editData.dias?.includes(dia) ? '#fff' : '#666',
                                             cursor: 'pointer',
                                             fontWeight: 'bold',
@@ -962,13 +962,13 @@ export default function AdminTurmaDetails() {
             <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
                 <div style={{ padding: '20px 25px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa' }}>
                     <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', color: '#333', fontSize: '1.2rem' }}>
-                        <Users size={20} color="#007d2f" />
+                        <Users size={20} color="#00a63a" />
                         LISTA DE ALUNOS ({students.length})
                     </h2>
                     <button
                         onClick={openAddStudentModal}
                         style={{
-                            padding: '8px 16px', background: '#007d2f', color: '#fff', border: 'none',
+                            padding: '8px 16px', background: '#00a63a', color: '#fff', border: 'none',
                             borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex',
                             alignItems: 'center', gap: '8px', fontSize: '0.9rem'
                         }}
@@ -983,7 +983,7 @@ export default function AdminTurmaDetails() {
                                 <th style={{ padding: '15px', textAlign: 'left', color: '#666', fontSize: '0.85rem' }}>Foto</th>
                                 <th
                                     onClick={() => handleSort('nome')}
-                                    style={{ padding: '15px', textAlign: 'left', color: sortBy === 'nome' ? '#007d2f' : '#666', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '15px', textAlign: 'left', color: sortBy === 'nome' ? '#00a63a' : '#666', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                         Aluno
@@ -1000,7 +1000,7 @@ export default function AdminTurmaDetails() {
                                 <th
                                     className="hide-mobile"
                                     onClick={() => handleSort('nascimento')}
-                                    style={{ padding: '15px', textAlign: 'left', color: sortBy === 'nascimento' ? '#007d2f' : '#666', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '15px', textAlign: 'left', color: sortBy === 'nascimento' ? '#00a63a' : '#666', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                         Nascimento
@@ -1042,7 +1042,7 @@ export default function AdminTurmaDetails() {
                                             <div className="student-info-mobile">
                                                 <span
                                                     onClick={() => navigate(`/admin/details/${s.registrationId}`)}
-                                                    style={{ fontWeight: 'bold', color: '#007d2f', textDecoration: 'underline', cursor: 'pointer', fontSize: '1rem' }}
+                                                    style={{ fontWeight: 'bold', color: '#00a63a', textDecoration: 'underline', cursor: 'pointer', fontSize: '1rem' }}
                                                 >
                                                     {s.nome}
                                                 </span>
@@ -1061,7 +1061,7 @@ export default function AdminTurmaDetails() {
                                             <div className="action-buttons" style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                 <button
                                                     onClick={() => openTransferModal(s)}
-                                                    style={{ background: '#fff', color: '#007d2f', border: '1px solid #007d2f', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                                    style={{ background: '#fff', color: '#00a63a', border: '1px solid #00a63a', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '5px' }}
                                                 >
                                                     <RefreshCw size={14} /> <span className="btn-text">Remanejar</span>
                                                 </button>
@@ -1092,7 +1092,7 @@ export default function AdminTurmaDetails() {
                     <div style={{ background: '#fff', padding: '30px', borderRadius: '16px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)' }}>
                         <h3 style={{ margin: '0 0 20px 0', color: '#333', textAlign: 'center' }}>Remanejar Aluno</h3>
                         <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', marginBottom: '25px', textAlign: 'center' }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#007d2f', marginBottom: '5px' }}>{movingStudent.nome}</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#00a63a', marginBottom: '5px' }}>{movingStudent.nome}</div>
                             <div style={{ fontSize: '0.9rem', color: '#666' }}>{turma.modalidade.toUpperCase()}</div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px', gap: '15px' }}>
@@ -1101,9 +1101,9 @@ export default function AdminTurmaDetails() {
                                 <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{turma.nome}</div>
                                 <div style={{ fontSize: '0.8rem', color: '#666' }}>{turma.horario}</div>
                             </div>
-                            <ArrowRight size={24} color="#007d2f" />
-                            <div className="animate-target-border" style={{ flex: 1, textAlign: 'center', padding: '15px', background: '#fff', border: '2px dashed #007d2f', borderRadius: '10px', transition: 'all 0.3s ease' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#007d2f', fontWeight: 'bold', marginBottom: '5px' }}>NOVA TURMA</div>
+                            <ArrowRight size={24} color="#00a63a" />
+                            <div className="animate-target-border" style={{ flex: 1, textAlign: 'center', padding: '15px', background: '#fff', border: '2px dashed #00a63a', borderRadius: '10px', transition: 'all 0.3s ease' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#00a63a', fontWeight: 'bold', marginBottom: '5px' }}>NOVA TURMA</div>
                                 <select
                                     value={selectedTurmaId}
                                     onChange={(e) => setSelectedTurmaId(e.target.value)}
@@ -1120,7 +1120,7 @@ export default function AdminTurmaDetails() {
                             <button
                                 onClick={handleTransfer}
                                 disabled={!selectedTurmaId || isTransferring}
-                                style={{ flex: 1, padding: '12px', background: selectedTurmaId ? '#007d2f' : '#ccc', color: '#fff', border: 'none', borderRadius: '8px', cursor: selectedTurmaId ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
+                                style={{ flex: 1, padding: '12px', background: selectedTurmaId ? '#00a63a' : '#ccc', color: '#fff', border: 'none', borderRadius: '8px', cursor: selectedTurmaId ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
                             >
                                 {isTransferring ? 'Processando...' : 'Confirmar Transferência'}
                             </button>
@@ -1170,7 +1170,7 @@ export default function AdminTurmaDetails() {
                                             padding: '6px 14px',
                                             borderRadius: '20px',
                                             border: '1px solid #ddd',
-                                            background: selectedFilter === f ? '#007d2f' : '#fff',
+                                            background: selectedFilter === f ? '#00a63a' : '#fff',
                                             color: selectedFilter === f ? '#fff' : '#666',
                                             fontSize: '0.85rem',
                                             fontWeight: 'bold',
@@ -1236,7 +1236,7 @@ export default function AdminTurmaDetails() {
                         <div onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', border: '1px solid #eee', borderRadius: '8px', marginBottom: '20px', minHeight: '200px', display: 'flex', flexDirection: 'column' }}>
                             {isLoadingPotential ? (
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', padding: '40px' }}>
-                                    <RefreshCw size={40} className="spin" color="#007d2f" />
+                                    <RefreshCw size={40} className="spin" color="#00a63a" />
                                     <div style={{ color: '#666', fontWeight: 'bold' }}>Buscando alunos...</div>
                                 </div>
                             ) : filteredPotentialStudents.length === 0 ? (
@@ -1260,7 +1260,7 @@ export default function AdminTurmaDetails() {
                                             </div>
                                         ))}
                                     {isScrolling && (
-                                        <div style={{ padding: '15px', textAlign: 'center', color: '#007d2f', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                        <div style={{ padding: '15px', textAlign: 'center', color: '#00a63a', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                             <RefreshCw size={16} className="spin" /> Carregando mais...
                                         </div>
                                     )}
@@ -1285,7 +1285,7 @@ export default function AdminTurmaDetails() {
                 }}>
                     <div className="native-card" style={{ width: '100%', maxWidth: '400px', margin: 0, animation: 'scaleIn 0.2s', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
-                            <h2 style={{ marginTop: 0, color: '#007d2f', fontSize: '1.2rem' }}>Alterar Professor</h2>
+                            <h2 style={{ marginTop: 0, color: '#00a63a', fontSize: '1.2rem' }}>Alterar Professor</h2>
                             <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Selecione o novo professor para esta turma.</p>
                         </div>
 
@@ -1314,14 +1314,14 @@ export default function AdminTurmaDetails() {
                                             <User size={18} color={t.active === false ? '#ef5350' : '#999'} />
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 'bold', color: turma.responsavel === t.name ? '#007d2f' : '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ fontWeight: 'bold', color: turma.responsavel === t.name ? '#00a63a' : '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 {t.name}
                                                 {turma.responsavel === t.name && <span style={{ fontSize: '0.7rem', color: '#666', fontWeight: 'normal' }}>(Atual)</span>}
                                                 {t.active === false && (
                                                     <span style={{
                                                         fontSize: '0.65rem',
                                                         background: '#ffebee',
-                                                        color: '#007d2f',
+                                                        color: '#00a63a',
                                                         padding: '2px 6px',
                                                         borderRadius: '4px',
                                                         border: '1px solid #ffcdd2'
@@ -1331,7 +1331,7 @@ export default function AdminTurmaDetails() {
                                                 )}
                                             </div>
                                         </div>
-                                        {turma.responsavel === t.name && <Check size={16} color="#007d2f" />}
+                                        {turma.responsavel === t.name && <Check size={16} color="#00a63a" />}
                                     </button>
                                 ))}
                                 {teachers.length === 0 && (

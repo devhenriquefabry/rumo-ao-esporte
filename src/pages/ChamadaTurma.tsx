@@ -65,7 +65,7 @@ export default function ChamadaTurma() {
             });
 
             // Fetch students matching this exact turmaId
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const snapshot = await getDocs(q);
             const list: Student[] = [];
 
@@ -94,7 +94,7 @@ export default function ChamadaTurma() {
     const fetchStudentsAndCall = async (modalidade: string, faixa: any) => {
         try {
             // 1. Fetch Students
-            const q = query(collection(db, 'arena_simonesia_2026_registrations'));
+            const q = query(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const snapshot = await getDocs(q);
 
             const flattenedStudents: Student[] = [];
@@ -152,7 +152,7 @@ export default function ChamadaTurma() {
             // 2. Check Existing Call for Today
             // ID Construct: chamada_MOD_FAIXA_DATE
             const callDocId = `chamada_${modalidade}_${faixa.id}_${today}`;
-            const callSnap = await getDoc(doc(db, 'arena_simonesia_2026_chamadas', callDocId));
+            const callSnap = await getDoc(doc(db, 'rumo_ao_esporte_2026_chamadas', callDocId));
 
             if (callSnap.exists()) {
                 const data = callSnap.data();
@@ -187,7 +187,7 @@ export default function ChamadaTurma() {
                 ? `chamada_explicit_${info.id}_${today}`
                 : `chamada_${info.modalidade}_${info.faixa.id}_${today}`;
 
-            await setDoc(doc(db, 'arena_simonesia_2026_chamadas', callDocId), {
+            await setDoc(doc(db, 'rumo_ao_esporte_2026_chamadas', callDocId), {
                 modalidade: info.modalidade,
                 turmaId: info.isExplicit ? info.id : info.faixa.id,
                 turmaLabel: info.isExplicit ? info.nome : info.faixa.label,
@@ -215,7 +215,7 @@ export default function ChamadaTurma() {
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto', background: '#f5f7fa', minHeight: '100vh', paddingBottom: '80px' }}>
             {/* Header */}
-            <div style={{ background: '#007d2f', color: '#fff', padding: '20px', borderRadius: '0 0 20px 20px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+            <div style={{ background: '#00a63a', color: '#fff', padding: '20px', borderRadius: '0 0 20px 20px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ margin: 0, textTransform: 'capitalize' }}>
                     {info.isExplicit ? info.nome : info.modalidade}
                 </h2>
@@ -296,7 +296,7 @@ export default function ChamadaTurma() {
                     onClick={handleSave}
                     disabled={saving}
                     style={{
-                        background: saved ? '#2e7d32' : '#007d2f',
+                        background: saved ? '#2e7d32' : '#00a63a',
                         color: '#fff',
                         border: 'none',
                         padding: '12px 25px',

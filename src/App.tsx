@@ -9,7 +9,6 @@ import AdminDashboard from './pages/AdminDashboard/index';
 import AdminDetails from './pages/AdminDetails';
 import AdminStats from './pages/AdminStats';
 import AdminExport from './pages/AdminExport';
-import AdminPaymentTest from './pages/AdminPaymentTest';
 
 import AdminSettings from './pages/AdminSettings';
 import AdminWhatsApp from './pages/AdminWhatsApp';
@@ -24,6 +23,7 @@ import AdminLinks from './pages/AdminLinks';
 import AdminFinanceiro from './pages/AdminFinanceiro';
 import AdminFinanceiroCobrancas from './pages/AdminFinanceiroCobrancas';
 import AdminPaymentDetails from './pages/AdminPaymentDetails';
+import AdminPaymentProviderSettings from './pages/AdminPaymentProviderSettings';
 import AdminGastos from './pages/AdminGastos';
 import AdminNovoCadastro from './pages/AdminNovoCadastro';
 import AdminMigrateTurmas from './pages/AdminMigrateTurmas'; // Migration tool
@@ -143,12 +143,13 @@ function App() {
               <Route path="financeiro" element={<AdminFinanceiro />} />
               <Route path="financeiro/gastos" element={<AdminGastos />} />
               <Route path="financeiro/cobrancas" element={<AdminFinanceiroCobrancas />} />
+              <Route path="financeiro/bancos" element={<AdminPaymentProviderSettings />} />
               <Route path="plans" element={<AdminPlans />} />
               <Route path="plans/auto-allocation" element={<AdminPlanAutoAllocation />} />
               <Route path="professores" element={<AdminTeachers />} />
               <Route path="portaria" element={<Portaria />} /> {/* New route */}
               <Route path="alugueis" element={<AdminRentals />} />
-              <Route path="payment-test" element={<AdminPaymentTest />} />
+              <Route path="payment-test" element={<AdminPaymentProviderSettings />} />
 
               <Route path="settings" element={<AdminSettings />} />
               <Route path="whatsapp" element={<AdminWhatsApp />} />

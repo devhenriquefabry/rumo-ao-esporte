@@ -37,15 +37,15 @@ export default function FinancialDetailsSection({ data, setData, isEditing = fal
             padding: '12px',
             borderRadius: '12px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-            borderLeft: '4px solid #007d2f',
+            borderLeft: '4px solid #00a63a',
             width: '100%'
         }}>
             <div
                 onClick={() => setIsOpen(!isOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '8px', borderBottom: '1px solid #eee', cursor: 'pointer', userSelect: 'none' }}
             >
-                {isOpen ? <ChevronDown size={18} color="#007d2f" /> : <ChevronRight size={18} color="#007d2f" />}
-                {data.modalidade === 'futebol' ? <FileText size={18} color="#007d2f" /> : <CreditCard size={18} color="#007d2f" />}
+                {isOpen ? <ChevronDown size={18} color="#00a63a" /> : <ChevronRight size={18} color="#00a63a" />}
+                {data.modalidade === 'futebol' ? <FileText size={18} color="#00a63a" /> : <CreditCard size={18} color="#00a63a" />}
                 <h3 style={{ margin: 0, color: '#333', fontSize: '1rem', flex: 1 }}>
                     {data.modalidade === 'futebol' ? "Autorizações Legais" : "Dados Financeiros"}
                 </h3>
@@ -119,7 +119,7 @@ export default function FinancialDetailsSection({ data, setData, isEditing = fal
                         borderTop: data.modalidade === 'futebol' ? 'none' : '1px solid #f0f0f0'
                     }}>
                         {data.modalidade !== 'futebol' && (
-                            <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#007d2f', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#00a63a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <FileText size={16} /> Autorizações Legais
                             </h4>
                         )}

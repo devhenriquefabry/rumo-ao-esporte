@@ -29,7 +29,7 @@ export interface Plan {
     valor?: number;
 }
 
-const COLLECTION_NAME = 'arena_simonesia_2026_plans';
+const COLLECTION_NAME = 'rumo_ao_esporte_2026_plans';
 
 export const planService = {
     async getPlans(): Promise<Plan[]> {

@@ -10,7 +10,7 @@ import { ensureInstance, sendWhatsApp } from './whatsappUtils';
 
 // URL da Evolution API
 const WHATSAPP_SERVICE_URL = (import.meta.env.VITE_WHATSAPP_URL as string) || 'https://evolution-api-im3d.onrender.com';
-const INSTANCE_NAME = 'uba_instance';
+const INSTANCE_NAME = 'rae_instance';
 
 const labelStyle: React.CSSProperties = {
     display: 'block', fontSize: '0.82rem', fontWeight: 700,
@@ -97,8 +97,8 @@ function TesteModal({ config, onClose }: { config: WhatsAppConfig; onClose: () =
                 {status !== 'idle' && (
                     <div style={{
                         padding: '12px 16px', borderRadius: '8px', marginBottom: '14px', fontSize: '0.87rem',
-                        background: status === 'success' ? '#eafaf1' : status === 'error' ? '#fff5f5' : '#f5f5f5',
-                        color: status === 'success' ? '#1e8449' : status === 'error' ? '#007d2f' : '#888',
+                        background: status === 'success' ? '#eafaf1' : status === 'error' ? '#eef8ff' : '#f5f5f5',
+                        color: status === 'success' ? '#1e8449' : status === 'error' ? '#00a63a' : '#888',
                         display: 'flex', alignItems: 'center', gap: '8px',
                         border: `1px solid ${status === 'success' ? '#abebc6' : status === 'error' ? '#f5b7b1' : '#eee'}`
                     }}>
@@ -111,7 +111,7 @@ function TesteModal({ config, onClose }: { config: WhatsAppConfig; onClose: () =
                     onClick={send}
                     disabled={status === 'sending' || !phone.trim()}
                     style={{
-                        width: '100%', padding: '13px', background: (!phone.trim() || status === 'sending') ? '#ddd' : '#007d2f',
+                        width: '100%', padding: '13px', background: (!phone.trim() || status === 'sending') ? '#ddd' : '#00a63a',
                         color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '0.95rem',
                         cursor: (!phone.trim() || status === 'sending') ? 'not-allowed' : 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background 0.2s'
@@ -296,7 +296,7 @@ export default function AdminMensagensConfig() {
 
     if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#888' }}><RefreshCw className="animate-spin" /> Carregando...</div>;
 
-    const statusColors = { CONNECTED: '#1e8449', DISCONNECTED: '#007d2f', PENDING: '#f39c12', CHECKING: '#999' };
+    const statusColors = { CONNECTED: '#1e8449', DISCONNECTED: '#00a63a', PENDING: '#f39c12', CHECKING: '#999' };
     const statusLabels = { CONNECTED: 'CONECTADO', DISCONNECTED: 'DESCONECTADO', PENDING: 'AGUARDANDO QR', CHECKING: 'VERIFICANDO...' };
 
     return (
@@ -362,7 +362,7 @@ export default function AdminMensagensConfig() {
                 {/* Configurações de API */}
                 <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', padding: '28px' }}>
                     <h3 style={{ margin: '0 0 20px', fontSize: '1rem', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <SaveIcon size={18} color="#007d2f" /> Credenciais da API
+                        <SaveIcon size={18} color="#00a63a" /> Credenciais da API
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div>
@@ -401,7 +401,7 @@ export default function AdminMensagensConfig() {
                                     />
                                     <label htmlFor="modoTeste" style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 700, cursor: 'pointer' }}>Ativar Modo Teste Geral</label>
                                 </div>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: config.modoTeste ? '#007d2f' : '#999', fontWeight: config.modoTeste ? 700 : 400 }}>
+                                <p style={{ margin: 0, fontSize: '0.75rem', color: config.modoTeste ? '#00a63a' : '#999', fontWeight: config.modoTeste ? 700 : 400 }}>
                                     {config.modoTeste ? '⚠️ Todas as mensagens saídas do sistema serão redirecionadas para o número de teste.' : 'Mensagens saem normalmente para os clientes.'}
                                 </p>
                             </div>
@@ -495,7 +495,7 @@ export default function AdminMensagensConfig() {
                     <button
                         onClick={save}
                         disabled={saving}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '13px 30px', background: saving ? '#ddd' : '#007d2f', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '0.95rem', cursor: saving ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '13px 30px', background: saving ? '#ddd' : '#00a63a', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '0.95rem', cursor: saving ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
                     >
                         <SaveIcon size={16} />
                         {saving ? 'Salvando...' : 'Salvar Configurações'}

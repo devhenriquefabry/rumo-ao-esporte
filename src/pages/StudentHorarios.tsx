@@ -5,7 +5,7 @@ export default function StudentHorarios() {
     return (
         <PageContainer>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <Clock size={28} color="#007d2f" />
+                <Clock size={28} color="#00a63a" />
                 <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#333' }}>Horários de Atividades</h1>
             </div>
 

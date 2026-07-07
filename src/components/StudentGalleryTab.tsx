@@ -27,7 +27,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
         try {
             setLoading(true);
             const q = query(
-                collection(db, 'arena_simonesia_2026_midias'),
+                collection(db, 'rumo_ao_esporte_2026_midias'),
                 where('alunoId', '==', alunoId)
             );
             const snap = await getDocs(q);
@@ -47,7 +47,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
     const handleDelete = async (id: string) => {
         if (!window.confirm("Deseja realmente excluir esta mídia do banco?")) return;
         try {
-            await deleteDoc(doc(db, 'arena_simonesia_2026_midias', id));
+            await deleteDoc(doc(db, 'rumo_ao_esporte_2026_midias', id));
             setMidias(prev => prev.filter(m => m.id !== id));
             showAlert('Mídia excluída.', 'success');
         } catch (error) {
@@ -58,7 +58,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
 
     const handleToggleConvocacao = async (id: string, currentStatus: boolean) => {
         try {
-            await updateDoc(doc(db, 'arena_simonesia_2026_midias', id), {
+            await updateDoc(doc(db, 'rumo_ao_esporte_2026_midias', id), {
                 isConvocacao: !currentStatus
             });
             setMidias(prev => prev.map(m => m.id === id ? { ...m, isConvocacao: !currentStatus } : m));
@@ -77,7 +77,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
             const compressed = await compressImage(fileToUpload);
             const formData = new FormData();
             formData.append('file', compressed, fileToUpload.name);
-            formData.append('folder', `arena_simonesia_2026_midias/${alunoId}`);
+            formData.append('folder', `rumo_ao_esporte_2026_midias/${alunoId}`);
 
             const workerUrl = import.meta.env.VITE_WORKER_URL;
             const res = await fetch(`${workerUrl}/images/upload`, {
@@ -90,7 +90,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
             const url = responseData.data?.url || responseData.url;
 
             if (url) {
-                const docRef = await addDoc(collection(db, 'arena_simonesia_2026_midias'), {
+                const docRef = await addDoc(collection(db, 'rumo_ao_esporte_2026_midias'), {
                     url,
                     alunoId,
                     isConvocacao: isUploadConvocacao,
@@ -125,7 +125,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
         <div className="student-gallery-tab" style={{ background: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: '#333' }}>
-                    <ImageIcon size={20} color="#007d2f" />
+                    <ImageIcon size={20} color="#00a63a" />
                     Galeria do Aluno
                 </h3>
 
@@ -153,7 +153,7 @@ export default function StudentGalleryTab({ alunoId }: StudentGalleryTabProps) {
                                 onClick={handleConfirmUpload}
                                 disabled={uploading}
                                 style={{
-                                    background: '#007d2f', color: '#fff', padding: '8px 16px', borderRadius: '8px', border: 'none',
+                                    background: '#00a63a', color: '#fff', padding: '8px 16px', borderRadius: '8px', border: 'none',
                                     fontWeight: 'bold', cursor: uploading ? 'not-allowed' : 'pointer', fontSize: '0.9rem',
                                     display: 'flex', alignItems: 'center', gap: '8px'
                                 }}

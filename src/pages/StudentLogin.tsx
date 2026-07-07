@@ -7,7 +7,7 @@ import { useDialog } from '../context/CustomDialogContext';
 import { useLoading } from '../components/LoadingService';
 import '../App.css';
 
-const MAIN_ADMIN_EMAIL = 'arenasimonesia@admin.com';
+const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
 
 export default function StudentLogin() {
     const [email, setEmail] = useState('');
@@ -29,9 +29,9 @@ export default function StudentLogin() {
 
         try {
             if (normalizedEmail === MAIN_ADMIN_EMAIL) {
-                localStorage.removeItem('uba_student_auth');
-                localStorage.removeItem('uba_teacher_auth');
-                localStorage.setItem('uba_admin_auth', 'true');
+                localStorage.removeItem('rae_student_auth');
+                localStorage.removeItem('rae_teacher_auth');
+                localStorage.setItem('rae_admin_auth', 'true');
                 showLoading(1500, 'Acessando Painel Administrativo...');
                 setTimeout(() => navigate('/admin/dashboard'), 1500);
                 return;
@@ -73,13 +73,13 @@ export default function StudentLogin() {
             // 2. Aggregate Credentials from Teachers AND Students (Robust Lookup)
             const emailVariants = Array.from(new Set([normalizedEmail, rawEmail]));
             const teacherQueries = emailVariants.map(v => query(collection(db, "teachers"), where("email", "==", v)));
-            const studentQueries = emailVariants.map(v => query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", v)));
+            const studentQueries = emailVariants.map(v => query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", v)));
 
             // Robust Fallback: Search by CPF directly if password looks like a CPF
             let cpfFallbackQueries: any[] = [];
             if (cleanPassword.length >= 11) {
                 cpfFallbackQueries = [
-                    query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.cpf", "==", cleanPassword)),
+                    query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.cpf", "==", cleanPassword)),
                 ];
             }
 
@@ -124,7 +124,7 @@ export default function StudentLogin() {
                     const tData = docSnap.data() as any;
                     addPotentialPassword(tData.senha);
                     addPotentialPassword(tData.cpf);
-                    addPotentialPassword('arena2026');
+                    addPotentialPassword('rumo2026');
                     const tCpfClean = (tData.cpf || '').replace(/\D/g, '');
                     if (tData.senha === password || (tCpfClean && tCpfClean === cleanPassword)) {
                         matchType = 'teacher';
@@ -241,9 +241,9 @@ export default function StudentLogin() {
         const normalizedEmail = userEmail.toLowerCase().trim();
 
         if (normalizedEmail === MAIN_ADMIN_EMAIL) {
-            localStorage.removeItem('uba_student_auth');
-            localStorage.removeItem('uba_teacher_auth');
-            localStorage.setItem('uba_admin_auth', 'true');
+            localStorage.removeItem('rae_student_auth');
+            localStorage.removeItem('rae_teacher_auth');
+            localStorage.setItem('rae_admin_auth', 'true');
             showLoading(1500, 'Acessando Painel Administrativo...');
             setTimeout(() => navigate('/admin/dashboard'), 1500);
             return;
@@ -255,23 +255,23 @@ export default function StudentLogin() {
         const teacherSnaps = await Promise.all(teacherQueries.map(q => getDocs(q)));
         const teacherDocs = teacherSnaps.flatMap(s => s.docs);
 
-        localStorage.removeItem('uba_admin_auth');
+        localStorage.removeItem('rae_admin_auth');
 
         if (teacherDocs.length > 0) {
             const teacher = teacherDocs[0].data() as any;
             if (teacher.active === false) {
                 await auth.signOut();
-                localStorage.removeItem('uba_teacher_auth');
+                localStorage.removeItem('rae_teacher_auth');
                 localStorage.removeItem('teacherName');
                 showAlert("Seu acesso de professor está desativado.", "error");
                 return;
             }
-            localStorage.setItem('uba_teacher_auth', 'true');
+            localStorage.setItem('rae_teacher_auth', 'true');
             localStorage.setItem('teacherName', teacher.nome);
             showLoading(3000, 'Acessando Portal do Professor...');
             setTimeout(() => navigate('/professor/turmas'), 3000);
         } else {
-            localStorage.setItem('uba_student_auth', 'true');
+            localStorage.setItem('rae_student_auth', 'true');
             showLoading(1500, 'Acessando Painel do Aluno...');
             setTimeout(() => navigate('/aluno/dashboard'), 1500);
         }
@@ -281,41 +281,44 @@ export default function StudentLogin() {
         <div className="landing-page" style={{ padding: '20px' }}>
             <div className="landing-content" style={{
                 padding: '0',
-                maxWidth: '900px',
+                maxWidth: '980px',
                 width: '100%',
                 display: 'flex',
                 flexDirection: 'row',
                 flexWrap: 'wrap',
                 overflow: 'hidden',
                 background: '#fff',
-                alignItems: 'stretch'
+                alignItems: 'stretch',
+                border: '1px solid rgba(255,255,255,0.28)',
+                boxShadow: '0 30px 80px rgba(6, 26, 64, 0.32)'
             }}>
                 {/* Left Side: Brand */}
                 <div style={{
                     flex: '1 1 300px',
-                    background: 'linear-gradient(135deg, #00237f 0%, #00154d 100%)',
+                    background: 'radial-gradient(circle at 20% 12%, rgba(244, 194, 13, 0.32), transparent 30%), radial-gradient(circle at 82% 20%, rgba(0, 166, 58, 0.24), transparent 28%), linear-gradient(135deg, #17428f 0%, #09245c 100%)',
                     padding: '40px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#fff',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden'
                 }}>
                     <div style={{
-                        width: '150px',
-                        marginBottom: '20px',
+                        width: 'min(280px, 82%)',
+                        marginBottom: '24px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: '#fff',
-                        borderRadius: '50%',
-                        padding: '10px'
+                        borderRadius: '8px',
+                        boxShadow: '0 22px 48px rgba(6, 26, 64, 0.28)'
                     }}>
-                        <img src="/arena-logo-transparent.png" alt="Arena Simonésia" style={{ width: '100%', height: 'auto', borderRadius: '50%' }} />
+                        <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ width: '100%', height: 'auto', borderRadius: '8px', display: 'block' }} />
                     </div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '10px', textTransform: 'uppercase' }}>Área do Usuário</h1>
-                    <p style={{ opacity: 0.9 }}>Portal do Aluno e Professor</p>
+                    <h1 style={{ fontSize: '1.85rem', fontWeight: '900', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Área do Usuário</h1>
+                    <p style={{ opacity: 0.92, maxWidth: '320px', lineHeight: 1.5 }}>Portal do aluno, responsável e professor.</p>
                 </div>
 
                 {/* Right Side: Form */}
@@ -325,13 +328,14 @@ export default function StudentLogin() {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    background: '#fff'
+                    background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)'
                 }}>
-                    <h2 style={{ color: '#333', marginBottom: '30px', fontWeight: '700', fontSize: '1.5rem' }}>Acesso</h2>
+                    <h2 style={{ color: '#10213f', marginBottom: '8px', fontWeight: '900', fontSize: '1.6rem' }}>Acesso ao portal</h2>
+                    <p style={{ margin: '0 0 28px', color: '#63708a', fontSize: '0.95rem' }}>Entre para acompanhar pagamentos, dados, turmas e comunicação.</p>
 
                     <form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div className="form-group" style={{ width: '100%' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', color: '#666', fontSize: '0.9rem', fontWeight: '600' }}>Email</label>
+                            <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Email</label>
                             <input
                                 type="email"
                                 value={email}
@@ -342,18 +346,18 @@ export default function StudentLogin() {
                                     width: '100%',
                                     padding: '14px',
                                     borderRadius: '8px',
-                                    border: '2px solid #eee',
+                                    border: '2px solid #dce7f3',
                                     fontSize: '1rem',
                                     outline: 'none',
                                     transition: 'border-color 0.3s'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#00237f'}
-                                onBlur={(e) => e.target.style.borderColor = '#eee'}
+                                onFocus={(e) => e.target.style.borderColor = '#17428f'}
+                                onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
                             />
                         </div>
 
                         <div className="form-group" style={{ width: '100%' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', color: '#666', fontSize: '0.9rem', fontWeight: '600' }}>Senha</label>
+                            <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Senha</label>
                             <input
                                 type="password"
                                 value={password}
@@ -364,13 +368,13 @@ export default function StudentLogin() {
                                     width: '100%',
                                     padding: '14px',
                                     borderRadius: '8px',
-                                    border: '2px solid #eee',
+                                    border: '2px solid #dce7f3',
                                     fontSize: '1rem',
                                     outline: 'none',
                                     transition: 'border-color 0.3s'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#00237f'}
-                                onBlur={(e) => e.target.style.borderColor = '#eee'}
+                                onFocus={(e) => e.target.style.borderColor = '#17428f'}
+                                onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
                             />
                         </div>
 
@@ -383,13 +387,13 @@ export default function StudentLogin() {
                                 fontSize: '1rem',
                                 marginTop: '10px',
                                 color: '#fff',
-                                background: '#00237f',
+                                background: 'linear-gradient(135deg, #17428f 0%, #00a63a 100%)',
                                 border: 'none',
                                 borderRadius: '8px',
                                 fontWeight: '700',
                                 cursor: loading ? 'not-allowed' : 'pointer',
                                 opacity: loading ? 0.8 : 1,
-                                boxShadow: '0 4px 15px rgba(0, 35, 127, 0.3)',
+                                boxShadow: '0 14px 28px rgba(23, 66, 143, 0.24)',
                                 transition: 'all 0.3s'
                             }}
                             onMouseOver={(e) => !loading && (e.currentTarget.style.transform = 'translateY(-2px)')}
@@ -400,7 +404,7 @@ export default function StudentLogin() {
                     </form>
 
                     <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                        <a href="/" style={{ color: '#888', fontSize: '0.9rem', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#00237f'} onMouseOut={e => e.currentTarget.style.color = '#888'}>
+                        <a href="/" style={{ color: '#63708a', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 700 }} onMouseOver={e => e.currentTarget.style.color = '#17428f'} onMouseOut={e => e.currentTarget.style.color = '#63708a'}>
                             ← Voltar ao Início
                         </a>
                     </div>

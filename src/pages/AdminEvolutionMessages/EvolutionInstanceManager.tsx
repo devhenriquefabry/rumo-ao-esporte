@@ -7,7 +7,7 @@ import {
   deleteEvolutionInstance,
   logoutEvolutionInstance,
   restartEvolutionInstance,
-  toArenaInstanceName
+  toRumoInstanceName
 } from './messagingApi';
 import type { EvolutionConnection, EvolutionInstance } from './messagingApi';
 
@@ -44,7 +44,7 @@ export default function EvolutionInstanceManager({
   const [initialConnection, setInitialConnection] = useState<EvolutionConnection | null>(null);
 
   const selected = useMemo(() => instances.find((instance) => instance.name === selectedName), [instances, selectedName]);
-  const normalizedName = instanceName.trim() ? toArenaInstanceName(instanceName) : '';
+  const normalizedName = instanceName.trim() ? toRumoInstanceName(instanceName) : '';
 
   const runAction = async (name: string, type: 'restart' | 'logout' | 'delete') => {
     if (type === 'delete' && !window.confirm(`Excluir definitivamente a instância ${name}?`)) return;
@@ -114,7 +114,7 @@ export default function EvolutionInstanceManager({
           ))}
         </div>
       ) : (
-        <div className="instance-empty"><Server size={32} /><strong>Nenhuma instância da Arena criada</strong></div>
+        <div className="instance-empty"><Server size={32} /><strong>Nenhuma instância do Rumo ao Esporte criada</strong></div>
       )}
 
       {selected && (

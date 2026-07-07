@@ -25,7 +25,7 @@ interface PublicPlan {
   };
 }
 
-const PLAN_COLLECTION = 'arena_simonesia_2026_plans';
+const PLAN_COLLECTION = 'rumo_ao_esporte_2026_plans';
 const MODALITY_LABELS: Record<ModalityId, string> = {
   futebol: 'Futebol',
   natacao: 'Natação',
@@ -350,7 +350,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
           width: '90%', maxWidth: '500px',
           boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
         }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '8px', color: '#007d2f', fontFamily: 'sans-serif' }}>Identificação do Casal</h3>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '8px', color: '#00a63a', fontFamily: 'sans-serif' }}>Identificação do Casal</h3>
           <p style={{ color: '#666', marginBottom: '25px' }}>Informe os nomes dos integrantes do casal para prosseguir.</p>
 
           <div className="form-group">
@@ -380,7 +380,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
             onClick={() => setShowCoupleModal(false)}
             style={{
               marginTop: '30px', width: '100%', padding: '15px',
-              backgroundColor: '#007d2f', color: '#fff', border: 'none',
+              backgroundColor: '#00a63a', color: '#fff', border: 'none',
               borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer',
               boxShadow: '0 4px 6px rgba(195, 34, 40, 0.2)'
             }}
@@ -396,14 +396,14 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
   const renderStep0 = () => (
     <div className="landing-page">
       <div className="landing-content">
-        <img src="/arena-logo-transparent.png" alt={'Arena Simon\u00e9sia Logo'} className="landing-logo" />
-        <h1 className="landing-title">{'CADASTRO ARENA SIMON\u00c9SIA'}</h1>
+        <img src="/rumo-ao-esporte-logo.png" alt={'Rumo ao Esporte Logo'} className="landing-logo" />
+        <h1 className="landing-title">{'RUMO AO ESPORTE'}</h1>
         <p className="landing-subtitle">
           {checkingPlans
-            ? 'Verificando inscri\u00e7\u00f5es...'
+            ? 'Verificando inscrições...'
             : hasOpenPlans
-              ? 'Bem-vindo ao sistema de cadastro online da Arena Simon\u00e9sia.'
-              : 'No momento, a Arena Simon\u00e9sia n\u00e3o est\u00e1 com inscri\u00e7\u00f5es abertas.'}
+              ? 'Bem-vindo ao sistema de cadastro online do Rumo ao Esporte.'
+              : 'No momento, o Rumo ao Esporte n\u00e3o est\u00e1 com inscri\u00e7\u00f5es abertas.'}
         </p>
         {hasOpenPlans && (
           <button className="btn-start" onClick={() => setStep(2)}>
@@ -416,10 +416,10 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
           style={{
             marginTop: '15px',
             padding: '12px 25px',
-            background: 'transparent',
-            border: '2px solid #fff',
+            background: 'rgba(255,255,255,0.10)',
+            border: '1px solid rgba(255,255,255,0.72)',
             color: '#fff',
-            borderRadius: '50px',
+            borderRadius: '8px',
             cursor: 'pointer',
             fontSize: '0.9rem',
             fontWeight: 'bold',
@@ -428,11 +428,11 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
             backdropFilter: 'blur(5px)'
           }}
           onMouseOver={e => {
-            e.currentTarget.style.background = '#fff';
-            e.currentTarget.style.color = '#007d2f';
+            e.currentTarget.style.background = '#f4c20d';
+            e.currentTarget.style.color = '#09245c';
           }}
           onMouseOut={e => {
-            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.background = 'rgba(255,255,255,0.10)';
             e.currentTarget.style.color = '#fff';
           }}
         >
@@ -628,7 +628,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
 
       const formData = new FormData();
       formData.append('file', compressedBlob, file.name);
-      formData.append('folder', 'arena_simonesia_2026_photos');
+      formData.append('folder', 'rumo_ao_esporte_2026_photos');
 
       console.log("Enviando para:", `${workerUrl}/images/upload`);
       const response = await fetch(`${workerUrl}/images/upload`, {
@@ -763,7 +763,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
         debug_v2: true // Debug flag to identify registrations from this version
       };
 
-      const registrationRef = await addDoc(collection(db, 'arena_simonesia_2026_registrations'), registrationPayload);
+      const registrationRef = await addDoc(collection(db, 'rumo_ao_esporte_2026_registrations'), registrationPayload);
 
       const successPayload = {
         ...registrationPayload,
@@ -973,7 +973,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     {(Object.values(SCHEDULE_OPTIONS[data.modalidade as 'natacao' | 'hidro'] || {}) as any[]).map((opt: any, idx: number) => (
                       <div key={idx} className="schedule-group">
-                        <p style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#007d2f', marginBottom: '8px' }}>
+                        <p style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#00a63a', marginBottom: '8px' }}>
                           {opt.days.join(' & ')}
                         </p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -987,9 +987,9 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                                 onClick={() => setSelectedSchedule({ days: opt.days, time: t })}
                                 style={{
                                   padding: '8px 16px',
-                                  border: isSelected ? '2px solid #007d2f' : '1px solid #ccc',
+                                  border: isSelected ? '2px solid #00a63a' : '1px solid #ccc',
                                   background: isSelected ? '#e9f8ef' : '#fff',
-                                  color: isSelected ? '#007d2f' : '#333',
+                                  color: isSelected ? '#00a63a' : '#333',
                                   borderRadius: '20px',
                                   cursor: 'pointer',
                                   fontWeight: isSelected ? 'bold' : 'normal',
@@ -1024,8 +1024,8 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                     <button type="button"
                       onClick={() => { setHasCoupon(true); }}
                       style={{
-                        padding: '10px 20px', borderRadius: '20px', border: hasCoupon === true ? '2px solid #007d2f' : '1px solid #ddd',
-                        background: hasCoupon === true ? '#e9f8ef' : '#fff', color: hasCoupon === true ? '#007d2f' : '#666',
+                        padding: '10px 20px', borderRadius: '20px', border: hasCoupon === true ? '2px solid #00a63a' : '1px solid #ddd',
+                        background: hasCoupon === true ? '#e9f8ef' : '#fff', color: hasCoupon === true ? '#00a63a' : '#666',
                         fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
                       }}>
                       SIM
@@ -1036,8 +1036,8 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                         setCouponCode('');
                       }}
                       style={{
-                        padding: '10px 20px', borderRadius: '20px', border: hasCoupon === false ? '2px solid #007d2f' : '1px solid #ddd',
-                        background: hasCoupon === false ? '#e9f8ef' : '#fff', color: hasCoupon === false ? '#007d2f' : '#666',
+                        padding: '10px 20px', borderRadius: '20px', border: hasCoupon === false ? '2px solid #00a63a' : '1px solid #ddd',
+                        background: hasCoupon === false ? '#e9f8ef' : '#fff', color: hasCoupon === false ? '#00a63a' : '#666',
                         fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
                       }}>
                       NÃO
@@ -1082,10 +1082,10 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
               {/* SELEÇÃO DE PLANO VOLEIBOL */}
               {data.modalidade === 'voleibol' && (
                 <div style={{ marginBottom: '30px', background: '#fff1f0', padding: '20px', borderRadius: '12px', border: '1px solid #ffccc7' }}>
-                  <h3 style={{ color: '#007d2f', marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 style={{ color: '#00a63a', marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                     Escolha seu Plano de Voleibol
                   </h3>
-                  <p style={{ color: '#007d2f', marginBottom: '15px' }}>Selecione o plano desejado para continuar:</p>
+                  <p style={{ color: '#00a63a', marginBottom: '15px' }}>Selecione o plano desejado para continuar:</p>
 
                   <div className="modality-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                     {[
@@ -1099,7 +1099,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                         style={{ height: 'auto', padding: '15px' }}>
                         <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>PLANO</div>
                         <strong>{p.label}</strong>
-                        <div style={{ color: '#007d2f', fontWeight: 'bold', marginTop: '8px' }}>{p.price}</div>
+                        <div style={{ color: '#00a63a', fontWeight: 'bold', marginTop: '8px' }}>{p.price}</div>
                       </div>
                     ))}
                   </div>
@@ -1140,7 +1140,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
 
         {data.modalidade && (
           <div className="animate-fade-in" style={{ marginTop: '30px', borderTop: '2px solid #eee', paddingTop: '20px' }}>
-            <h3 style={{ color: '#007d2f', marginBottom: '15px' }}>Dados do(s) Aluno(s)</h3>
+            <h3 style={{ color: '#00a63a', marginBottom: '15px' }}>Dados do(s) Aluno(s)</h3>
             {data.alunos.map((aluno, index) => (
               <div key={index} className="student-block" style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '8px' }}>
                 <h4 style={{ marginBottom: '10px', color: '#666' }}>Aluno {index + 1}</h4>
@@ -1188,8 +1188,8 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                 padding: '12px',
                 marginTop: '20px',
                 backgroundColor: 'transparent',
-                border: '2px dashed #007d2f',
-                color: '#007d2f',
+                border: '2px dashed #00a63a',
+                color: '#00a63a',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 fontWeight: 'bold',
@@ -1215,7 +1215,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
 
       {data.alunos.map((aluno, index) => (
         <div key={index} className="student-health-block animate-fade-in" style={{ marginBottom: '40px', background: '#f8f9fa', padding: '20px', borderRadius: '12px', border: '1px solid #e0e0e0' }}>
-          <h3 style={{ color: '#007d2f', marginBottom: '20px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>
+          <h3 style={{ color: '#00a63a', marginBottom: '20px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>
             {index + 1}. {aluno.nome || `Aluno ${index + 1}`}
           </h3>
 
@@ -1231,7 +1231,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
 
               <div className="photo-upload-container">
                 {aluno.fotoUrl ? (
-                  <div className="photo-preview" style={{ width: '150px', height: '150px', margin: '0 auto', border: '4px solid #007d2f', borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
+                  <div className="photo-preview" style={{ width: '150px', height: '150px', margin: '0 auto', border: '4px solid #00a63a', borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
                     <img src={aluno.fotoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button type="button" className="btn-remove-photo" onClick={() => removePhoto(index)}
                       style={{
@@ -1255,11 +1255,11 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
 
                     <label htmlFor={`foto-upload-${index}`} className="upload-label" style={{
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                      padding: '30px', border: '2px dashed #007d2f', borderRadius: '10px',
+                      padding: '30px', border: '2px dashed #00a63a', borderRadius: '10px',
                       cursor: 'pointer', background: '#e9f8ef'
                     }}>
-                      <Camera size={48} color="#007d2f" />
-                      <span style={{ color: '#007d2f', fontWeight: 'bold' }}>{uploading ? 'Enviando...' : 'Clique aqui para tirar ou enviar foto'}</span>
+                      <Camera size={48} color="#00a63a" />
+                      <span style={{ color: '#00a63a', fontWeight: 'bold' }}>{uploading ? 'Enviando...' : 'Clique aqui para tirar ou enviar foto'}</span>
                     </label>
                   </div>
                 )}
@@ -1381,7 +1381,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
           }))}
         />
         {data.confirmacao.assinaturaDigital && (
-          <div style={{ marginTop: '10px', color: '#007d2f', fontWeight: 'bold', fontSize: '0.9rem' }}>
+          <div style={{ marginTop: '10px', color: '#00a63a', fontWeight: 'bold', fontSize: '0.9rem' }}>
             Assinatura salva.
           </div>
         )}
@@ -1431,7 +1431,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
               </p>
             </div>
 
-            <h3 style={{ color: '#007d2f', marginBottom: '20px' }}>
+            <h3 style={{ color: '#00a63a', marginBottom: '20px' }}>
               Forma de Pagamento
             </h3>
 
@@ -1441,11 +1441,11 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                   style={{
                     flex: 1,
                     padding: '15px',
-                    border: paymentMethod === 'PIX' ? '2px solid #007d2f' : '1px solid #ddd',
+                    border: paymentMethod === 'PIX' ? '2px solid #00a63a' : '1px solid #ddd',
                     borderRadius: '8px',
                     background: paymentMethod === 'PIX' ? '#e9f8ef' : '#fff',
                     fontWeight: 'bold',
-                    color: paymentMethod === 'PIX' ? '#007d2f' : '#666',
+                    color: paymentMethod === 'PIX' ? '#00a63a' : '#666',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
@@ -1504,7 +1504,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
             </svg>
           </div>
           <h2 className="success-title">Inscrição Realizada com Sucesso!</h2>
-          <p className="success-message">Seus dados foram enviados para a secretaria da Arena Simonésia. Em breve entraremos em contato.</p>
+          <p className="success-message">Seus dados foram enviados para a secretaria da Rumo ao Esporte. Em breve entraremos em contato.</p>
 
           <div className="success-summary-card">
             <div className="success-summary-header">
@@ -1615,8 +1615,8 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
       )}
 
       <header className="header">
-        <img src="/arena-logo-transparent.png" alt={'Arena Simon\u00e9sia Logo'} className="header-logo" onError={(e) => e.currentTarget.style.display = 'none'} />
-        <h1 className="header-title">{'CADASTRO ARENA SIMON\u00c9SIA'}</h1>
+        <img src="/rumo-ao-esporte-logo.png" alt={'Rumo ao Esporte Logo'} className="header-logo" onError={(e) => e.currentTarget.style.display = 'none'} />
+        <h1 className="header-title">{'RUMO AO ESPORTE'}</h1>
       </header>
 
       {!success && (

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import { collection, getDocs, query, orderBy, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useDialog } from '../context/CustomDialogContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { planService } from '../utils/planService';
 import type { Plan } from '../utils/planService';
 import { useLoading } from '../components/LoadingService';
@@ -40,6 +40,7 @@ export default function AdminFinanceiro() {
     const [isOverdueModalOpen, setIsOverdueModalOpen] = useState(false);
     const observerTarget = useRef<HTMLDivElement>(null);
     const location = useLocation();
+    const navigate = useNavigate();
 
     // Hook for Financial Operations
     const {
@@ -118,6 +119,17 @@ export default function AdminFinanceiro() {
             if (allAlreadySelected) return prev.filter(id => !ids.includes(id));
             return [...new Set([...prev, ...ids])];
         });
+    };
+
+    const handleCloseDrawer = () => {
+        setSelectedRegistration(null);
+
+        const params = new URLSearchParams(location.search);
+        if (params.has('regId')) {
+            params.delete('regId');
+            const nextSearch = params.toString();
+            navigate(`${location.pathname}${nextSearch ? `?${nextSearch}` : ''}`, { replace: true });
+        }
     };
 
     const filtered = useMemo(() => {
@@ -286,7 +298,7 @@ export default function AdminFinanceiro() {
                 const firstStudent = students[0];
                 const otherStudents = students.slice(1);
 
-                const originRef = doc(db, 'arena_simonesia_2026_registrations', reg.id);
+                const originRef = doc(db, 'rumo_ao_esporte_2026_registrations', reg.id);
                 await updateDoc(originRef, {
                     alunos: [firstStudent]
                 });
@@ -294,7 +306,7 @@ export default function AdminFinanceiro() {
                 for (let i = 0; i < otherStudents.length; i++) {
                     const student = otherStudents[i];
                     const deterministicId = `${reg.id}_split_${i + 1}`;
-                    const newRegRef = doc(db, 'arena_simonesia_2026_registrations', deterministicId);
+                    const newRegRef = doc(db, 'rumo_ao_esporte_2026_registrations', deterministicId);
 
                     const newRegData = {
                         ...reg,
@@ -317,7 +329,7 @@ export default function AdminFinanceiro() {
         setLoading(true);
 
         try {
-            const registrationsRef = collection(db, 'arena_simonesia_2026_registrations');
+            const registrationsRef = collection(db, 'rumo_ao_esporte_2026_registrations');
             const q = query(registrationsRef, orderBy('createdAt', 'desc'));
             const snap = await getDocs(q);
             const rawData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudentData));
@@ -368,7 +380,7 @@ export default function AdminFinanceiro() {
     return (
         <div className="admin-page page-enter" style={{ position: 'relative' }}>
             <header style={{ marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '1.8rem', color: '#007d2f', fontWeight: '800', margin: 0 }}>FINANCEIRO</h1>
+                <h1 style={{ fontSize: '1.8rem', color: '#00a63a', fontWeight: '800', margin: 0 }}>FINANCEIRO</h1>
                 <p style={{ color: '#666', marginTop: '5px' }}>Gestão de faturas, planos e recebimentos.</p>
             </header>
 
@@ -391,7 +403,7 @@ export default function AdminFinanceiro() {
                             padding: '12px 30px',
                             borderRadius: '12px 12px 0 0',
                             border: 'none',
-                            background: modalityFilter === tab.id ? '#007d2f' : 'transparent',
+                            background: modalityFilter === tab.id ? '#00a63a' : 'transparent',
                             color: modalityFilter === tab.id ? '#fff' : '#888',
                             fontWeight: '800',
                             fontSize: '0.9rem',
@@ -462,7 +474,7 @@ export default function AdminFinanceiro() {
 
             <FinanceDrawer
                 registration={selectedRegistration}
-                onClose={() => setSelectedRegistration(null)}
+                onClose={handleCloseDrawer}
                 plans={plans}
                 paymentHistory={paymentHistory}
                 loadingHistory={loadingHistory}

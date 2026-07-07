@@ -2,6 +2,11 @@
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { SyncService } from './SyncService';
+import {
+    DEFAULT_PAYMENT_PROVIDER_CONFIG,
+    withPaymentProviderQuery,
+    type PaymentProviderConfig
+} from './paymentProviderConfig';
 
 /**
  * Calcula o status financeiro do aluno baseado na lista de pagamentos.
@@ -181,7 +186,8 @@ export const syncStudentFinancialData = async (
     cpf: string,
     studentFullName: string,
     modality: string,
-    workerUrl: string
+    workerUrl: string,
+    paymentConfig: PaymentProviderConfig = DEFAULT_PAYMENT_PROVIDER_CONFIG
 ) => {
     if (!cpf) return null;
 
@@ -189,7 +195,7 @@ export const syncStudentFinancialData = async (
         const cleanCpf = cpf.replace(/\D/g, '');
 
         // 1. Get Customer ID
-        const custRes = await fetch(`${workerUrl}/customers-by-cpf/${cleanCpf}`);
+        const custRes = await fetch(`${workerUrl}${withPaymentProviderQuery(`/customers-by-cpf/${cleanCpf}`, paymentConfig)}`);
         if (!custRes.ok) throw new Error(`Busca de cliente falhou: ${custRes.status}`);
         const custData = await custRes.json();
 
@@ -201,7 +207,7 @@ export const syncStudentFinancialData = async (
         if (customers.length > 0) {
             for (const customer of customers) {
                 if (!customer?.id) continue;
-                const payRes = await fetch(`${workerUrl}/payments?customer=${customer.id}&limit=100`);
+                const payRes = await fetch(`${workerUrl}${withPaymentProviderQuery(`/payments?customer=${encodeURIComponent(customer.id)}&limit=100`, paymentConfig)}`);
                 if (payRes.ok) {
                     const payData = await payRes.json();
                     if (payData && payData.data) {
@@ -282,7 +288,7 @@ export const syncStudentFinancialData = async (
             for (const pId of toDeleteIds) {
                 // 1. Tenta remover do Asaas via Worker
                 try {
-                    await fetch(`${workerUrl}/payments/${pId}`, { method: 'DELETE' });
+                    await fetch(`${workerUrl}${withPaymentProviderQuery(`/payments/${pId}`, paymentConfig)}`, { method: 'DELETE' });
                 } catch (err) {
                     console.error(`[Deduplicate] Erro ao remover fatura duplicada ${pId} no Asaas:`, err);
                 }
@@ -306,7 +312,7 @@ export const syncStudentFinancialData = async (
         const statusData = calculateStatusFromPayments(finalPayments);
 
         // 5. Update Registration Doc
-        const regRef = doc(db, 'arena_simonesia_2026_registrations', registrationId);
+        const regRef = doc(db, 'rumo_ao_esporte_2026_registrations', registrationId);
         await updateDoc(regRef, {
             status: statusData.status,
             financialPendingAmount: statusData.financialPendingAmount,

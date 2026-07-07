@@ -92,7 +92,7 @@ const RentalCalendar: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#00237f', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}
+                        style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#17428f', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}
                     >
                         <Plus size={20} /> Nova Reserva
                     </button>
@@ -126,7 +126,7 @@ const RentalCalendar: React.FC = () => {
                             </div>
 
                             <div style={{ flex: 1, minWidth: '200px' }}>
-                                <div style={{ fontWeight: 'bold', color: '#00237f' }}>{book.locationName}</div>
+                                <div style={{ fontWeight: 'bold', color: '#17428f' }}>{book.locationName}</div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#555', marginTop: '4px' }}>
                                     <User size={14} /> {book.customerName}
                                 </div>
@@ -144,7 +144,7 @@ const RentalCalendar: React.FC = () => {
                                     <a
                                         href={book.paymentLink} target="_blank" rel="noopener noreferrer"
                                         style={{
-                                            background: '#f0f4ff', color: '#00237f', padding: '8px', borderRadius: '8px',
+                                            background: '#f0f4ff', color: '#17428f', padding: '8px', borderRadius: '8px',
                                             display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 'bold'
                                         }}
                                     >

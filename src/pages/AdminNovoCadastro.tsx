@@ -149,7 +149,7 @@ const AdminNovoCadastro: React.FC = () => {
 
             const formData = new FormData();
             formData.append('file', fileToSend, file.name);
-            formData.append('folder', isDoc ? 'arena_simonesia_2026_docs' : 'arena_simonesia_2026_photos');
+            formData.append('folder', isDoc ? 'rumo_ao_esporte_2026_docs' : 'rumo_ao_esporte_2026_photos');
 
             const workerUrl = import.meta.env.VITE_WORKER_URL;
             const res = await fetch(`${workerUrl}/images/upload`, { method: 'POST', body: formData });
@@ -230,7 +230,7 @@ const AdminNovoCadastro: React.FC = () => {
                 return { ...aluno, turmaId };
             }));
 
-            await addDoc(collection(db, 'arena_simonesia_2026_registrations'), {
+            await addDoc(collection(db, 'rumo_ao_esporte_2026_registrations'), {
                 ...data,
                 alunos: updatedAlunos,
                 status: 'confirmado',
@@ -271,7 +271,7 @@ const AdminNovoCadastro: React.FC = () => {
         const refYear = 2026;
         const ageRef = refYear - year;
         const cat = (ageRef >= 3 && ageRef <= 5) ? 'INICIAÇÃO' : (ageRef >= 6 && ageRef <= 15) ? `SUB ${ageRef}` : 'FORA DE FAIXA';
-        return <span style={{ fontSize: '0.8rem', color: '#007d2f', fontWeight: 'bold', marginLeft: '10px' }}>({cat})</span>;
+        return <span style={{ fontSize: '0.8rem', color: '#00a63a', fontWeight: 'bold', marginLeft: '10px' }}>({cat})</span>;
     };
 
     const handleResponsavelChange = (field: string, value: string) => {
@@ -291,12 +291,12 @@ const AdminNovoCadastro: React.FC = () => {
         <div className="admin-page page-enter" style={{ maxWidth: '100vw', padding: '20px', boxSizing: 'border-box', overflowX: 'hidden', paddingBottom: '100px' }}>
             <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', color: '#007d2f', fontWeight: '800', margin: 0 }}>NOVO CADASTRO</h1>
+                    <h1 style={{ fontSize: '1.8rem', color: '#00a63a', fontWeight: '800', margin: 0 }}>NOVO CADASTRO</h1>
                     <p style={{ color: '#666' }}>Entrada rápida de dados para administração.</p>
                 </div>
                 <button type="submit" form="admin-form" className="btn-save-admin" style={{
-                    background: '#007d2f', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '8px',
-                    fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(0, 125, 47, 0.3)'
+                    background: '#00a63a', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '8px',
+                    fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(0, 166, 58, 0.28)'
                 }}>
                     <Save size={20} /> FINALIZAR CADASTRO
                 </button>
@@ -406,7 +406,7 @@ const AdminNovoCadastro: React.FC = () => {
                                     <label>HORÁRIO PREFERENCIAL</label>
                                     {Object.values(SCHEDULE_OPTIONS[data.modalidade as 'natacao' | 'hidro'] || {}).map((opt, i) => (
                                         <div key={i} style={{ marginBottom: '10px' }}>
-                                            <p style={{ fontSize: '0.8rem', color: '#007d2f', fontWeight: 'bold', margin: '5px 0' }}>{opt.days.join(' & ')}</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#00a63a', fontWeight: 'bold', margin: '5px 0' }}>{opt.days.join(' & ')}</p>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                                 {opt.times.map((t: string) => (
                                                     <button key={t} type="button"
@@ -429,7 +429,7 @@ const AdminNovoCadastro: React.FC = () => {
                     <div className="admin-card">
                         <div className="admin-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Users size={18} /> ALUNOS ({data.alunos.length})</div>
-                            <button type="button" onClick={addStudent} style={{ background: '#fff', color: '#007d2f', border: '1px solid #007d2f', padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>+ ADICIONAR</button>
+                            <button type="button" onClick={addStudent} style={{ background: '#fff', color: '#00a63a', border: '1px solid #00a63a', padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>+ ADICIONAR</button>
                         </div>
                         <div className="admin-card-body" style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' }}>
                             {data.alunos.map((aluno, index) => (
@@ -437,7 +437,7 @@ const AdminNovoCadastro: React.FC = () => {
                                     border: '1px solid #eee', borderRadius: '10px', padding: '15px', marginBottom: '20px', background: '#fdfdfd'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
-                                        <span style={{ fontWeight: 'bold', color: '#007d2f' }}>ALUNO {index + 1} {renderCategory(aluno.dataNascimento)}</span>
+                                        <span style={{ fontWeight: 'bold', color: '#00a63a' }}>ALUNO {index + 1} {renderCategory(aluno.dataNascimento)}</span>
                                         {data.alunos.length > 1 && <button type="button" onClick={() => removeStudent(index)} style={{ color: '#ff4d4f', border: 'none', background: 'none', cursor: 'pointer' }}><Trash2 size={18} /></button>}
                                     </div>
 
@@ -488,7 +488,7 @@ const AdminNovoCadastro: React.FC = () => {
 
                                     {/* HEALTH INFO (COMPACT) */}
                                     <div style={{ marginTop: '15px', padding: '10px', background: '#fff9f9', borderRadius: '8px', border: '1px solid #ffebeb' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 'bold', color: '#007d2f', marginBottom: '8px' }}><Heart size={14} /> SAÚDE</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 'bold', color: '#00a63a', marginBottom: '8px' }}><Heart size={14} /> SAÚDE</div>
                                         <div style={{ display: 'flex', gap: '15px' }}>
                                             <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}><input type="checkbox" checked={aluno.saude.temAlergia} onChange={(e) => { const n = [...data.alunos]; n[index].saude.temAlergia = e.target.checked; setData({ ...data, alunos: n }); }} /> Alergia</label>
                                             <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}><input type="checkbox" checked={aluno.saude.tomaMedicamento} onChange={(e) => { const n = [...data.alunos]; n[index].saude.tomaMedicamento = e.target.checked; setData({ ...data, alunos: n }); }} /> Med. Contínuo</label>
@@ -517,11 +517,11 @@ const AdminNovoCadastro: React.FC = () => {
                 .admin-form-group { margin-bottom: 15px; }
                 .admin-form-group label { display: block; font-size: 0.75rem; font-weight: 800; color: #999; margin-bottom: 6px; letter-spacing: 0.5px; }
                 .admin-form-group input, .admin-form-group select, .admin-form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; transition: all 0.2s; box-sizing: border-box; }
-                .admin-form-group input:focus { border-color: #007d2f; box-shadow: 0 0 0 3px rgba(0, 125, 47, 0.1); }
+                .admin-form-group input:focus { border-color: #00a63a; box-shadow: 0 0 0 3px rgba(23, 66, 143, 0.14); }
                 .admin-toggle-btn { flex: 1; padding: 10px; border: 1px solid #ddd; background: #fff; color: #666; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-                .admin-toggle-btn.active { border-color: #007d2f; background: #fff0f0; color: #007d2f; }
+                .admin-toggle-btn.active { border-color: #00a63a; background: #fff0f0; color: #00a63a; }
                 .mini-schedule-btn { padding: 6px 12px; border: 1px solid #ddd; background: #fff; border-radius: 15px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-                .mini-schedule-btn.active { background: #007d2f; color: #fff; border-color: #007d2f; }
+                .mini-schedule-btn.active { background: #00a63a; color: #fff; border-color: #00a63a; }
                 .animate-slide-down { animation: slideDown 0.3s ease-out; }
                 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

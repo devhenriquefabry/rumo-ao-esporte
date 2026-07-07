@@ -62,9 +62,9 @@ const DEFAULT_COLUMNS = ['aluno', 'plano', 'status', 'telefone'];
 // Mapa de modalidades → grupos de relatórios
 const allReportGroups: ReportGroup[] = [
     {
-        title: 'FUTEBOL', color: '#007d2f',
+        title: 'FUTEBOL', color: '#00a63a',
         categories: [
-            { id: 'futebol_geral', label: 'Todos os Alunos', color: '#007d2f' },
+            { id: 'futebol_geral', label: 'Todos os Alunos', color: '#00a63a' },
             { id: 'futebol_bolsista_50', label: 'Bolsistas 50%', color: '#8b5cf6' },
             { id: 'futebol_bolsista_integral', label: 'Bolsistas Integral', color: '#6d28d9' }
         ]
@@ -131,7 +131,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
     useEffect(() => {
         const loadConfigs = async () => {
             try {
-                const docRef = doc(db, 'arena_simonesia_2026_settings', CONFIG_DOC_ID);
+                const docRef = doc(db, 'rumo_ao_esporte_2026_settings', CONFIG_DOC_ID);
                 const snap = await getDoc(docRef);
                 if (snap.exists()) {
                     const data = snap.data();
@@ -150,7 +150,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
         try {
             const newConfigs = { ...categoryConfigs, [categoryId]: planIds };
             setCategoryConfigs(newConfigs);
-            const docRef = doc(db, 'arena_simonesia_2026_settings', CONFIG_DOC_ID);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_settings', CONFIG_DOC_ID);
             await setDoc(docRef, { configs: newConfigs }, { merge: true });
             setConfigModal(null);
         } catch (err) {
@@ -164,7 +164,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
         setSelectedColumns(cols);
         setColumnsModal(false);
         try {
-            const docRef = doc(db, 'arena_simonesia_2026_settings', CONFIG_DOC_ID);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_settings', CONFIG_DOC_ID);
             await setDoc(docRef, { columns: cols }, { merge: true });
         } catch (err) {
             console.error('Error saving columns:', err);
@@ -303,10 +303,10 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
                                 return (
                                     <div key={plan.id} onClick={() => togglePlanInModal(plan.id)} style={{
                                         display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '10px', cursor: 'pointer',
-                                        border: isSelected ? '2px solid #007d2f' : '1px solid #f1f5f9', background: isSelected ? '#fef2f2' : '#fff',
+                                        border: isSelected ? '2px solid #00a63a' : '1px solid #f1f5f9', background: isSelected ? '#fef2f2' : '#fff',
                                         marginBottom: '8px', transition: 'all 0.15s'
                                     }}>
-                                        <div style={{ width: '22px', height: '22px', borderRadius: '6px', border: isSelected ? '2px solid #007d2f' : '2px solid #d1d5db', background: isSelected ? '#007d2f' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <div style={{ width: '22px', height: '22px', borderRadius: '6px', border: isSelected ? '2px solid #00a63a' : '2px solid #d1d5db', background: isSelected ? '#00a63a' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                             {isSelected && <Check size={14} color="#fff" />}
                                         </div>
                                         <div style={{ flex: 1 }}>
@@ -345,7 +345,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
                             <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>{configModal.selectedPlanIds.length} plano(s)</span>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <button onClick={() => setConfigModal(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer' }}>Cancelar</button>
-                                <button onClick={() => saveConfig(configModal.categoryId, configModal.selectedPlanIds)} disabled={savingConfig} style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', opacity: savingConfig ? 0.7 : 1 }}>
+                                <button onClick={() => saveConfig(configModal.categoryId, configModal.selectedPlanIds)} disabled={savingConfig} style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', opacity: savingConfig ? 0.7 : 1 }}>
                                     {savingConfig ? 'Salvando...' : 'Salvar'}
                                 </button>
                             </div>
@@ -376,7 +376,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                         padding: '14px 10px', borderRadius: '12px', cursor: 'pointer', textAlign: 'center',
                                         background: isSelected ? '#fef2f2' : '#f8fafc',
-                                        border: `2px solid ${isSelected ? '#007d2f' : '#e2e8f0'}`,
+                                        border: `2px solid ${isSelected ? '#00a63a' : '#e2e8f0'}`,
                                         position: 'relative', minHeight: '50px', transition: 'all 0.2s'
                                     }}>
                                         <input
@@ -389,9 +389,9 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
                                                         : [...prev, col.id]
                                                 );
                                             }}
-                                            style={{ position: 'absolute', top: '6px', right: '6px', accentColor: '#007d2f', width: '16px', height: '16px' }}
+                                            style={{ position: 'absolute', top: '6px', right: '6px', accentColor: '#00a63a', width: '16px', height: '16px' }}
                                         />
-                                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: isSelected ? '#007d2f' : '#64748b' }}>{col.label}</span>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: isSelected ? '#00a63a' : '#64748b' }}>{col.label}</span>
                                     </label>
                                 );
                             })}
@@ -399,7 +399,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
 
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button onClick={() => setColumnsModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#fff', fontWeight: '700', cursor: 'pointer', color: '#64748b' }}>Cancelar</button>
-                            <button onClick={() => saveColumns(tempColumns)} disabled={tempColumns.length === 0} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: '700', cursor: 'pointer', opacity: tempColumns.length === 0 ? 0.5 : 1 }}>Salvar Colunas</button>
+                            <button onClick={() => saveColumns(tempColumns)} disabled={tempColumns.length === 0} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: '700', cursor: 'pointer', opacity: tempColumns.length === 0 ? 0.5 : 1 }}>Salvar Colunas</button>
                         </div>
                     </div>
                 </div>
@@ -419,9 +419,9 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
                     ].map(opt => (
                         <button key={opt.id} onClick={() => setStatusFilter(opt.id as any)} style={{
                             padding: '6px 14px', borderRadius: '8px',
-                            border: statusFilter === opt.id ? '2px solid #007d2f' : '1px solid #e2e8f0',
+                            border: statusFilter === opt.id ? '2px solid #00a63a' : '1px solid #e2e8f0',
                             background: statusFilter === opt.id ? '#fef2f2' : '#fff',
-                            color: statusFilter === opt.id ? '#007d2f' : '#64748b',
+                            color: statusFilter === opt.id ? '#00a63a' : '#64748b',
                             fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s'
                         }}>{opt.label}</button>
                     ))}
@@ -562,7 +562,7 @@ export default function AdminReports({ registrations, plans, turmas = [] }: Admi
                                                 {isCatExpanded && !hasConfig && (
                                                     <div style={{ padding: '20px 16px', textAlign: 'center', color: '#f59e0b', fontSize: '0.85rem' }}>
                                                         <p style={{ margin: 0, fontWeight: '700' }}>⚠ Configure quais planos pertencem a esta categoria.</p>
-                                                        <button onClick={() => openConfigModal(category.id)} style={{ marginTop: '8px', padding: '6px 16px', borderRadius: '8px', border: 'none', background: '#007d2f', color: '#fff', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer' }}>
+                                                        <button onClick={() => openConfigModal(category.id)} style={{ marginTop: '8px', padding: '6px 16px', borderRadius: '8px', border: 'none', background: '#00a63a', color: '#fff', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer' }}>
                                                             Configurar Agora
                                                         </button>
                                                     </div>

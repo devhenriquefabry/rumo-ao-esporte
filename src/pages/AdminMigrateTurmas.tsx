@@ -43,7 +43,7 @@ export default function AdminMigrateTurmas() {
                 ← Voltar
             </button>
 
-            <h1 style={{ color: '#007d2f', marginBottom: '10px' }}>Migrar Turmas</h1>
+            <h1 style={{ color: '#00a63a', marginBottom: '10px' }}>Migrar Turmas</h1>
             <p style={{ color: '#666', marginBottom: '30px' }}>
                 Esta ação irá limpar todas as turmas atuais e criar as novas turmas de futebol conforme o cronograma atualizado.
                 Os alunos serão automaticamente alocados nas turmas baseado na idade e modalidade.
@@ -69,7 +69,7 @@ export default function AdminMigrateTurmas() {
                 onClick={handleRun}
                 disabled={running}
                 style={{
-                    background: running ? '#ccc' : '#007d2f',
+                    background: running ? '#ccc' : '#00a63a',
                     color: '#fff',
                     border: 'none',
                     padding: '15px 30px',

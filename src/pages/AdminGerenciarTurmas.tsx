@@ -137,7 +137,7 @@ export default function AdminGerenciarTurmas() {
                 <button
                     onClick={() => { resetForm(); setShowModal(true); }}
                     style={{
-                        background: '#007d2f', color: '#fff', border: 'none', padding: '12px 20px',
+                        background: '#00a63a', color: '#fff', border: 'none', padding: '12px 20px',
                         borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
                     }}
                 >
@@ -151,7 +151,7 @@ export default function AdminGerenciarTurmas() {
             ) : (
                 Object.entries(groupedTurmas).map(([modalidade, turmasList]) => (
                     <div key={modalidade} style={{ marginBottom: '40px' }}>
-                        <h2 style={{ color: '#007d2f', textTransform: 'uppercase', borderBottom: '2px solid #f0f0f0', paddingBottom: '10px', marginBottom: '20px' }}>
+                        <h2 style={{ color: '#00a63a', textTransform: 'uppercase', borderBottom: '2px solid #f0f0f0', paddingBottom: '10px', marginBottom: '20px' }}>
                             {modalidade}
                         </h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
@@ -163,7 +163,7 @@ export default function AdminGerenciarTurmas() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                                         <div>
                                             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Clock size={20} color="#007d2f" />
+                                                <Clock size={20} color="#00a63a" />
                                                 {turma.horario}
                                             </div>
                                             <div style={{ fontSize: '1.1rem', color: '#555', marginTop: '5px' }}>
@@ -175,7 +175,7 @@ export default function AdminGerenciarTurmas() {
                                                 <Edit2 size={16} color="#1565c0" />
                                             </button>
                                             <button onClick={() => handleDelete(turma)} style={{ background: '#ffebee', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer' }}>
-                                                <Trash2 size={16} color="#007d2f" />
+                                                <Trash2 size={16} color="#00a63a" />
                                             </button>
                                         </div>
                                     </div>
@@ -262,7 +262,7 @@ export default function AdminGerenciarTurmas() {
                                             onClick={() => toggleDia(dia)}
                                             style={{
                                                 padding: '10px 15px', borderRadius: '8px', border: '1px solid #ddd',
-                                                background: formData.dias.includes(dia) ? '#007d2f' : '#fff',
+                                                background: formData.dias.includes(dia) ? '#00a63a' : '#fff',
                                                 color: formData.dias.includes(dia) ? '#fff' : '#333',
                                                 cursor: 'pointer', fontWeight: 'bold'
                                             }}
@@ -294,7 +294,7 @@ export default function AdminGerenciarTurmas() {
                                 </button>
                                 <button
                                     type="submit"
-                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#007d2f', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#00a63a', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
                                     {editingTurma ? 'Salvar' : 'Criar Turma'}
                                 </button>

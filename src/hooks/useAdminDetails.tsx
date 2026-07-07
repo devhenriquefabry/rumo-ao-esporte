@@ -12,6 +12,13 @@ import { AlertTriangle } from 'lucide-react';
 import { useFinancialOperations } from '../pages/AdminFinanceiroComponents/useFinancialOperations';
 import { SyncService } from '../utils/SyncService';
 import { getRegistrationById, getRegistrationsFromSource } from '../utils/registrationSource';
+import {
+    DEFAULT_PAYMENT_PROVIDER_CONFIG,
+    getPaymentProviderConfig,
+    withPaymentProviderPayload,
+    withPaymentProviderQuery,
+    type PaymentProviderConfig
+} from '../utils/paymentProviderConfig';
 
 export function useAdminDetails() {
     const { id } = useParams();
@@ -49,6 +56,7 @@ export function useAdminDetails() {
     const [isProcessingApproval, setIsProcessingApproval] = useState(false);
     const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
     const [plans, setPlans] = useState<any[]>([]);
+    const [paymentConfig, setPaymentConfig] = useState<PaymentProviderConfig>(DEFAULT_PAYMENT_PROVIDER_CONFIG);
 
     const setRegistrationsStable = useCallback((updateFn: any) => {
         setData((prevValue: any) => {
@@ -70,6 +78,13 @@ export function useAdminDetails() {
 
     const initialLoadRef = useRef(true);
 
+    useEffect(() => {
+        getPaymentProviderConfig().then(setPaymentConfig);
+    }, []);
+
+    const workerPath = useCallback((path: string) => withPaymentProviderQuery(path, paymentConfig), [paymentConfig]);
+    const workerPayload = useCallback((payload: Record<string, any>) => withPaymentProviderPayload(payload, paymentConfig), [paymentConfig]);
+
     // Fetch Data
     // Fetch Data
     const fetchStudentData = useCallback(async (targetId?: string) => {
@@ -85,7 +100,7 @@ export function useAdminDetails() {
                 if (docData.paymentId && (!docData.amount || !docData.billingType || !docData.invoiceUrl)) {
                     try {
                         if (workerUrl) {
-                            const response = await fetch(`${workerUrl}/payment-status?paymentId=${docData.paymentId}`);
+                            const response = await fetch(`${workerUrl}${workerPath(`/payment-status?paymentId=${encodeURIComponent(docData.paymentId)}`)}`);
                             const result = await response.json();
                             if (result.payment) {
                                 docData = {
@@ -125,7 +140,7 @@ export function useAdminDetails() {
 
                 if (respCpf) {
                     try {
-                        const siblingRecords = await getRegistrationsFromSource('arena', false);
+                        const siblingRecords = await getRegistrationsFromSource('rumo', false);
                         const siblings = siblingRecords
                             .map(item => ({ id: item.id, ...item.data as any }))
                             .filter(d => {
@@ -166,7 +181,7 @@ export function useAdminDetails() {
         } finally {
             setLoading(false);
         }
-    }, [id, navigate, workerUrl]); // Removed showAlert from deps to avoid loops if not stable
+    }, [id, navigate, workerUrl, workerPath]); // Removed showAlert from deps to avoid loops if not stable
 
     useEffect(() => {
         fetchStudentData();
@@ -192,7 +207,7 @@ export function useAdminDetails() {
         if (!id || !data) return;
         try {
             setGlobalLoading(true, 'Salvando alteraÃ§Ãµes...');
-            const docRef = doc(db, 'arena_simonesia_2026_registrations', id);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
             const { id: _, ...updateData } = data;
             await updateDoc(docRef, updateData);
             showAlert('AlteraÃ§Ãµes salvas com sucesso!', 'success');
@@ -214,7 +229,7 @@ export function useAdminDetails() {
 
         const autoSave = async () => {
             try {
-                const docRef = doc(db, 'arena_simonesia_2026_registrations', id);
+                const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
                 const { id: _, ...updateData } = data;
                 await updateDoc(docRef, updateData);
             } catch (error) {
@@ -240,11 +255,17 @@ export function useAdminDetails() {
                     dias: d.data().dias
                 }));
                 setTurmas(listTurmas);
+            } catch (e) {
+                console.error('Error fetching turmas:', e);
+                setTurmas([]);
+            }
 
+            try {
                 const listPlans = await planService.getPlans();
                 setPlans(listPlans);
             } catch (e) {
-                console.error('Error fetching aux data:', e);
+                console.error('Error fetching plans:', e);
+                setPlans([]);
             }
         };
         loadAux();
@@ -300,7 +321,7 @@ export function useAdminDetails() {
 
             const publicSignature = typeof data.confirmacao?.assinaturaDigital === 'string' && data.confirmacao.assinaturaDigital.startsWith('data:image');
             const signatureDate = data.confirmacao?.dataAssinatura || new Date().toISOString();
-            const docRef = doc(db, 'arena_simonesia_2026_registrations', id as string);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id as string);
             const updatePayload = {
                 contractStatus: 'aprovado',
                 paymentDay: approvalConfig.paymentDay,
@@ -349,10 +370,10 @@ export function useAdminDetails() {
                         multa: selectedPlan.multa || 0
                     };
 
-                    const carnetRes = await fetch(`${workerUrl}/generate-carnet`, {
+                    const carnetRes = await fetch(`${workerUrl}${workerPath('/generate-carnet')}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(carnetPayload)
+                        body: JSON.stringify(workerPayload(carnetPayload))
                     });
                     const carnetResult = await carnetRes.json();
 
@@ -361,6 +382,8 @@ export function useAdminDetails() {
                         // Não bloqueia a aprovaÃ§Ã£o, apenas loga o erro
                     } else {
                         console.log('CarnÃª gerado com sucesso:', carnetResult.payments?.length, 'cobranÃ§as');
+
+                        window.dispatchEvent(new Event('refresh-financial-history'));
 
                         // --- PRORATION LOGIC ---
                         if (approvalConfig.prorate && carnetResult.payments && carnetResult.payments.length > 0) {
@@ -381,12 +404,12 @@ export function useAdminDetails() {
                                     console.log(`[PRORATE] Adjusting first payment ${firstPayment.id} from ${fullMonthlyCentavos} to ${proratedCentavos} cents (${remainingDays} days left)`);
 
                                     // Worker call to update payment value
-                                    await fetch(`${workerUrl}/payments/${firstPayment.id}`, {
+                                    await fetch(`${workerUrl}${workerPath(`/payments/${firstPayment.id}`)}`, {
                                         method: 'PUT',
                                         headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
+                                        body: JSON.stringify(workerPayload({
                                             value: proratedCentavos / 100 // Worker expects Reais
-                                        })
+                                        }))
                                     });
 
                                     // Update Firestore Cache via SyncService
@@ -394,6 +417,8 @@ export function useAdminDetails() {
                                         ...firstPayment,
                                         value: proratedCentavos / 100
                                     }, id as string);
+
+                                    window.dispatchEvent(new Event('refresh-financial-history'));
                                 }
                             } catch (prorateError) {
                                 console.error('Erro ao realizar prorrateio:', prorateError);
@@ -445,7 +470,7 @@ export function useAdminDetails() {
         const lines = [
             `Olá ${nomeResponsavel}, tudo bem?`,
             '',
-            `O cadastro do aluno(a) *${nomeAluno}* foi *APROVADO* com sucesso na Arena Simonésia!`,
+            `O cadastro do aluno(a) *${nomeAluno}* foi *APROVADO* com sucesso na Rumo ao Esporte!`,
             ''
         ];
 
@@ -462,7 +487,7 @@ export function useAdminDetails() {
 
         lines.push(`*ACESSO À ÁREA DO ALUNO:*`);
         lines.push(`Você já pode acessar sua área restrita para visualizar a carteirinha e os boletos.`);
-        lines.push(`Link: https://arenasimonesia.web.app/aluno/login`);
+        lines.push(`Link: https://rumo-ao-esporte.web.app/aluno/login`);
         lines.push(`Login: ${data.responsavel?.email?.trim() || ''}`);
         lines.push(`Senha: ${currentPassword}`);
         lines.push('');
@@ -472,7 +497,7 @@ export function useAdminDetails() {
             lines.push('');
         }
         lines.push(`Atenciosamente,`);
-        lines.push(`Equipe Arena Simonésia`);
+        lines.push(`Equipe Rumo ao Esporte`);
         lines.push('');
         lines.push(`Dúvidas? Entre em contato: +55 33 8414-4053`);
 
@@ -504,7 +529,7 @@ export function useAdminDetails() {
         if (!transferTarget || !selectedTurmaId) return;
         try {
             setIsTransferring(true);
-            const docRef = doc(db, 'arena_simonesia_2026_registrations', transferTarget.id);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', transferTarget.id);
 
             const updatedAlunos = [...transferTarget.alunos];
             updatedAlunos[0] = { ...updatedAlunos[0], turmaId: selectedTurmaId };
@@ -541,7 +566,7 @@ export function useAdminDetails() {
         try {
             // 1. Create new registration document
             const newId = `${id}_${config.modality}_${Date.now()}`;
-            const newRegRef = doc(db, 'arena_simonesia_2026_registrations', newId);
+            const newRegRef = doc(db, 'rumo_ao_esporte_2026_registrations', newId);
 
             // Clone data but reset specific fields
             const {
@@ -612,7 +637,7 @@ export function useAdminDetails() {
         if (!window.confirm(`Tem certeza que deseja remover este aluno da modalidade ${modalityName.toUpperCase()}? Esta aÃ§Ã£o excluirÃ¡ este registro permanentemente.`)) return;
 
         try {
-            const docRef = doc(db, 'arena_simonesia_2026_registrations', regId);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', regId);
             await deleteDoc(docRef);
             showAlert("Modalidade removida com sucesso.", "success");
 
@@ -659,7 +684,7 @@ export function useAdminDetails() {
                 try {
                     const cpf = data.responsavel?.cpf?.replace(/\D/g, '');
                     if (cpf && workerUrl) {
-                        const custResponse = await fetch(`${workerUrl}/customers-by-cpf/${cpf}`);
+                        const custResponse = await fetch(`${workerUrl}${workerPath(`/customers-by-cpf/${cpf}`)}`);
                         const custData = await custResponse.json();
 
                         const customers = [];
@@ -668,7 +693,7 @@ export function useAdminDetails() {
 
                         for (const customer of customers) {
                             if (!customer?.id) continue;
-                            const payResponse = await fetch(`${workerUrl}/payments?customer=${customer.id}&limit=100`);
+                            const payResponse = await fetch(`${workerUrl}${workerPath(`/payments?customer=${encodeURIComponent(customer.id)}&limit=100`)}`);
                             const payData = await payResponse.json();
                             const payments = payData.data || [];
 
@@ -687,13 +712,13 @@ export function useAdminDetails() {
                             });
 
                             for (const p of paymentsToDelete) {
-                                await fetch(`${workerUrl}/payments/${p.id}`, { method: 'DELETE' });
+                                await fetch(`${workerUrl}${workerPath(`/payments/${p.id}`)}`, { method: 'DELETE' });
                                 await SyncService.deletePaymentFromFirestore(p.id);
                             }
                         }
                     }
 
-                    const docRef = doc(db, 'arena_simonesia_2026_registrations', id);
+                    const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
                     await updateDoc(docRef, {
                         contractStatus: 'desativado',
                         status: 'desativado',
@@ -725,7 +750,7 @@ export function useAdminDetails() {
             async () => {
                 setGlobalLoading(true, 'Reativando...');
                 try {
-                    const docRef = doc(db, 'arena_simonesia_2026_registrations', id);
+                    const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
                     await updateDoc(docRef, {
                         contractStatus: 'aprovado',
                         status: 'pendente'
@@ -753,10 +778,10 @@ export function useAdminDetails() {
                                 multa: selectedPlan.multa || 0
                             };
 
-                            const res = await fetch(`${workerUrl}/generate-carnet`, {
+                            const res = await fetch(`${workerUrl}${workerPath('/generate-carnet')}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(carnetPayload)
+                                body: JSON.stringify(workerPayload(carnetPayload))
                             });
                             const result = await res.json();
                             if (result.success) showAlert('Novas faturas geradas com sucesso!', 'success');
@@ -798,11 +823,11 @@ export function useAdminDetails() {
                     const cpf = data.responsavel?.cpf?.replace(/\D/g, '');
                     if (!cpf) throw new Error('CPF não encontrado.');
 
-                    const custResponse = await fetch(`${workerUrl}/customers-by-cpf/${cpf}`);
+                    const custResponse = await fetch(`${workerUrl}${workerPath(`/customers-by-cpf/${cpf}`)}`);
                     const custData = await custResponse.json();
 
                     if (custData.customer && custData.customer.id) {
-                        const payResponse = await fetch(`${workerUrl}/payments?customer=${custData.customer.id}&limit=100`);
+                        const payResponse = await fetch(`${workerUrl}${workerPath(`/payments?customer=${encodeURIComponent(custData.customer.id)}&limit=100`)}`);
                         const payData = await payResponse.json();
                         const payments = payData.data || [];
 
@@ -815,12 +840,12 @@ export function useAdminDetails() {
 
                         for (let i = 0; i < paymentsToDelete.length; i++) {
                             const p = paymentsToDelete[i];
-                            await fetch(`${workerUrl}/payments/${p.id}`, { method: 'DELETE' });
+                            await fetch(`${workerUrl}${workerPath(`/payments/${p.id}`)}`, { method: 'DELETE' });
                             setDeleteProgress({ current: i + 1, total: paymentsToDelete.length });
                         }
                     }
 
-                    await deleteDoc(doc(db, 'arena_simonesia_2026_registrations', id));
+                    await deleteDoc(doc(db, 'rumo_ao_esporte_2026_registrations', id));
 
                     setDeleteStatus('success');
                     setTimeout(() => {

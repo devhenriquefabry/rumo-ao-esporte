@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import type { Employee } from '../types/user';
 import { DEFAULT_ADMIN_PERMISSIONS } from '../types/user';
 
-const MAIN_ADMIN_EMAILS = ['arenasimonesia@admin.com'];
+const MAIN_ADMIN_EMAILS = [
+    ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase()
+];
 
 const isMainAdminEmail = (email?: string | null) =>
     !!email && MAIN_ADMIN_EMAILS.includes(email.trim().toLowerCase());
@@ -14,7 +16,7 @@ export function useAdminPermissions() {
     const [user, setUser] = useState<Employee | null>(null);
 
     useEffect(() => {
-        const storedAuth = localStorage.getItem('uba_admin_auth');
+        const storedAuth = localStorage.getItem('rae_admin_auth');
 
         if (!storedAuth) {
             setLoading(false);
@@ -29,7 +31,7 @@ export function useAdminPermissions() {
                 if (storedAuth === 'true') {
                     setRole('admin');
                     setPermissions(DEFAULT_ADMIN_PERMISSIONS);
-                    setUser({ id: 'admin', nome: 'Administrador', email: 'arenasimonesia@admin.com', role: 'admin', active: true, permissions: DEFAULT_ADMIN_PERMISSIONS });
+                    setUser({ id: 'admin', nome: 'Administrador', email: MAIN_ADMIN_EMAILS[0], role: 'admin', active: true, permissions: DEFAULT_ADMIN_PERMISSIONS });
                     setLoading(false);
                 } else {
                     // It's a JSON object (Employee)

@@ -21,7 +21,7 @@ export default function StudentHome() {
     useEffect(() => {
         // Use onAuthStateChanged to ensure we wait for Firebase to initialize
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('uba_impersonated_student_email');
+            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail || (user && user.email)) {
                 try {
                     // 1. Fetch ALL Registrations for this email (normalized to lowercase)
@@ -29,7 +29,7 @@ export default function StudentHome() {
                     console.log("[DEBUG] StudentHome: User Email:", user?.email);
                     console.log("[DEBUG] StudentHome: Normalized Email:", normalizedEmail);
 
-                    const q = query(collection(db, "arena_simonesia_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
+                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
                     const querySnapshot = await getDocs(q);
 
                     console.log("[DEBUG] StudentHome: Records found:", querySnapshot.size);
@@ -187,7 +187,7 @@ export default function StudentHome() {
     if (allStudents.length === 0) return (
         <PageContainer>
             <div style={{ textAlign: 'center', padding: '50px' }}>
-                <h2 style={{ color: '#007d2f' }}>Nenhum atleta encontrado.</h2>
+                <h2 style={{ color: '#00a63a' }}>Nenhum atleta encontrado.</h2>
                 <p style={{ color: '#666' }}>Entre em contato com a secretaria se acreditar que isso é um erro.</p>
             </div>
         </PageContainer>
@@ -220,7 +220,7 @@ export default function StudentHome() {
                         background: #fff;
                         border-radius: 12px;
                         padding: 20px;
-                        border-left: 5px solid #007d2f; /* Red Theme */
+                        border-left: 5px solid #00a63a; /* Red Theme */
                         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
                         display: flex;
                         align-items: center;
@@ -231,8 +231,8 @@ export default function StudentHome() {
                         width: 45px;
                         height: 45px;
                         border-radius: 50%;
-                        background: #fff5f5;
-                        color: #007d2f;
+                        background: #eef8ff;
+                        color: #00a63a;
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -245,7 +245,7 @@ export default function StudentHome() {
                         overflow: hidden;
                         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
                         border: 1px solid #eef2ff;
-                        border-left: 5px solid #00237f; /* Blue Theme */
+                        border-left: 5px solid #17428f; /* Blue Theme */
                     }
                     .student-card-content {
                         display: flex;
@@ -272,7 +272,7 @@ export default function StudentHome() {
                     }
                     .student-name {
                         margin: 0;
-                        color: #00237f;
+                        color: #17428f;
                         font-size: 1.25rem;
                         text-transform: uppercase;
                         font-weight: 800;
@@ -301,7 +301,7 @@ export default function StudentHome() {
                     }
                     .badge-class {
                         background: #eef2ff;
-                        color: #00237f;
+                        color: #17428f;
                     }
                         .badge-pending {
                             background: #fff3cd;
@@ -367,7 +367,7 @@ export default function StudentHome() {
                             </div>
                             <div>
                                 <span style={{ fontSize: '0.75rem', color: '#999', textTransform: 'uppercase', fontWeight: 'bold' }}>Responsável Financeiro</span>
-                                <h3 style={{ margin: 0, color: '#007d2f', fontSize: '1.1rem' }}>
+                                <h3 style={{ margin: 0, color: '#00a63a', fontSize: '1.1rem' }}>
                                     {responsavel.nome.toUpperCase()}
                                 </h3>
                                 <div style={{ display: 'flex', gap: '5px', alignItems: 'center', fontSize: '0.8rem', color: '#666', marginTop: '2px' }}>
@@ -461,7 +461,7 @@ export default function StudentHome() {
                                                     <div style={{
                                                         padding: '4px 0',
                                                         fontSize: '0.75rem',
-                                                        color: '#007d2f',
+                                                        color: '#00a63a',
                                                         textTransform: 'uppercase',
                                                         fontWeight: '900',
                                                         marginBottom: '8px',
@@ -725,7 +725,7 @@ export default function StudentHome() {
                                                     )}
                                                 </span>
 
-                                                <span className={`badge ${!aluno.contractGenerated ? 'badge-no-contract' : (aluno.signatureData ? 'badge-class' : 'badge-pending')}`} style={{ background: !aluno.contractGenerated ? '#eee' : (aluno.signatureData ? '#eef2ff' : '#fff3cd'), color: !aluno.contractGenerated ? '#666' : (aluno.signatureData ? '#00237f' : '#856404') }}>
+                                                <span className={`badge ${!aluno.contractGenerated ? 'badge-no-contract' : (aluno.signatureData ? 'badge-class' : 'badge-pending')}`} style={{ background: !aluno.contractGenerated ? '#eee' : (aluno.signatureData ? '#eef2ff' : '#fff3cd'), color: !aluno.contractGenerated ? '#666' : (aluno.signatureData ? '#17428f' : '#856404') }}>
                                                     {!aluno.contractGenerated ? 'Sem Contrato' : (aluno.signatureData ? 'Contrato OK' : 'Assinatura Pendente')}
                                                 </span>
                                             </div>

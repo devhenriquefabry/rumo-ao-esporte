@@ -108,7 +108,7 @@ export default function AdminSettings() {
                                 position: 'relative',
                                 width: '56px',
                                 height: '30px',
-                                background: creditCardEnabled ? '#007d2f' : '#e0e0e0',
+                                background: creditCardEnabled ? '#00a63a' : '#e0e0e0',
                                 borderRadius: '30px',
                                 border: 'none',
                                 cursor: saving ? 'wait' : 'pointer',

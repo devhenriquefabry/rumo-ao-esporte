@@ -73,10 +73,10 @@ export default function AddModalityModal({
                                     style={{
                                         padding: '12px',
                                         borderRadius: '8px',
-                                        border: selectedModality === m.id ? '2px solid #007d2f' : '1px solid #eee',
-                                        background: selectedModality === m.id ? '#fff5f5' : '#f9f9f9',
+                                        border: selectedModality === m.id ? '2px solid #00a63a' : '1px solid #eee',
+                                        background: selectedModality === m.id ? '#eef8ff' : '#f9f9f9',
                                         fontWeight: 'bold',
-                                        color: selectedModality === m.id ? '#007d2f' : '#333',
+                                        color: selectedModality === m.id ? '#00a63a' : '#333',
                                         cursor: 'pointer',
                                         fontSize: '0.85rem'
                                     }}
@@ -132,7 +132,7 @@ export default function AddModalityModal({
                         width: '100%',
                         padding: '16px',
                         borderRadius: '12px',
-                        background: (selectedModality && selectedPlan && !isProcessing) ? '#007d2f' : '#ccc',
+                        background: (selectedModality && selectedPlan && !isProcessing) ? '#00a63a' : '#ccc',
                         color: '#fff',
                         border: 'none',
                         fontWeight: 'bold',

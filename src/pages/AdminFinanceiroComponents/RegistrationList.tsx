@@ -88,7 +88,7 @@ export const RegistrationList: React.FC<RegistrationListProps> = ({
                                                 cursor: 'pointer',
                                                 flexShrink: 0,
                                                 marginRight: '10px',
-                                                accentColor: '#007d2f',
+                                                accentColor: '#00a63a',
                                                 zIndex: 2,
                                                 display: 'block !important',
                                                 WebkitAppearance: 'checkbox',
@@ -122,7 +122,7 @@ export const RegistrationList: React.FC<RegistrationListProps> = ({
                                             onClick={() => navigate(`/admin/details/${r.id}`)}
                                             style={{
                                                 fontWeight: '800',
-                                                color: '#007d2f',
+                                                color: '#00a63a',
                                                 cursor: 'pointer',
                                                 textDecoration: 'underline',
                                                 textTransform: 'uppercase',
@@ -214,7 +214,7 @@ export const RegistrationList: React.FC<RegistrationListProps> = ({
                                         padding: '8px 15px',
                                         borderRadius: '8px',
                                         cursor: 'pointer',
-                                        color: readOnly ? '#666' : '#007d2f',
+                                        color: readOnly ? '#666' : '#00a63a',
                                         fontWeight: 'bold',
                                         display: 'flex',
                                         alignItems: 'center',

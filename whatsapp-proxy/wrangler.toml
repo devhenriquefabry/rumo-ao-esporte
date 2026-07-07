@@ -1,14 +1,41 @@
-name = "arenasimonesia-whatsapp-proxy"
+name = "rumo-ao-esporte-whatsapp-proxy"
 main = "src/index.js"
 compatibility_date = "2024-03-20"
+workers_dev = true
 
 [[kv_namespaces]]
-binding = "UBA_STORAGE"
-id = "796436dfd42a43849ef856fdf28518b0"
+binding = "RAE_STORAGE"
+id = "b742c8f51783484c9aa22238542a4fb3"
 
 [vars]
-FIREBASE_PROJECT_ID = "arenasimonesia"
-FIREBASE_API_KEY = "AIzaSyBy1Qyf-v0swTbrrBhSYRTRUPD-M45KUIA"
+FIREBASE_PROJECT_ID = "rumo-ao-esporte"
+FIREBASE_API_KEY = "AIzaSyB5p94AGRA75Y8KsdAs1lgi4bmO_hcwcpM"
+WORKER_PUBLIC_URL = "https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev"
+PAYMENT_PROVIDER = "asaas"
+CORA_DEFAULT_ENVIRONMENT = "stage"
+CORA_STAGE_CLIENT_ID = "int-2GlPPaOKqVarPWJqZqGyRB"
+CORA_PRODUCTION_CLIENT_ID = "int-2GlPPaOKqVarPWJqZqGyRB"
+
+[[mtls_certificates]]
+binding = "CORA_STAGE_CERT"
+certificate_id = "157f5982-81c4-43e6-95db-acd531e87755"
+
+[[mtls_certificates]]
+binding = "CORA_PRODUCTION_CERT"
+certificate_id = "112d1013-bb8a-407a-b4bc-938af26bb158"
+
+# Para ativar a Cora de verdade, suba os certificados fora do Git:
+# npx wrangler mtls-certificate upload --cert caminho/certificate.pem --key caminho/private-key.key --name cora-stage
+# Depois adicione o binding retornado pelo Cloudflare:
+# [[mtls_certificates]]
+# binding = "CORA_STAGE_CERT"
+# certificate_id = "cole-o-certificate-id-stage"
+#
+# Para produção, repita com as credenciais de produção:
+# CORA_PRODUCTION_CLIENT_ID = "cole-o-client-id-producao"
+# [[mtls_certificates]]
+# binding = "CORA_PRODUCTION_CERT"
+# certificate_id = "cole-o-certificate-id-producao"
 
 [triggers]
 crons = ["* * * * *"]

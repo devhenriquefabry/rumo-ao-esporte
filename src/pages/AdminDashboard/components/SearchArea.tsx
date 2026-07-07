@@ -41,7 +41,7 @@ export const SearchArea: React.FC<SearchAreaProps> = ({
                         transition: 'border-color 0.2s ease',
                         boxSizing: 'border-box'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#007d2f'}
+                    onFocus={(e) => e.target.style.borderColor = '#00a63a'}
                     onBlur={(e) => e.target.style.borderColor = '#ddd'}
                 />
                 {searchTerm && (
@@ -65,7 +65,7 @@ export const SearchArea: React.FC<SearchAreaProps> = ({
                     position: 'absolute',
                     left: '12px',
                     pointerEvents: 'none',
-                    color: '#007d2f',
+                    color: '#00a63a',
                     display: 'flex',
                     alignItems: 'center'
                 }}>
@@ -91,7 +91,7 @@ export const SearchArea: React.FC<SearchAreaProps> = ({
                         boxSizing: 'border-box'
                     }}
                     onFocus={(e) => {
-                        e.target.style.borderColor = '#007d2f';
+                        e.target.style.borderColor = '#00a63a';
                         e.target.style.boxShadow = '0 0 0 2px rgba(0, 125, 47, 0.15)';
                     }}
                     onBlur={(e) => {

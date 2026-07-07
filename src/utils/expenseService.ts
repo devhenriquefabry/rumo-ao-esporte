@@ -9,7 +9,7 @@ import {
     orderBy
 } from 'firebase/firestore';
 
-const COLLECTION = 'uba_gastos';
+const COLLECTION = 'rae_gastos';
 
 export interface ExpenseInput {
     description: string;

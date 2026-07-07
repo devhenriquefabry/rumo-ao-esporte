@@ -50,8 +50,8 @@ function MessageDetailsModal({ log, onClose }: { log: any; onClose: () => void }
                             <label style={labelStyle}>Status</label>
                             <span style={{ 
                                 padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700,
-                                background: log.status === 'SUCESSO' ? '#eafaf1' : '#fff5f5',
-                                color: log.status === 'SUCESSO' ? '#1e8449' : '#007d2f',
+                                background: log.status === 'SUCESSO' ? '#eafaf1' : '#eef8ff',
+                                color: log.status === 'SUCESSO' ? '#1e8449' : '#00a63a',
                                 display: 'inline-flex', alignItems: 'center', gap: '5px'
                             }}>
                                 {log.status === 'SUCESSO' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
@@ -229,8 +229,8 @@ export default function AdminMensagensHistorico() {
                                                 <span style={{ 
                                                     display: 'inline-flex', alignItems: 'center', gap: '5px',
                                                     padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700,
-                                                    background: log.status === 'SUCESSO' ? '#eafaf1' : '#fff5f5',
-                                                    color: log.status === 'SUCESSO' ? '#1e8449' : '#007d2f',
+                                                    background: log.status === 'SUCESSO' ? '#eafaf1' : '#eef8ff',
+                                                    color: log.status === 'SUCESSO' ? '#1e8449' : '#00a63a',
                                                     width: 'fit-content'
                                                 }}>
                                                     {log.status === 'SUCESSO' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
@@ -243,7 +243,7 @@ export default function AdminMensagensHistorico() {
                                         </td>
                                         <td style={{ padding: '12px 8px' }}>
                                             <button 
-                                                style={{ background: 'none', border: 'none', color: '#007d2f', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                style={{ background: 'none', border: 'none', color: '#00a63a', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                                 onClick={(e) => { e.stopPropagation(); setSelectedLog(log); }}
                                             >
                                                 Detalhes <ExternalLink size={14} />

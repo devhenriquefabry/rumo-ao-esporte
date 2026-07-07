@@ -256,7 +256,7 @@ export const ManualChargesModal: React.FC<ManualChargesModalProps> = ({ isOpen, 
                 <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px' : '20px 30px' }}>
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '50px' }}>
-                            <div className="spinner" style={{ margin: '0 auto 15px', width: '40px', height: '40px', border: '3px solid #f1f5f9', borderTop: '3px solid #007d2f', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                            <div className="spinner" style={{ margin: '0 auto 15px', width: '40px', height: '40px', border: '3px solid #f1f5f9', borderTop: '3px solid #00a63a', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                             <p style={{ color: '#64748b' }}>Carregando lançamentos...</p>
                         </div>
                     ) : filteredAndSortedCharges.length === 0 ? (
@@ -302,7 +302,7 @@ export const ManualChargesModal: React.FC<ManualChargesModalProps> = ({ isOpen, 
                                             </div>
                                             {charge.invoiceUrl && (
                                                 <a href={charge.invoiceUrl} target="_blank" rel="noreferrer" style={{
-                                                    background: '#007d2f', color: '#fff', padding: '8px 12px', borderRadius: '8px',
+                                                    background: '#00a63a', color: '#fff', padding: '8px 12px', borderRadius: '8px',
                                                     fontSize: '0.75rem', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px'
                                                 }}>
                                                     <ExternalLink size={14} /> Link
@@ -395,7 +395,7 @@ export const ManualChargesModal: React.FC<ManualChargesModalProps> = ({ isOpen, 
                                             <td style={{ padding: '15px 10px' }}>
                                                 {charge.invoiceUrl && (
                                                     <a href={charge.invoiceUrl} target="_blank" rel="noreferrer" style={{
-                                                        color: '#007d2f', display: 'flex', alignItems: 'center', gap: '5px',
+                                                        color: '#00a63a', display: 'flex', alignItems: 'center', gap: '5px',
                                                         fontSize: '0.8rem', fontWeight: 'bold', textDecoration: 'none'
                                                     }}>
                                                         <ExternalLink size={14} /> Link

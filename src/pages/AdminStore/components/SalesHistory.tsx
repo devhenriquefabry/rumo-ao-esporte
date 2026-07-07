@@ -16,7 +16,7 @@ export default function SalesHistory() {
     const fetchOrders = async () => {
         setLoading(true);
         try {
-            const q = query(collection(db, 'uba_store_orders'), orderBy('createdAt', 'desc'));
+            const q = query(collection(db, 'rae_store_orders'), orderBy('createdAt', 'desc'));
             const snap = await getDocs(q);
             const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as StoreOrder));
             setOrders(data);
@@ -52,7 +52,7 @@ export default function SalesHistory() {
                     }
                 }
 
-                await updateDoc(doc(db, 'uba_store_orders', orderId), {
+                await updateDoc(doc(db, 'rae_store_orders', orderId), {
                     status: newStatus,
                     updatedAt: new Date().toISOString()
                 });
@@ -78,11 +78,11 @@ export default function SalesHistory() {
                 }
 
                 // Delete doc
-                await deleteDoc(doc(db, 'uba_store_orders', order.id!));
+                await deleteDoc(doc(db, 'rae_store_orders', order.id!));
 
                 // Restore stock
                 for (const item of order.items) {
-                    await updateDoc(doc(db, 'uba_store_products', item.productId), {
+                    await updateDoc(doc(db, 'rae_store_products', item.productId), {
                         stock: increment(item.quantity)
                     });
                 }
@@ -111,7 +111,7 @@ export default function SalesHistory() {
                     });
                 }
 
-                await updateDoc(doc(db, 'uba_store_orders', order.id!), {
+                await updateDoc(doc(db, 'rae_store_orders', order.id!), {
                     status: 'paid',
                     updatedAt: new Date().toISOString()
                 });
@@ -152,7 +152,7 @@ export default function SalesHistory() {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-                <h2 style={{ margin: 0, color: '#00237f', fontSize: '1.2rem' }}>Histórico de Vendas</h2>
+                <h2 style={{ margin: 0, color: '#17428f', fontSize: '1.2rem' }}>Histórico de Vendas</h2>
 
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     <div style={{ position: 'relative', width: '300px' }}>
@@ -215,11 +215,11 @@ export default function SalesHistory() {
                                         <span>Data: {new Date(order.createdAt).toLocaleString('pt-BR')}</span>
                                         <span>ID: {order.id}</span>
                                         {order.invoiceUrl ? (
-                                            <a href={order.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: '#00237f', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                                            <a href={order.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: '#17428f', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
                                                 Fatura <ExternalLink size={12} />
                                             </a>
                                         ) : order.invoiceId ? (
-                                            <a href={`https://www.asaas.com/c/${order.invoiceId}`} target="_blank" rel="noreferrer" style={{ color: '#00237f', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                                            <a href={`https://www.asaas.com/c/${order.invoiceId}`} target="_blank" rel="noreferrer" style={{ color: '#17428f', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
                                                 Asaas <ExternalLink size={12} />
                                             </a>
                                         ) : null}
@@ -259,7 +259,7 @@ export default function SalesHistory() {
                                 {order.status === 'pending_payment' && (
                                     <button
                                         onClick={() => handleMarkAsPaid(order)}
-                                        style={{ background: '#00237f', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                        style={{ background: '#17428f', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                                     >
                                         <CheckCircle size={16} /> JÁ RECEBIDO
                                     </button>

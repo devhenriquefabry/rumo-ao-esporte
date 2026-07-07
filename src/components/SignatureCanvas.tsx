@@ -271,7 +271,7 @@ export default function SignatureCanvas({ onConfirm, onClear, showConfirmButton 
                         style={{
                             flex: 1,
                             padding: '10px',
-                            background: hasSignature ? '#00237f' : '#ccc',
+                            background: hasSignature ? '#17428f' : '#ccc',
                             border: 'none',
                             borderRadius: '8px',
                             color: '#fff',

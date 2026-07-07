@@ -161,7 +161,7 @@ export function useGlobalQRScanner() {
 
                 console.log("[GlobalScanner] Searching for:", { nome, cpfClean, nascBR });
 
-                const allRegs = await getDocs(collection(db, "arena_simonesia_2026_registrations"));
+                const allRegs = await getDocs(collection(db, "rumo_ao_esporte_2026_registrations"));
 
                 allRegs.forEach(docSnap => {
                     if (foundStudent) return;

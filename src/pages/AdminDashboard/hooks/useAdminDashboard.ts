@@ -101,16 +101,17 @@ export function useAdminDashboard(filterStatus?: string) {
     }, [allStudents, searchTerm, activeModality, filterStatus, sortBy]);
 
     const handleModalityClick = (mod: string) => {
-        if (activeModality !== mod) {
+        const nextModality = mod || null;
+        if (activeModality !== nextModality) {
             showLoading(1500);
-            setActiveModality(mod);
+            setActiveModality(nextModality);
         }
     };
 
     const handleGeneratePDF = async (pdfSortBy?: string) => {
-        if (!activeModality) return;
         showLoading(4000);
         setIsExportModalOpen(false);
+        const exportScope = activeModality || 'todos';
 
         let studentsToExport = [...filteredStudents];
         const targetSort = pdfSortBy || sortBy;
@@ -149,7 +150,7 @@ export function useAdminDashboard(filterStatus?: string) {
             });
         }
 
-        await generatePDF(activeModality, studentsToExport, turmas, plans, selectedColumns, targetSort);
+        await generatePDF(exportScope, studentsToExport, turmas, plans, selectedColumns, targetSort);
     };
 
     const toggleColumn = (id: string) => {

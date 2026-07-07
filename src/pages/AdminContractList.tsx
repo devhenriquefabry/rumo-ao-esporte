@@ -54,7 +54,7 @@ export default function AdminContractList() {
             setPlans(allPlans);
             const defaultPlan = allPlans.find(p => p.isDefault) || allPlans[0];
 
-            const snap = await getDocs(collection(db, 'arena_simonesia_2026_registrations'));
+            const snap = await getDocs(collection(db, 'rumo_ao_esporte_2026_registrations'));
             const items: ContractItem[] = [];
 
             snap.docs.forEach(docSnap => {
@@ -100,7 +100,7 @@ export default function AdminContractList() {
             `⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\nVocê está prestes a EXCLUIR os dados de contrato/assinatura de:\n\n📋 Aluno: ${contract.studentName}\n👤 Responsável: ${contract.responsavelName}\n\nO aluno ficará sem contrato e precisará ser aprovado novamente para gerar um novo.\n\nDeseja continuar?`,
             async () => {
                 try {
-                    const docRef = doc(db, 'arena_simonesia_2026_registrations', contract.registrationId);
+                    const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', contract.registrationId);
                     const docSnap = await getDoc(docRef);
 
                     if (docSnap.exists()) {
@@ -162,7 +162,7 @@ export default function AdminContractList() {
         if (!newPlanId) return;
 
         try {
-            const docRef = doc(db, 'arena_simonesia_2026_registrations', contract.registrationId);
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', contract.registrationId);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -206,7 +206,7 @@ export default function AdminContractList() {
         <PageContainer>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
-                <FileText size={28} color="#007d2f" />
+                <FileText size={28} color="#00a63a" />
                 <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#333' }}>Lista de Contratos</h1>
             </div>
 
@@ -225,7 +225,7 @@ export default function AdminContractList() {
                         onClick={() => setSelectedModality(mod.label)}
                         style={{
                             padding: '10px 20px',
-                            background: selectedModality === mod.label ? '#007d2f' : 'transparent',
+                            background: selectedModality === mod.label ? '#00a63a' : 'transparent',
                             color: selectedModality === mod.label ? '#fff' : '#666',
                             border: 'none',
                             borderRadius: '20px',
@@ -234,7 +234,7 @@ export default function AdminContractList() {
                             fontSize: '0.9rem',
                             whiteSpace: 'nowrap',
                             transition: 'all 0.2s',
-                            boxShadow: selectedModality === mod.label ? '0 2px 5px rgba(0, 125, 47, 0.3)' : 'none'
+                            boxShadow: selectedModality === mod.label ? '0 2px 5px rgba(0, 166, 58, 0.28)' : 'none'
                         }}
                     >
                         {mod.label}
@@ -479,7 +479,7 @@ export default function AdminContractList() {
                                                         borderRadius: '6px',
                                                         padding: '8px',
                                                         cursor: 'pointer',
-                                                        color: '#007d2f'
+                                                        color: '#00a63a'
                                                     }}
                                                     title="Excluir Contrato e Assinatura"
                                                 >
@@ -621,7 +621,7 @@ export default function AdminContractList() {
                                                 borderRadius: '6px',
                                                 padding: '10px 16px',
                                                 cursor: 'pointer',
-                                                color: '#007d2f',
+                                                color: '#00a63a',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '6px',

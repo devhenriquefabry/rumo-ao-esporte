@@ -50,7 +50,7 @@ export default function PlanMigrationModal({
             }}>
                 {/* Header */}
                 <div style={{ padding: '20px 25px', borderBottom: '1px solid #eee', position: 'relative' }}>
-                    <div style={{ color: '#007d2f', fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    <div style={{ color: '#00a63a', fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase', marginBottom: '4px' }}>
                         FINANCEIRO
                     </div>
                     <div style={{ color: '#666', fontSize: '0.9rem' }}>{alunoNome}</div>
@@ -71,11 +71,11 @@ export default function PlanMigrationModal({
                 {/* Body */}
                 <div style={{ padding: '25px' }}>
                     <div style={{
-                        border: '1px solid #007d2f', borderRadius: '4px', padding: '20px',
+                        border: '1px solid #00a63a', borderRadius: '4px', padding: '20px',
                         background: '#fff', position: 'relative'
                     }}>
                         <div style={{
-                            color: '#007d2f', fontWeight: 'bold', fontSize: '0.85rem',
+                            color: '#00a63a', fontWeight: 'bold', fontSize: '0.85rem',
                             textTransform: 'uppercase', marginBottom: '15px'
                         }}>
                             MIGRAÇÃO DE PLANO / MODALIDADE
@@ -116,7 +116,7 @@ export default function PlanMigrationModal({
                             onClick={handleConfirm}
                             disabled={!selectedPlanId || !selectedModality || isMigrating}
                             style={{
-                                width: '100%', padding: '12px', background: '#007d2f', color: '#fff',
+                                width: '100%', padding: '12px', background: '#00a63a', color: '#fff',
                                 border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.95rem',
                                 cursor: 'pointer', opacity: (selectedPlanId && selectedModality) ? 1 : 0.6
                             }}

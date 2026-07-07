@@ -50,35 +50,40 @@ export default function StudentDetailsSection({
         try {
             const compressedFile = await compressImage(file);
             const formData = new FormData();
-            formData.append('studentId', aluno.id);
-            formData.append('photo', compressedFile);
+            formData.append('file', compressedFile, file.name);
+            formData.append('folder', 'rumo_ao_esporte_2026_photos');
 
-            const response = await fetch('https://sistema-playkids-kids-geo-v2.thayron-alves-da-silva.workers.dev/upload-photo', {
+            const workerUrl = import.meta.env.VITE_WORKER_URL || 'https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev';
+            const response = await fetch(`${workerUrl}/images/upload`, {
                 method: 'POST',
                 body: formData
             });
 
             const result = await response.json();
-            if (result.success) {
+            const uploadedUrl = result.data?.url || result.url || result.photoUrl;
+
+            if (response.ok && uploadedUrl) {
                 const updatedAlunos = [...data.alunos];
-                updatedAlunos[index] = { ...updatedAlunos[index], fotoUrl: result.photoUrl };
+                updatedAlunos[index] = { ...updatedAlunos[index], fotoUrl: uploadedUrl };
                 setData({ ...data, alunos: updatedAlunos });
                 showAlert('Foto atualizada com sucesso!', 'success');
             } else {
-                showAlert('Erro ao atualizar foto.', 'error');
+                showAlert(result.error || 'Erro ao atualizar foto.', 'error');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            showAlert('Erro ao enviar foto.', 'error');
+            showAlert(`Erro ao enviar foto: ${error.message || 'Erro desconhecido'}`, 'error');
         } finally {
             setUploading(false);
+            e.target.value = '';
         }
     };
 
     const getAge = (birthDate: string) => {
-        if (!birthDate) return '';
+        const birth = parseBirthDate(birthDate);
+        if (!birth) return '-';
+
         const today = new Date();
-        const birth = new Date(birthDate);
         let age = today.getFullYear() - birth.getFullYear();
         const m = today.getMonth() - birth.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
@@ -87,25 +92,51 @@ export default function StudentDetailsSection({
         return `${age} anos`;
     };
 
+    const parseBirthDate = (birthDate?: string) => {
+        if (!birthDate) return null;
+
+        const normalized = birthDate.trim();
+        const brDateMatch = normalized.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+
+        if (brDateMatch) {
+            const [, day, month, year] = brDateMatch;
+            const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+            const isValid =
+                parsed.getFullYear() === Number(year) &&
+                parsed.getMonth() === Number(month) - 1 &&
+                parsed.getDate() === Number(day);
+
+            return isValid ? parsed : null;
+        }
+
+        const parsed = new Date(normalized);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const formatBirthDate = (birthDate?: string) => {
+        const parsed = parseBirthDate(birthDate);
+        return parsed ? parsed.toLocaleDateString('pt-BR') : birthDate || '-';
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '20px' }}>
             {/* TABS HEADER */}
             <div style={{ display: 'flex', gap: '10px', padding: '0 10px', marginBottom: '-1px', zIndex: 1, position: 'relative' }}>
                 <button
                     onClick={() => setActiveTab('overview')}
-                    style={{ padding: '12px 24px', background: activeTab === 'overview' ? '#007d2f' : '#eee', color: activeTab === 'overview' ? '#fff' : '#666', borderRadius: '12px 12px 0 0', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: activeTab === 'overview' ? '0 -2px 10px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+                    style={{ padding: '12px 24px', background: activeTab === 'overview' ? '#00a63a' : '#eee', color: activeTab === 'overview' ? '#fff' : '#666', borderRadius: '12px 12px 0 0', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: activeTab === 'overview' ? '0 -2px 10px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
                 >
                     <User size={18} /> Visão Geral
                 </button>
                 <button
                     onClick={() => setActiveTab('galerie')}
-                    style={{ padding: '12px 24px', background: activeTab === 'galerie' ? '#007d2f' : '#eee', color: activeTab === 'galerie' ? '#fff' : '#666', borderRadius: '12px 12px 0 0', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: activeTab === 'galerie' ? '0 -2px 10px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+                    style={{ padding: '12px 24px', background: activeTab === 'galerie' ? '#00a63a' : '#eee', color: activeTab === 'galerie' ? '#fff' : '#666', borderRadius: '12px 12px 0 0', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: activeTab === 'galerie' ? '0 -2px 10px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
                 >
                     <Camera size={18} /> Galeria de Mídias
                 </button>
             </div>
 
-            <div style={{ background: activeTab === 'overview' ? '#007d2f' : 'transparent', borderRadius: '16px', borderTopLeftRadius: activeTab === 'overview' ? '0' : '16px', overflow: 'hidden', border: activeTab === 'overview' ? '1px solid rgba(255,255,255,0.1)' : 'none', boxShadow: activeTab === 'overview' ? '0 10px 25px rgba(0, 125, 47, 0.25)' : 'none' }}>
+            <div style={{ background: activeTab === 'overview' ? '#00a63a' : 'transparent', borderRadius: '16px', borderTopLeftRadius: activeTab === 'overview' ? '0' : '16px', overflow: 'hidden', border: activeTab === 'overview' ? '1px solid rgba(255,255,255,0.1)' : 'none', boxShadow: activeTab === 'overview' ? '0 10px 25px rgba(0, 125, 47, 0.25)' : 'none' }}>
 
                 {activeTab === 'overview' && (
                     <div className="student-grid-layout" style={{
@@ -200,7 +231,7 @@ export default function StudentDetailsSection({
                                 <div>
                                     <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '2px', fontWeight: 'bold', textTransform: 'uppercase' }}>Nascimento</label>
                                     <div style={{ fontSize: '1rem', color: '#fff', fontWeight: '600' }}>
-                                        {aluno.dataNascimento ? new Date(aluno.dataNascimento).toLocaleDateString() : '-'}
+                                        {formatBirthDate(aluno.dataNascimento)}
                                         <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginLeft: '5px' }}>({getAge(aluno.dataNascimento)})</span>
                                     </div>
                                 </div>
@@ -288,7 +319,7 @@ export default function StudentDetailsSection({
                                                                 borderRadius: '6px',
                                                                 cursor: 'pointer',
                                                                 fontWeight: '800',
-                                                                color: '#007d2f',
+                                                                color: '#00a63a',
                                                                 border: 'none',
                                                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                                                             }}
@@ -366,7 +397,7 @@ export default function StudentDetailsSection({
                                                         padding: '2px 8px',
                                                         borderRadius: '4px',
                                                         background: reg.status === 'pago' ? '#2e7d32' : '#fff',
-                                                        color: reg.status === 'pago' ? '#fff' : '#007d2f'
+                                                        color: reg.status === 'pago' ? '#fff' : '#00a63a'
                                                     }}>{(reg.status || 'pendente').toUpperCase()}</span>
                                                 </div>
                                             </div>

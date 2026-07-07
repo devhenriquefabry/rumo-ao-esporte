@@ -12,11 +12,11 @@ export default function AdminStore() {
     return (
         <div style={{ paddingBottom: '40px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', background: '#fff', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', flexWrap: 'wrap' }}>
-                <div style={{ background: '#00237f', color: '#fff', padding: '15px', borderRadius: '14px', display: 'flex' }}>
+                <div style={{ background: '#17428f', color: '#fff', padding: '15px', borderRadius: '14px', display: 'flex' }}>
                     <Store size={28} />
                 </div>
                 <div style={{ flex: 1 }}>
-                    <h1 style={{ margin: 0, color: '#00237f', fontSize: '1.6rem', fontWeight: 800, textTransform: 'uppercase' }}>Loja do Clube</h1>
+                    <h1 style={{ margin: 0, color: '#17428f', fontSize: '1.6rem', fontWeight: 800, textTransform: 'uppercase' }}>Loja do Clube</h1>
                     <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '0.95rem' }}>Gerencie produtos virtuais e físicos, vendas e configurações da loja.</p>
                 </div>
                 <button
@@ -86,7 +86,7 @@ const TabButton = ({ active, onClick, icon, label }: any) => (
             alignItems: 'center',
             gap: '8px',
             padding: '12px 20px',
-            background: active ? '#00237f' : '#fff',
+            background: active ? '#17428f' : '#fff',
             color: active ? '#fff' : '#666',
             border: 'none',
             borderRadius: '12px',

@@ -25,7 +25,7 @@ export const RegistrationCard: React.FC<RegistrationCardProps> = ({ registration
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
-            borderLeft: '4px solid #007d2f',
+            borderLeft: '4px solid #00a63a',
             transition: 'background 0.2s'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -40,7 +40,7 @@ export const RegistrationCard: React.FC<RegistrationCardProps> = ({ registration
                                 cursor: 'pointer',
                                 flexShrink: 0,
                                 margin: '0 8px 0 5px',
-                                accentColor: '#007d2f',
+                                accentColor: '#00a63a',
                                 display: 'block !important',
                                 WebkitAppearance: 'checkbox',
                                 appearance: 'checkbox'
@@ -72,7 +72,7 @@ export const RegistrationCard: React.FC<RegistrationCardProps> = ({ registration
                             onClick={() => navigate(`/admin/details/${r.id}`)}
                             style={{
                                 fontWeight: '800',
-                                color: '#007d2f',
+                                color: '#00a63a',
                                 cursor: 'pointer',
                                 textDecoration: 'underline',
                                 textTransform: 'uppercase',
@@ -105,7 +105,7 @@ export const RegistrationCard: React.FC<RegistrationCardProps> = ({ registration
             <button
                 onClick={() => onSelect(r)}
                 style={{
-                    width: '100%', padding: '12px', background: readOnly ? '#f0f0f0' : '#007d2f', color: readOnly ? '#666' : '#fff',
+                    width: '100%', padding: '12px', background: readOnly ? '#f0f0f0' : '#00a63a', color: readOnly ? '#666' : '#fff',
                     border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                 }}
