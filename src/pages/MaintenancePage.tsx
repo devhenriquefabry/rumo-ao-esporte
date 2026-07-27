@@ -19,13 +19,14 @@ export default function MaintenancePage({ title }: MaintenancePageProps) {
             zIndex: 9999
         }}>
             <img
-                src="/manutencao.png"
-                alt="Manutenção"
+                src="/rumo-ao-esporte-logo.png"
+                alt="Rumo ao Esporte"
                 style={{
                     width: '100%',
-                    maxWidth: '300px',
+                    maxWidth: '260px',
                     height: 'auto',
-                    marginBottom: '20px'
+                    marginBottom: '25px',
+                    borderRadius: '16px'
                 }}
             />
             <h1 style={{ color: '#17428f', margin: '0 0 10px 0', fontSize: '1.8rem', fontWeight: 'bold' }}>

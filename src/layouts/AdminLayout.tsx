@@ -130,6 +130,7 @@ export default function AdminLayout() {
     const handleLogout = async () => {
         await signOut(auth);
         localStorage.removeItem('rae_admin_auth');
+        sessionStorage.removeItem('rae_admin_session_active');
         navigate('/admin/login');
     };
 

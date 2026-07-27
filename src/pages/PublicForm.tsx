@@ -8,6 +8,7 @@ import { findOrCreateTurma } from '../utils/turmaService';
 import { SCHEDULE_OPTIONS } from '../utils/turmasConstants';
 import SignatureCanvas from '../components/SignatureCanvas';
 import { notifyPendingApprovalRegistration } from './AdminEvolutionMessages/messagingApi';
+import { normalizeNameKey } from '../utils/nameUtils';
 
 type ModalityId = 'futebol' | 'natacao' | 'voleibol' | 'hidro';
 
@@ -743,7 +744,8 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
         ...data,
         responsavel: {
           ...data.responsavel,
-          email: data.responsavel.email.toLowerCase().trim()
+          email: data.responsavel.email.toLowerCase().trim(),
+          nomeBusca: normalizeNameKey(data.responsavel.nome)
         }
       };
 

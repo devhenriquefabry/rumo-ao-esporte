@@ -24,6 +24,7 @@ export default function AdminDetails() {
         deleteProgress, showDeleteOverlay, setShowDeleteOverlay, deleteStatus, handleDelete,
         turmas, availableTurmas,
         showTransferModal, setShowTransferModal, selectedTurmaId, setSelectedTurmaId, isTransferring, handleTransfer, openTransferModal,
+        handleBirthDateAutoAssign,
         showApprovalModal, setShowApprovalModal, showSuccessModal, setShowSuccessModal, plans, approvalConfig, setApprovalConfig, isProcessingApproval,
         confirmApprove, handleApprove, handleSendWhatsApp,
         showAddModalityModal, setShowAddModalityModal, isCreatingModality, handleAddModality,
@@ -43,7 +44,7 @@ export default function AdminDetails() {
     if (loading) return <div className="loading-container">Carregando detalhes...</div>;
     if (!data) return <div className="error-container">Nada encontrado.</div>;
 
-    const assignedTurma = (data?.alunos && data.alunos[0].turmaId)
+    const assignedTurma = (data?.alunos && data.alunos[0]?.turmaId)
         ? turmas.find(t => t.id === data.alunos[0].turmaId)
         : null;
 
@@ -207,6 +208,7 @@ export default function AdminDetails() {
                             onTransfer={openTransferModal}
                             allRegistrations={allRegistrations}
                             onRemoveModality={handleRemoveModality}
+                            onBirthDateSet={handleBirthDateAutoAssign}
                         />
                     ))
                 }

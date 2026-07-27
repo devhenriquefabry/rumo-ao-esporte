@@ -4,6 +4,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { isRunningAsInstalledApp, openPWAInstallPrompt } from '../utils/pwaInstall';
+import { configureAuthPersistence } from '../utils/authPersistence';
 import '../App.css';
 import {
     Settings,
@@ -16,13 +18,13 @@ import {
     History,
     Lock,
     Instagram,
-    Radio,
     Home,
     ChevronRight,
     DollarSign,
     QrCode,
     Clock,
-    Store
+    Store,
+    Download
 } from 'lucide-react';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
@@ -37,6 +39,8 @@ export default function StudentLayout() {
     const [allStudents, setAllStudents] = useState<any[]>([]);
     const [selectedStudentIndex, setSelectedStudentIndex] = useState(0);
     const [qrCodeUrl, setQrCodeUrl] = useState('');
+    const [isInstalledApp] = useState(isRunningAsInstalledApp);
+    const [checkingSavedSession, setCheckingSavedSession] = useState(true);
 
     const [storeEnabled, setStoreEnabled] = useState(false);
 
@@ -65,15 +69,16 @@ export default function StudentLayout() {
 
     // Security Check
     useEffect(() => {
-        const checkAuth = async () => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
             const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
             if (impersonatedEmail) {
                 // Skip normal security redirects while impersonating
+                setCheckingSavedSession(false);
                 return;
             }
 
             const localAuth = localStorage.getItem('rae_student_auth');
-            const currentEmail = auth.currentUser?.email?.toLowerCase().trim();
+            const currentEmail = user?.email?.toLowerCase().trim();
 
             if (currentEmail === MAIN_ADMIN_EMAIL) {
                 localStorage.removeItem('rae_student_auth');
@@ -83,23 +88,36 @@ export default function StudentLayout() {
                 return;
             }
 
-            if (!localAuth) {
-                if (auth.currentUser) {
-                    localStorage.setItem('rae_student_auth', 'true');
-                } else {
-                    navigate('/aluno/login');
-                }
-            }
-
             // Also ensure we DO NOT have admin auth
             if (localStorage.getItem('rae_admin_auth')) {
                 localStorage.removeItem('rae_admin_auth');
                 localStorage.removeItem('rae_student_auth');
-                await signOut(auth);
+                if (user) await signOut(auth);
                 navigate('/aluno/login');
+                return;
             }
-        };
-        checkAuth();
+
+            if (!user) {
+                localStorage.removeItem('rae_student_auth');
+                navigate('/aluno/login');
+                return;
+            }
+
+            if (!localAuth) {
+                localStorage.setItem('rae_student_auth', 'true');
+            }
+
+            const shouldKeepSession = localStorage.getItem('rae_keep_signed_in') !== 'false';
+            try {
+                await configureAuthPersistence(auth, shouldKeepSession);
+            } catch (error) {
+                console.error('Session persistence restore error:', error);
+            } finally {
+                setCheckingSavedSession(false);
+            }
+        });
+
+        return unsubscribe;
     }, [navigate]);
 
     // Fetch basic info
@@ -413,6 +431,30 @@ export default function StudentLayout() {
         </div>
     );
 
+    if (checkingSavedSession) {
+        return (
+            <div style={{
+                minHeight: '100vh',
+                display: 'grid',
+                placeItems: 'center',
+                padding: '24px',
+                background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)',
+                color: '#17428f',
+                textAlign: 'center'
+            }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+                    <img
+                        src="/pwa/icon-192.png"
+                        alt=""
+                        aria-hidden="true"
+                        style={{ width: '76px', height: '76px', borderRadius: '18px' }}
+                    />
+                    <strong>Restaurando seu acesso...</strong>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(180deg, #f4f8fc 0%, #eef8ff 100%)', flexDirection: 'column' }}>
             {localStorage.getItem('rae_impersonated_student_email') && (
@@ -690,6 +732,7 @@ export default function StudentLayout() {
                             {storeEnabled && <MenuGridItem icon={Store} label="Loja" link="/aluno/loja" />}
                             <MenuGridItem icon={Lock} label="Trocar Senha" link="/aluno/configuracoes" />
                             <MenuGridItem icon={Clock} label="Horários" link="/aluno/horarios" />
+                            {!isInstalledApp && <MenuGridItem icon={Download} label="Instalar App" onClick={openPWAInstallPrompt} />}
                         </div>
 
                         <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)', margin: '0 10px' }} />
@@ -704,8 +747,7 @@ export default function StudentLayout() {
 
                         {/* Section 3: Institucional */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                            <MenuGridItem icon={Instagram} label="Instagram" onClick={() => window.open('https://www.instagram.com/clubeuba/', '_blank')} />
-                            <MenuGridItem icon={Radio} label="Rádio Rumo ao Esporte" link="/aluno/radio" />
+                            <MenuGridItem icon={Instagram} label="Instagram" onClick={() => window.open('https://www.instagram.com/rumoaoesporte2025/', '_blank')} />
                         </div>
 
                         <div style={{ marginTop: '10px' }}>

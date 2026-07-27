@@ -3,9 +3,9 @@ import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import PageContainer from '../components/PageContainer';
 import PageTitle from '../components/PageTitle';
-import { Download, ArrowRight, ArrowLeft, Share2, RefreshCw, CheckCircle, Settings } from 'lucide-react';
+import { Download, ArrowRight, ArrowLeft, Share2, RefreshCw, CheckCircle, Settings, ClipboardCheck } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import { loadWhatsAppConfig, sendWhatsApp, saveWhatsAppConfig, WORKER_URL } from './AdminMensagens/whatsappUtils';
+import { loadWhatsAppConfig, saveWhatsAppConfig, WORKER_URL, TEST_PHONE } from './AdminMensagens/whatsappUtils';
 import type { WhatsAppFullConfig } from './AdminMensagens/whatsappUtils';
 
 interface BirthdayStudent {
@@ -32,6 +32,11 @@ export default function AdminBirthdays() {
     const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; student: BirthdayStudent | null }>({
         isOpen: false,
         student: null
+    });
+    const [pasteInstructionModal, setPasteInstructionModal] = useState<{ isOpen: boolean; studentName: string; imageCopied: boolean }>({
+        isOpen: false,
+        studentName: '',
+        imageCopied: false
     });
     const [showAutomationModal, setShowAutomationModal] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -184,15 +189,6 @@ export default function AdminBirthdays() {
         return () => clearTimeout(timer);
     }, [loading, students, whatsappConfig?.birthdayAutomationEnabled]);
 
-    const formatLongDate = (dateStr: string) => {
-        const [d, m] = dateStr.split('/');
-        const months = [
-            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-        ];
-        return `${d.padStart(2, '0')} de ${months[parseInt(m) - 1]}`;
-    };
-
     const generateCardImage = async (studentId: string): Promise<Blob | null> => {
         const element = cardRefs.current[studentId];
         if (!element) return null;
@@ -262,21 +258,18 @@ export default function AdminBirthdays() {
         setConfirmModal({ isOpen: true, student: { nome: studentName, telefoneResponsavel: telefone, id: studentId, fotoUrl: studentPhotoUrl } as BirthdayStudent });
     };
 
+    // Sem emojis de propósito: o app WhatsApp Desktop (Windows) intercepta o link wa.me
+    // e "digita" o texto simulando teclado, o que corrompe emojis (viram �).
+    const buildBirthdayMessage = (firstName: string) => {
+        return `*Feliz Aniversário, ${firstName}!*\n\nA equipe *Rumo ao Esporte* deseja a você um dia repleto de alegria, saúde e muitas conquistas. Que este novo ciclo seja brilhante!\n\nFeliz aniversário!`;
+    };
+
+    // Envio via wa.me: não depende de nenhuma integração/API do WhatsApp configurada.
+    // Como o link wa.me não permite anexar imagem automaticamente, copiamos o cartão
+    // para a área de transferência e orientamos o admin a colar (Ctrl+V) na conversa.
     const executeWhatsAppSend = async (toTest: boolean) => {
         const student = confirmModal.student;
         if (!student) return;
-
-        if (!whatsappConfig) {
-            const config = await loadWhatsAppConfig();
-            if (!config) {
-                alert("Configuração do WhatsApp não encontrada.");
-                return;
-            }
-            setWhatsappConfig(config);
-        }
-
-        const firstName = student.nome.split(' ')[0];
-        const text = `Parabéns ${firstName}!\n\nA Rumo ao Esporte deseja a você um dia repleto de alegria, saúde e muitas conquistas. Que este novo ciclo seja brilhante!\n\nFeliz aniversário!`;
 
         setSendingStatus(prev => ({ ...prev, [student.id]: 'sending' }));
         setConfirmModal({ isOpen: false, student: null });
@@ -284,39 +277,42 @@ export default function AdminBirthdays() {
         // Pequeno delay para permitir que o modal feche e o spinner renderize antes do bloco pesado de CPU
         await new Promise(r => setTimeout(r, 150));
 
-        // 1. Gera a imagem real do cartão de aniversário antes de enviar
-        const blob = await generateCardImage(student.id);
-        let birthdayCardDataUrl: string | undefined = undefined;
-        
-        if (blob) {
-            birthdayCardDataUrl = await new Promise<string>((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.readAsDataURL(blob);
-            });
-        }
-
         try {
-            const res = await sendWhatsApp(
-                student.telefoneResponsavel,
-                text,
-                whatsappConfig!,
-                toTest,
-                birthdayCardDataUrl, // Usamos o card gerado dinamicamente aqui!
-                undefined,
-                student.nome,
-                student.fotoUrl
-            );
-
-            if (res.success) {
-                setSendingStatus(prev => ({ ...prev, [student.id]: 'success' }));
-                setTimeout(() => {
-                    setSendingStatus(prev => ({ ...prev, [student.id]: 'idle' }));
-                }, 3000);
-            } else {
+            // 1. Gera a imagem real do cartão de aniversário
+            const blob = await generateCardImage(student.id);
+            if (!blob) {
+                alert('Erro ao gerar a imagem do cartão. Tente novamente.');
                 setSendingStatus(prev => ({ ...prev, [student.id]: 'error' }));
-                alert(`Erro ao enviar: ${res.log}`);
+                return;
             }
+
+            // 2. Copia a imagem para a área de transferência
+            let imageCopied = false;
+            try {
+                if (navigator.clipboard && 'ClipboardItem' in window) {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    imageCopied = true;
+                }
+            } catch (clipErr) {
+                console.error('Falha ao copiar imagem para a área de transferência:', clipErr);
+            }
+
+            // 3. Abre o WhatsApp (wa.me) com a mensagem já estruturada
+            const firstName = student.nome.split(' ')[0];
+            const rawPhone = (toTest ? (whatsappConfig?.testPhone || TEST_PHONE) : student.telefoneResponsavel).replace(/\D/g, '');
+            const phone = rawPhone.startsWith('55') ? rawPhone : `55${rawPhone}`;
+            const text = buildBirthdayMessage(firstName);
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+
+            setSendingStatus(prev => ({ ...prev, [student.id]: 'success' }));
+            setTimeout(() => {
+                setSendingStatus(prev => ({ ...prev, [student.id]: 'idle' }));
+            }, 3000);
+
+            // 4. Orienta o admin a colar a imagem na conversa que acabou de abrir
+            setPasteInstructionModal({ isOpen: true, studentName: firstName, imageCopied });
         } catch (err) {
             console.error(err);
             setSendingStatus(prev => ({ ...prev, [student.id]: 'error' }));
@@ -451,8 +447,25 @@ export default function AdminBirthdays() {
                             }}
                             className="birthday-card-animate"
                         >
-                            {/* 
-                                The Card Container 
+                            {/* Birthday date badge (admin-only, not part of the exported art) */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                padding: '8px 14px',
+                                borderRadius: '10px',
+                                background: student.isToday ? '#00a63a' : '#eef2ff',
+                                color: student.isToday ? '#fff' : '#334155',
+                                fontWeight: 'bold',
+                                fontSize: '0.9rem'
+                            }}>
+                                <span>🎂 {String(student.day).padStart(2, '0')}/{String(student.month).padStart(2, '0')}</span>
+                                {student.isToday && <span>· Hoje!</span>}
+                            </div>
+
+                            {/*
+                                The Card Container
                                 1. We display this responsively to the user.
                                 2. html2canvas captures this exact element.
                             */}
@@ -486,25 +499,34 @@ export default function AdminBirthdays() {
                                         }}
                                     />
 
-                                    {/* Photo Container */}
+                                    {/* Name (top, below PARABÉNS) */}
+                                    <div className="birthday-name-top" aria-hidden="true">
+                                        <span className="birthday-name-text">
+                                            {student.nome.split(' ')[0].charAt(0).toUpperCase() + student.nome.split(' ')[0].slice(1).toLowerCase()}
+                                        </span>
+                                    </div>
+
+                                    {/* Photo Container - sits under the white frame so no background shows through */}
                                     <div
                                         className="force-radius-photo"
                                         style={{
                                             position: 'absolute',
-                                            top: 'calc(29.5% - 5.5cqw)', // Scale-invariant 22px (at 400px width)
-                                            left: '21.5%',
-                                            width: '57%',
-                                            height: '47%',
+                                            top: 'calc(29.75% - 0.3cqw)',
+                                            left: 'calc(23.05% - 0.3cqw)',
+                                            width: 'calc(53.71% + 0.6cqw)',
+                                            height: 'calc(44.34% + 0.6cqw)',
                                             overflow: 'hidden',
                                             backgroundImage: `url(${customPhotos[student.id] || student.fotoUrl || '/placeholder.png'})`,
                                             backgroundSize: 'cover',
                                             backgroundPosition: 'center',
                                             backgroundRepeat: 'no-repeat',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
+                                            zIndex: 2
                                         }}
                                         onClick={() => document.getElementById(`file-${student.id}`)?.click()}
                                     >
                                     </div>
+                                    <div className="birthday-photo-frame" aria-hidden="true"></div>
                                     <input
                                         type="file"
                                         id={`file-${student.id}`}
@@ -612,13 +634,13 @@ export default function AdminBirthdays() {
                             Enviar Parabéns
                         </h3>
                         <p style={{ margin: '0 0 20px', color: '#64748b', fontSize: '1rem' }}>
-                            Deseja enviar o cartão de aniversário para o responsável de <strong>{confirmModal.student.nome}</strong>?
+                            Vamos abrir o WhatsApp com a mensagem pronta para o responsável de <strong>{confirmModal.student.nome}</strong>. A imagem do cartão será copiada para você colar na conversa.
                         </p>
 
                         <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '25px', textAlign: 'left' }}>
                             <p style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px' }}>Prévia da Mensagem:</p>
                             <p style={{ fontSize: '0.9rem', color: '#334155', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
-                                Parabéns {confirmModal.student.nome.split(' ')[0]}! 🥳🎂...
+                                {buildBirthdayMessage(confirmModal.student.nome.split(' ')[0])}
                             </p>
                         </div>
 
@@ -632,7 +654,7 @@ export default function AdminBirthdays() {
                                     fontSize: '1rem'
                                 }}
                             >
-                                <Share2 size={20} /> Enviar para Responsável
+                                <Share2 size={20} /> Abrir WhatsApp do Responsável
                             </button>
                             <button
                                 onClick={() => executeWhatsAppSend(true)}
@@ -654,6 +676,45 @@ export default function AdminBirthdays() {
                                 Cancelar
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Paste Image Instruction Modal */}
+            {pasteInstructionModal.isOpen && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 1050,
+                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+                }}>
+                    <div style={{
+                        background: '#fff', borderRadius: '24px', padding: '30px',
+                        maxWidth: '420px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ color: pasteInstructionModal.imageCopied ? '#25D366' : '#f59e0b', marginBottom: '20px' }}>
+                            <ClipboardCheck size={48} />
+                        </div>
+                        <h3 style={{ margin: '0 0 10px', color: '#334155', fontWeight: '800', fontSize: '1.3rem' }}>
+                            {pasteInstructionModal.imageCopied ? 'Imagem copiada!' : 'WhatsApp aberto'}
+                        </h3>
+                        <p style={{ margin: '0 0 25px', color: '#64748b', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                            {pasteInstructionModal.imageCopied ? (
+                                <>O WhatsApp foi aberto com a mensagem para <strong>{pasteInstructionModal.studentName}</strong> pronta. Clique no campo de mensagem e pressione <strong>Ctrl+V</strong> (ou <strong>Cmd+V</strong> no Mac) para colar o cartão de aniversário antes de enviar.</>
+                            ) : (
+                                <>Não foi possível copiar a imagem automaticamente neste navegador. Clique em <strong>"Baixar"</strong> no card de {pasteInstructionModal.studentName} e anexe a imagem manualmente na conversa que abriu no WhatsApp.</>
+                            )}
+                        </p>
+                        <button
+                            onClick={() => setPasteInstructionModal({ isOpen: false, studentName: '', imageCopied: false })}
+                            style={{
+                                width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
+                                background: '#17428f', color: '#fff', fontWeight: '800', fontSize: '1rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Entendi
+                        </button>
                     </div>
                 </div>
             )}
@@ -767,50 +828,40 @@ export default function AdminBirthdays() {
                              {/* Background */}
                              <img src="/aniversario.png" style={{ width: '100%', display: 'block', height: 'auto' }} />
                              
-                             {/* Photo */}
-                             <div style={{ 
-                                position: 'absolute', 
-                                top: 'calc(29.5% - 22px)', // 22px approximates 5.5cqw at 400px width
-                                left: '21.5%', 
-                                width: '57%', 
-                                height: '47%', 
-                                backgroundImage: `url(${customPhotos[student.id] || student.fotoUrl || '/placeholder.png'})`, 
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                borderRadius: '4px'
-                             }}></div>
-
-                             {/* Name and Date */}
-                             <div style={{ 
-                                position: 'absolute', 
-                                top: '85%', 
-                                left: '50%', 
-                                transform: 'translateX(-50%)', 
-                                width: '85%', 
+                             {/* Name (top, below PARABÉNS) */}
+                             <div style={{
+                                position: 'absolute',
+                                top: '20.5%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                width: '90%',
                                 textAlign: 'center',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center'
+                                zIndex: 5
                              }}>
-                                <h2 style={{ 
-                                    margin: 0,
-                                    color: '#17428f', 
-                                    fontFamily: "'DucksFiesta', sans-serif", 
-                                    fontSize: '44px', // Approximates 11cqw at 400px
+                                <span style={{
+                                    color: '#fff',
+                                    fontFamily: "'DucksFiesta', sans-serif",
+                                    fontSize: '40px',
                                     textTransform: 'capitalize',
-                                    textShadow: '3px 3px 0 #fff'
+                                    textShadow: '2.4px 2.4px 0 rgba(0,15,60,0.55)'
                                 }}>
                                     {student.nome.split(' ')[0].charAt(0).toUpperCase() + student.nome.split(' ')[0].slice(1).toLowerCase()}
-                                </h2>
-                                <div style={{
-                                    color: 'black',
-                                    fontFamily: "'BeneathTheSilence', serif",
-                                    fontSize: '24px', // Approximates 6cqw
-                                    marginTop: '8px'
-                                }}>
-                                    {formatLongDate(student.dataNascimento)}
-                                </div>
+                                </span>
                              </div>
+
+                             {/* Photo - fills the frame opening drawn into the art, square corners under the white frame */}
+                             <div style={{
+                                position: 'absolute',
+                                top: 'calc(29.75% - 0.3cqw)',
+                                left: 'calc(23.05% - 0.3cqw)',
+                                width: 'calc(53.71% + 0.6cqw)',
+                                height: 'calc(44.34% + 0.6cqw)',
+                                backgroundImage: `url(${customPhotos[student.id] || student.fotoUrl || '/placeholder.png'})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                zIndex: 2
+                             }}></div>
+                             <div className="birthday-photo-frame" aria-hidden="true"></div>
                         </div>
                     </div>
                 ))}
@@ -848,9 +899,43 @@ export default function AdminBirthdays() {
                 }
                 
                 .force-radius-photo {
-                    border-radius: 45px !important;
-                    border: 3.75cqw solid white !important; /* Scale-invariant 15px (at 400px width) */
-                    box-sizing: content-box !important;
+                    border-radius: 0px !important;
+                    box-sizing: border-box !important;
+                    z-index: 2 !important;
+                }
+
+                .birthday-photo-frame {
+                    position: absolute;
+                    /* Inner opening aligned to the frame drawn into aniversario.png (measured from the art: top 29.75%, left 23.05%, right 76.76%, bottom 74.09%, border ~2.6% of width) */
+                    top: calc(29.75% - 2.6cqw);
+                    left: calc(23.05% - 2.6cqw);
+                    width: 53.71%;
+                    height: 44.34%;
+                    border-radius: 7cqw;
+                    border: 2.6cqw solid #fff;
+                    box-sizing: content-box;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+
+                .birthday-name-top {
+                    position: absolute;
+                    top: 20.5%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 90%;
+                    text-align: center;
+                    z-index: 5;
+                    pointer-events: none;
+                }
+
+                .birthday-name-text {
+                    color: #fff;
+                    font-family: 'DucksFiesta', sans-serif;
+                    font-size: 10cqw;
+                    text-transform: capitalize;
+                    text-shadow: 0.6cqw 0.6cqw 0 rgba(0, 15, 60, 0.55);
+                    line-height: 1;
                 }
 
                 .touch-feedback:active {

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17428f">
+  <title>Sem conexão | Rumo ao Esporte</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: linear-gradient(180deg, #f4f8fc, #eaf3fb);
+      color: #09245c;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+    }
+    main {
+      width: min(420px, 100%);
+      padding: 30px 24px;
+      border: 1px solid #dce7f3;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 20px 60px rgba(9, 36, 92, 0.14);
+    }
+    img {
+      width: 82px;
+      height: 82px;
+      border-radius: 19px;
+    }
+    h1 { margin: 18px 0 8px; font-size: 1.4rem; }
+    p { margin: 0; color: #63708a; line-height: 1.55; }
+    button {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 22px;
+      border: 0;
+      border-radius: 10px;
+      background: #00a63a;
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/pwa/icon-192.png" alt="">
+    <h1>Você está sem conexão</h1>
+    <p>Conecte-se à internet para consultar valores atualizados e realizar pagamentos com segurança.</p>
+    <button type="button" onclick="window.location.reload()">Tentar novamente</button>
+  </main>
+</body>
+</html>

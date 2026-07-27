@@ -29,7 +29,7 @@ const getTimestamp = (val: any): number => {
 
 export function useAdminDashboard(filterStatus?: string) {
     const { showLoading } = useLoading();
-    const { allStudents, turmas, plans, loading, removeRegistrationIds } = useDashboardData();
+    const { allStudents, turmas, plans, loading, removeRegistrationIds, patchRegistrations } = useDashboardData();
 
     const [activeModality, setActiveModality] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -160,6 +160,6 @@ export function useAdminDashboard(filterStatus?: string) {
     return {
         allStudents, turmas, plans, loading, activeModality, searchTerm, setSearchTerm,
         sortBy, setSortBy, isExportModalOpen, setIsExportModalOpen, selectedColumns, isMobile, filteredStudents,
-        handleModalityClick, handleGeneratePDF, toggleColumn, removeRegistrationIds
+        handleModalityClick, handleGeneratePDF, toggleColumn, removeRegistrationIds, patchRegistrations
     };
 }

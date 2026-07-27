@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Employee } from '../types/user';
 import { DEFAULT_ADMIN_PERMISSIONS } from '../types/user';
+import { DIRETORIA_PERMISSIONS, isDiretoriaEmail } from '../config/accessProfiles';
 
 const MAIN_ADMIN_EMAILS = [
     ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase()
@@ -41,6 +42,15 @@ export function useAdminPermissions() {
                         setRole('admin');
                         setPermissions(DEFAULT_ADMIN_PERMISSIONS);
                         setUser({ ...parsedUser, role: 'admin', active: true, permissions: DEFAULT_ADMIN_PERMISSIONS });
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Perfil "Diretoria": permissões definidas no código (não confiar no localStorage)
+                    if (isDiretoriaEmail(parsedUser.email)) {
+                        setRole('employee');
+                        setPermissions(DIRETORIA_PERMISSIONS);
+                        setUser({ ...parsedUser, role: 'employee', active: true, permissions: DIRETORIA_PERMISSIONS });
                         setLoading(false);
                         return;
                     }

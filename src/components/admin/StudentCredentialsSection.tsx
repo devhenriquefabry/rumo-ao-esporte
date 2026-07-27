@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Copy, Key, Edit2, X, Check, Loader, MessageCircle, Users } from 'lucide-react';
 import { useDialog } from '../../context/CustomDialogContext';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { buildSyntheticEmail } from '../../utils/nameUtils';
 
 interface StudentCredentialsSectionProps {
     data: any;
@@ -19,6 +22,7 @@ export default function StudentCredentialsSection({
     const [passwordValue, setPasswordValue] = useState(data.senha || '');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [impersonating, setImpersonating] = useState(false);
 
     const workerUrl = import.meta.env.VITE_WORKER_URL;
 
@@ -106,12 +110,18 @@ export default function StudentCredentialsSection({
             return;
         }
 
-        const name = data.responsavel?.nome?.split(' ')[0] || 'Responsável';
-        const email = data.responsavel?.email || '';
+        const firstName = data.responsavel?.nome?.split(' ')[0] || 'Responsável';
+        const fullName = data.responsavel?.nome || 'Responsável';
         const password = currentPassword;
         const loginUrl = `${window.location.origin}/aluno/login`;
 
-        const text = `Olá, *${name}*! 👋\n\nAqui estão suas credenciais de acesso ao *Portal do Aluno Rumo ao Esporte 2026*:\n\n📧 *Login:* ${email}\n🔑 *Senha:* ${password}\n\n🌐 *Portal:* ${loginUrl}\n\n_Guarde estas informações com segurança._`;
+        // E-mails internos (gerados automaticamente para quem não tem e-mail real)
+        // não devem ser exibidos ao responsável, já que o login é feito pelo nome.
+        const realEmail = data.responsavel?.email && !data.responsavel.email.includes('@responsaveis.rumoaoesporte.local')
+            ? data.responsavel.email
+            : '';
+
+        const text = `Olá, *${firstName}*! 👋\n\nAqui estão suas credenciais de acesso ao *Portal do Aluno Rumo ao Esporte 2026*:\n\n👤 *Login (nome completo):* ${fullName}\n🔑 *Senha:* ${password}${realEmail ? `\n📧 *Ou entre com seu e-mail:* ${realEmail}` : ''}\n\n🌐 *Portal:* ${loginUrl}\n\n_Guarde estas informações com segurança._`;
         const encodedText = encodeURIComponent(text);
 
         window.open(`https://wa.me/55${phone}?text=${encodedText}`, '_blank');
@@ -145,6 +155,7 @@ export default function StudentCredentialsSection({
     // Default password calculation (CPF numbers)
     const defaultPassword = (data.responsavel?.cpf || '').replace(/\D/g, '');
     const currentPassword = data.senha || defaultPassword;
+    const isSyntheticEmail = Boolean(data.responsavel?.email) && data.responsavel.email.includes('@responsaveis.rumoaoesporte.local');
 
     return (
         <div style={{
@@ -184,7 +195,28 @@ export default function StudentCredentialsSection({
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                {/* Email/Login */}
+                {/* Nome (login principal) */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: '#f0f7ff',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
+                    border: '1px solid #cfe3ff'
+                }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+                        <span style={{ fontSize: '0.65rem', color: '#17428f', fontWeight: 'bold' }}>LOGIN (NOME COMPLETO)</span>
+                        <span style={{ fontSize: '0.9rem', color: '#333', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {data.responsavel?.nome || '---'}
+                        </span>
+                    </div>
+                    <button onClick={() => copyToClipboard(data.responsavel?.nome, 'Nome')} style={buttonStyle} title="Copiar Nome">
+                        <Copy size={16} />
+                    </button>
+                </div>
+
+                {/* Email/Login alternativo */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -196,7 +228,7 @@ export default function StudentCredentialsSection({
                     transition: 'all 0.2s'
                 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
-                        <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>LOGIN (E-MAIL)</span>
+                        <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>E-MAIL (LOGIN ALTERNATIVO)</span>
                         {editingEmail ? (
                             <input
                                 type="email"
@@ -215,6 +247,10 @@ export default function StudentCredentialsSection({
                                 autoFocus
                                 disabled={loading}
                             />
+                        ) : isSyntheticEmail ? (
+                            <span style={{ fontSize: '0.85rem', color: '#aaa', fontStyle: 'italic' }}>
+                                (gerado automaticamente, uso interno)
+                            </span>
                         ) : (
                             <span style={{ fontSize: '0.9rem', color: '#333', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {data.responsavel?.email}
@@ -236,9 +272,11 @@ export default function StudentCredentialsSection({
                                 <button onClick={() => setEditingEmail(true)} style={buttonStyle} title="Editar E-mail">
                                     <Edit2 size={16} />
                                 </button>
-                                <button onClick={() => copyToClipboard(data.responsavel?.email, 'E-mail')} style={buttonStyle} title="Copiar E-mail">
-                                    <Copy size={16} />
-                                </button>
+                                {!isSyntheticEmail && (
+                                    <button onClick={() => copyToClipboard(data.responsavel?.email, 'E-mail')} style={buttonStyle} title="Copiar E-mail">
+                                        <Copy size={16} />
+                                    </button>
+                                )}
                             </>
                         )}
                     </div>
@@ -341,28 +379,44 @@ export default function StudentCredentialsSection({
             </button>
 
             <button
-                onClick={() => {
-                    const email = data.responsavel?.email;
-                    if (!email) {
-                        showAlert('E-mail do responsável não cadastrado.', 'error');
-                        return;
+                onClick={async () => {
+                    setImpersonating(true);
+                    try {
+                        let email = data.responsavel?.email;
+
+                        // Cadastros que ainda não tiveram o primeiro login do responsável
+                        // (login por nome + CPF) não têm e-mail salvo ainda. Gera o mesmo
+                        // e-mail interno determinístico que o login usaria, e persiste.
+                        if (!email) {
+                            const cpfClean = (data.responsavel?.cpf || '').replace(/\D/g, '');
+                            email = buildSyntheticEmail(cpfClean, data.id);
+                            await updateDoc(doc(db, 'rumo_ao_esporte_2026_registrations', data.id), {
+                                'responsavel.email': email
+                            });
+                            setData({ ...data, responsavel: { ...data.responsavel, email } });
+                        }
+
+                        localStorage.setItem('rae_impersonated_student_email', email);
+                        localStorage.setItem('rae_impersonated_student_back_id', data.id);
+                        localStorage.setItem('rae_student_auth', 'true');
+                        window.location.href = '/aluno/dashboard';
+                    } catch (err: any) {
+                        showAlert('Erro ao acessar conta do atleta: ' + err.message, 'error');
+                        setImpersonating(false);
                     }
-                    localStorage.setItem('rae_impersonated_student_email', email);
-                    localStorage.setItem('rae_impersonated_student_back_id', data.id);
-                    localStorage.setItem('rae_student_auth', 'true');
-                    window.location.href = '/aluno/dashboard';
                 }}
+                disabled={impersonating}
                 style={{
                     width: '100%',
                     marginTop: '10px',
                     padding: '12px',
-                    background: '#17428f',
+                    background: impersonating ? '#9ca3af' : '#17428f',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '10px',
                     fontWeight: 'bold',
                     fontSize: '0.9rem',
-                    cursor: 'pointer',
+                    cursor: impersonating ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -370,11 +424,11 @@ export default function StudentCredentialsSection({
                     boxShadow: '0 4px 12px rgba(0, 35, 127, 0.2)',
                     transition: 'all 0.2s'
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.filter = 'brightness(0.95)')}
-                onMouseOut={(e) => (e.currentTarget.style.filter = 'brightness(1)')}
+                onMouseOver={(e) => !impersonating && (e.currentTarget.style.filter = 'brightness(0.95)')}
+                onMouseOut={(e) => !impersonating && (e.currentTarget.style.filter = 'brightness(1)')}
             >
-                <Users size={20} />
-                ACESSAR CONTA DO ATLETA
+                {impersonating ? <Loader size={20} className="spin" /> : <Users size={20} />}
+                {impersonating ? 'ACESSANDO...' : 'ACESSAR CONTA DO ATLETA'}
             </button>
 
             <div style={{ marginTop: '15px', padding: '10px', background: '#fff9e6', borderRadius: '8px', border: '1px solid #ffeeba', display: 'flex', gap: '10px', alignItems: 'start' }}>

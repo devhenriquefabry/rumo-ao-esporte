@@ -78,5 +78,20 @@ export function useDashboardData() {
         setAllStudents(prev => prev.filter(student => !idSet.has(student.regId)));
     };
 
-    return { allStudents, turmas, plans, loading, removeRegistrationIds };
+    const patchRegistrations = (patches: Record<string, { contractStatus?: string; planId?: string; turmaId?: string }>) => {
+        setAllStudents(prev => prev.map(student => {
+            const patch = patches[student.regId];
+            if (!patch) return student;
+            return {
+                ...student,
+                contractStatus: patch.contractStatus ?? student.contractStatus,
+                planId: patch.planId ?? student.planId,
+                aluno: patch.turmaId !== undefined && student.aluno
+                    ? { ...student.aluno, turmaId: patch.turmaId }
+                    : student.aluno
+            };
+        }));
+    };
+
+    return { allStudents, turmas, plans, loading, removeRegistrationIds, patchRegistrations };
 }

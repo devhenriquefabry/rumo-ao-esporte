@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { formatModalidade } from '../utils/modalidadeUtils';
 
 interface StudentCardProps {
     student: {
@@ -23,10 +24,11 @@ interface StudentCardProps {
         };
     };
     numeroCota?: string;
+    modalidade?: string | string[];
     width?: string | number;
 }
 
-const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroCota, width = '100%' }) => {
+const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroCota, modalidade, width = '100%' }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -150,7 +152,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     {/* COTA */}
                     <div className="card-field" style={{
                         position: 'absolute',
-                        top: '51%',
+                        top: '47.7%',
                         left: '52.5%',
                         fontWeight: '800',
                         color: '#333'
@@ -161,7 +163,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     {/* CPF */}
                     <div className="card-field" style={{
                         position: 'absolute',
-                        top: '61%',
+                        top: '57.25%',
                         left: '43.0%',
                         fontWeight: '800',
                         color: '#333'
@@ -172,12 +174,27 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                     {/* BIRTH DATE */}
                     <div className="card-field" style={{
                         position: 'absolute',
-                        top: '71%',
+                        top: '66.3%',
                         left: '68.0%',
                         fontWeight: '800',
                         color: '#333'
                     }}>
                         {student.dataNascimento || '-'}
+                    </div>
+
+                    {/* MODALIDADE */}
+                    <div className="card-field" style={{
+                        position: 'absolute',
+                        top: '75.6%',
+                        left: '55.0%',
+                        right: '5%',
+                        fontWeight: '800',
+                        color: '#333',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                    }}>
+                        {formatModalidade(modalidade)}
                     </div>
 
                     {/* QR CODE */}
@@ -227,7 +244,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                 }}>
                     {/* Header: Logo + Title */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative', zIndex: 1 }}>
-                        <img src="/real-logo-transparente.svg" alt="Logo" style={{ height: 'clamp(16px, 5vw, 24px)', borderRadius: '2px' }} />
+                        <img src="/escudo-futsal.svg" alt="Logo" style={{ height: 'clamp(16px, 5vw, 24px)', borderRadius: '2px' }} />
                         <span style={{ fontWeight: 'bold', fontSize: 'clamp(8px, 2.5vw, 12px)' }}>Rumo ao Esporte 2026</span>
                         <span style={{ marginLeft: 'auto', fontSize: 'clamp(6px, 1.8vw, 9px)', opacity: 0.7, textTransform: 'uppercase' }}>Responsável Financeiro</span>
                     </div>
@@ -277,7 +294,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student, responsavel, numeroC
                         </div>
                     </div>
                     <img
-                        src="/real-logo-transparente.svg"
+                        src="/escudo-futsal.svg"
                         alt="Logo Real"
                         style={{
                             position: 'absolute',

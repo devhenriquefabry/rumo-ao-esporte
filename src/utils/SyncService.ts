@@ -107,11 +107,25 @@ export const SyncService = {
             if (snapshot.empty) return;
 
             const batch = writeBatch(db);
+            let deleteCount = 0;
             snapshot.docs.forEach(d => {
+                const payment = d.data();
+                const isLegacyImport =
+                    payment.importedFromLegacySystem === true ||
+                    String(payment.importBatch || '').startsWith('financeiro-legado-');
+
+                // O histórico migrado não pertence ao cache do provedor e precisa
+                // sobreviver às sincronizações futuras.
+                if (isLegacyImport) return;
+
                 batch.delete(d.ref);
+                deleteCount++;
             });
+
+            if (deleteCount === 0) return;
+
             await batch.commit();
-            console.log(`[Sync] Cache limpo para aluno ${studentId}.`);
+            console.log(`[Sync] Cache limpo para aluno ${studentId}: ${deleteCount} cobrança(s) do provedor removida(s).`);
         } catch (error) {
             console.error("[Sync] Erro ao limpar cache:", error);
         }

@@ -1,17 +1,19 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, updateDoc, deleteDoc, collection, getDocs, query, orderBy, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc, collection, getDocs, getDoc, query, orderBy, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useDialog } from '../context/CustomDialogContext';
 import { useLoading } from '../components/LoadingService';
 import { planService } from '../utils/planService';
 import { generateStudentCardPDF } from '../utils/pdfGenerator';
 import { normalizeModality, calculateClass } from '../utils/turmasConstants';
+import { findOrCreateTurma } from '../utils/turmaService';
 import { AlertTriangle } from 'lucide-react';
 import { useFinancialOperations } from '../pages/AdminFinanceiroComponents/useFinancialOperations';
 import { SyncService } from '../utils/SyncService';
 import { getRegistrationById, getRegistrationsFromSource } from '../utils/registrationSource';
+import { normalizeNameKey } from '../utils/nameUtils';
 import {
     DEFAULT_PAYMENT_PROVIDER_CONFIG,
     getPaymentProviderConfig,
@@ -57,6 +59,7 @@ export function useAdminDetails() {
     const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
     const [plans, setPlans] = useState<any[]>([]);
     const [paymentConfig, setPaymentConfig] = useState<PaymentProviderConfig>(DEFAULT_PAYMENT_PROVIDER_CONFIG);
+    const providerLabel = paymentConfig.provider === 'cora' ? 'Cora' : 'Asaas';
 
     const setRegistrationsStable = useCallback((updateFn: any) => {
         setData((prevValue: any) => {
@@ -95,6 +98,14 @@ export function useAdminDetails() {
             const record = await getRegistrationById(fetchId);
             if (record) {
                 let docData: any = { id: record.id, ...record.data };
+
+                // Defesa: normaliza `alunos` para array caso algum dado legado esteja
+                // no formato mapa {0:{...}} (evita que o painel do aluno deixe de renderizar).
+                if (docData.alunos && !Array.isArray(docData.alunos) && typeof docData.alunos === 'object') {
+                    docData.alunos = Object.keys(docData.alunos)
+                        .sort((a, b) => Number(a) - Number(b))
+                        .map(k => docData.alunos[k]);
+                }
 
                 // Auto-fetch payment details if missing
                 if (docData.paymentId && (!docData.amount || !docData.billingType || !docData.invoiceUrl)) {
@@ -206,14 +217,17 @@ export function useAdminDetails() {
     const saveNow = async () => {
         if (!id || !data) return;
         try {
-            setGlobalLoading(true, 'Salvando alteraÃ§Ãµes...');
+            setGlobalLoading(true, 'Salvando alterações...');
             const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
             const { id: _, ...updateData } = data;
+            if (updateData.responsavel?.nome) {
+                updateData.responsavel = { ...updateData.responsavel, nomeBusca: normalizeNameKey(updateData.responsavel.nome) };
+            }
             await updateDoc(docRef, updateData);
-            showAlert('AlteraÃ§Ãµes salvas com sucesso!', 'success');
+            showAlert('Alterações salvas com sucesso!', 'success');
         } catch (error) {
             console.error('Save error:', error);
-            showAlert('Erro ao salvar alteraÃ§Ãµes.', 'error');
+            showAlert('Erro ao salvar alterações.', 'error');
         } finally {
             setGlobalLoading(false);
         }
@@ -231,6 +245,9 @@ export function useAdminDetails() {
             try {
                 const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
                 const { id: _, ...updateData } = data;
+                if (updateData.responsavel?.nome) {
+                    updateData.responsavel = { ...updateData.responsavel, nomeBusca: normalizeNameKey(updateData.responsavel.nome) };
+                }
                 await updateDoc(docRef, updateData);
             } catch (error) {
                 console.error('Auto-save error:', error);
@@ -284,9 +301,9 @@ export function useAdminDetails() {
             return;
         }
 
-        // Determinar a turma: se houver seleÃ§Ã£o manual (modalidade: 'turma'), usa o ID selecionado.
-        // Se a modalidade for 'payment' (apenas plano) ou o usuÃ¡rio tiver escolhido "Matricular Manualmente" sem selecionar, pode ser null.
-        // Pela lÃ³gica original, se o usuÃ¡rio seleciona uma turma no select, usamos ela.
+        // Determinar a turma: se houver seleção manual (modalidade: 'turma'), usa o ID selecionado.
+        // Se a modalidade for 'payment' (apenas plano) ou o usuário tiver escolhido "Matricular Manualmente" sem selecionar, pode ser null.
+        // Pela lógica original, se o usuário seleciona uma turma no select, usamos ela.
         let finalTurmaId = approvalConfig.turmaId;
 
         setIsProcessingApproval(true);
@@ -301,7 +318,7 @@ export function useAdminDetails() {
             if (finalTurmaId === 'auto') {
                 const student = data.alunos[0];
                 const mod = normalizeModality(data.modalidade || '');
-                const isNatacaoOrHidro = mod === 'NataÃ§Ã£o' || mod === 'HidroginÃ¡stica';
+                const isNatacaoOrHidro = mod === 'Natação' || mod === 'Hidroginástica';
 
                 if (isNatacaoOrHidro) {
                     finalTurmaId = student.turmaId || '';
@@ -347,7 +364,7 @@ export function useAdminDetails() {
 
             setData((prev: any) => ({ ...prev, ...updatePayload, alunos: updatedAlunos }));
 
-            // 2. Gerar boletos no Asaas via /generate-carnet
+            // 2. Gerar boletos no provedor de pagamento via /generate-carnet
             const selectedPlan = plans.find(p => p.id === approvalConfig.planId);
             const mensalidadeZero = (selectedPlan?.valores?.mensalidade?.ateVencimento || 0) === 0;
 
@@ -378,10 +395,10 @@ export function useAdminDetails() {
                     const carnetResult = await carnetRes.json();
 
                     if (!carnetResult.success) {
-                        console.error('Erro ao gerar carnÃª:', carnetResult.error);
-                        // Não bloqueia a aprovaÃ§Ã£o, apenas loga o erro
+                        console.error('Erro ao gerar carnê:', carnetResult.error);
+                        // Não bloqueia a aprovação, apenas loga o erro
                     } else {
-                        console.log('CarnÃª gerado com sucesso:', carnetResult.payments?.length, 'cobranÃ§as');
+                        console.log('Carnê gerado com sucesso:', carnetResult.payments?.length, 'cobranças');
 
                         window.dispatchEvent(new Event('refresh-financial-history'));
 
@@ -426,8 +443,8 @@ export function useAdminDetails() {
                         }
                     }
                 } catch (carnetError) {
-                    console.error('Erro na geraÃ§Ã£o do carnÃª:', carnetError);
-                    // Não bloqueia a aprovaÃ§Ã£o
+                    console.error('Erro na geração do carnê:', carnetError);
+                    // Não bloqueia a aprovação
                 }
             }
 
@@ -555,6 +572,54 @@ export function useAdminDetails() {
         }
     };
 
+    // Auto-allocate turma when an admin fills in a birth date that was previously missing
+    // (typical for students imported without dataNascimento, hence "Sem turma definida").
+    // Only triggers if the student doesn't already have a turma, so it never overrides a
+    // manual allocation just because the birth date was edited/corrected afterwards.
+    const handleBirthDateAutoAssign = async (alunoIndex: number, birthDateStr: string) => {
+        if (!id || !data) return;
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(birthDateStr)) return;
+
+        const currentAluno = data.alunos?.[alunoIndex];
+        if (!currentAluno || currentAluno.turmaId) return;
+
+        try {
+            const newTurmaId = await findOrCreateTurma(data.modalidade || '', birthDateStr);
+            if (!newTurmaId) return;
+
+            // Never use dot-notation on an array index (e.g. 'alunos.0.turmaId') here:
+            // Firestore would convert `alunos` into a map and wipe out the other fields.
+            const rawAlunos = data.alunos;
+            const alunosArray = Array.isArray(rawAlunos) ? [...rawAlunos] : [];
+            if (!alunosArray[alunoIndex]) return;
+            alunosArray[alunoIndex] = { ...alunosArray[alunoIndex], dataNascimento: birthDateStr, turmaId: newTurmaId };
+
+            const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
+            const updatePayload: any = { alunos: alunosArray };
+            if (alunoIndex === 0) updatePayload.turmaId = newTurmaId;
+
+            await updateDoc(docRef, updatePayload);
+            setData((prev: any) => ({ ...prev, ...updatePayload }));
+
+            let turmaLabel = 'turma definida automaticamente';
+            try {
+                const turmaSnap = await getDoc(doc(db, 'turmas', newTurmaId));
+                if (turmaSnap.exists()) {
+                    const t: any = turmaSnap.data();
+                    turmaLabel = `${t.nome}${t.horario ? ` - ${t.horario}` : ''}`;
+                }
+            } catch (e) {
+                console.error('Erro ao buscar dados da turma para confirmação:', e);
+            }
+
+            showAlert(`Aluno matriculado automaticamente na turma: ${turmaLabel}`, 'success', 'Turma Definida');
+
+            // Keep siblings/allRegistrations in sync with the new turma
+            fetchStudentData(id);
+        } catch (error) {
+            console.error('Erro ao auto-alocar turma pela data de nascimento:', error);
+        }
+    };
 
     // Add Modality Handlers
     const [showAddModalityModal, setShowAddModalityModal] = useState(false);
@@ -598,13 +663,13 @@ export function useAdminDetails() {
                 alunos: updatedAlunos,
                 modalidade: config.modality,
                 status: 'pendente', // Status financeiro geral
-                contractStatus: 'aprovado', // JÃ¡ aprovado conforme pedido
+                contractStatus: 'aprovado', // Já aprovado conforme pedido
                 contractGenerated: true,    // Gerar contrato
                 dateCreated: new Date().toISOString(),
                 approvedAt: new Date().toISOString(),
                 planId: config.planId,
                 turmaId: config.turmaId,
-                paymentDay: 10, // PadrÃ£o
+                paymentDay: 10, // Padrão
                 originalRegistrationId: id
             };
 
@@ -634,7 +699,7 @@ export function useAdminDetails() {
     };
 
     const handleRemoveModality = async (regId: string, modalityName: string) => {
-        if (!window.confirm(`Tem certeza que deseja remover este aluno da modalidade ${modalityName.toUpperCase()}? Esta aÃ§Ã£o excluirÃ¡ este registro permanentemente.`)) return;
+        if (!window.confirm(`Tem certeza que deseja remover este aluno da modalidade ${modalityName.toUpperCase()}? Esta ação excluirá este registro permanentemente.`)) return;
 
         try {
             const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', regId);
@@ -665,15 +730,15 @@ export function useAdminDetails() {
         if (!id || !data) return;
         showConfirm(
             <div style={{ textAlign: 'left' }}>
-                <h3 style={{ color: '#c62828', marginTop: 0 }}>Desativar MatrÃ­cula?</h3>
-                <p>O aluno será movido para a seÃ§Ã£o de <strong>Desativados</strong>.</p>
+                <h3 style={{ color: '#c62828', marginTop: 0 }}>Desativar Matrícula?</h3>
+                <p>O aluno será movido para a seção de <strong>Desativados</strong>.</p>
                 <div style={{ background: '#fff3e0', padding: '10px', borderRadius: '8px', border: '1px solid #ffe0b2', marginTop: '10px' }}>
                     <div style={{ fontWeight: 'bold', color: '#e65100', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <AlertTriangle size={20} /> O QUE ACONTECERÃ:
+                        <AlertTriangle size={20} /> O QUE ACONTECERÁ:
                     </div>
                     <ul style={{ margin: '5px 0 0 20px', color: '#e65100', fontSize: '0.9rem' }}>
                         <li>O aluno será removido da turma atual.</li>
-                        <li><strong>Todas as faturas pendentes ou atrasadas no Asaas serÃ£o EXCLUÃDAS.</strong></li>
+                        <li><strong>Todas as faturas pendentes ou atrasadas no {providerLabel} serão EXCLUÍDAS.</strong></li>
                         <li>O contrato do aluno será arquivado.</li>
                         <li>O acesso do aluno será bloqueado.</li>
                     </ul>
@@ -719,11 +784,22 @@ export function useAdminDetails() {
                     }
 
                     const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', id);
+                    // Nunca usar dot-notation em indice de array ('alunos.0.turmaId'):
+                    // o Firestore converteria o array em mapa e apagaria os dados do aluno.
+                    const rawAlunos: any = (data as any).alunos;
+                    const alunosArray = Array.isArray(rawAlunos)
+                        ? [...rawAlunos]
+                        : (rawAlunos && typeof rawAlunos === 'object'
+                            ? Object.keys(rawAlunos).sort((a, b) => Number(a) - Number(b)).map(k => rawAlunos[k])
+                            : []);
+                    if (alunosArray.length > 0) {
+                        alunosArray[0] = { ...alunosArray[0], turmaId: null };
+                    }
                     await updateDoc(docRef, {
                         contractStatus: 'desativado',
                         status: 'desativado',
                         turmaId: null,
-                        'alunos.0.turmaId': null
+                        ...(alunosArray.length > 0 ? { alunos: alunosArray } : {})
                     });
 
                     showAlert('Aluno desativado com sucesso.', 'success');
@@ -744,7 +820,7 @@ export function useAdminDetails() {
         showConfirm(
             <div style={{ textAlign: 'left' }}>
                 <h3 style={{ color: '#198754', marginTop: 0 }}>Reativar Aluno?</h3>
-                <p>O aluno voltarÃ¡ a ficar <strong>Ativo</strong> no sistema.</p>
+                <p>O aluno voltará a ficar <strong>Ativo</strong> no sistema.</p>
                 <p>Deseja gerar novamente as faturas (Refaturar) para este aluno?</p>
             </div>,
             async () => {
@@ -758,7 +834,7 @@ export function useAdminDetails() {
 
                     showAlert('Aluno reativado!', 'success');
 
-                    const shouldRefaturar = window.confirm('Gostaria de gerar os boletos (carnÃª) agora?');
+                    const shouldRefaturar = window.confirm('Gostaria de gerar os boletos (carnê) agora?');
                     if (shouldRefaturar) {
                         const selectedPlan = plans.find(p => p.id === data.planId);
                         if (selectedPlan && workerUrl) {
@@ -804,15 +880,15 @@ export function useAdminDetails() {
         showConfirm(
             <div style={{ textAlign: 'left' }}>
                 <h3 style={{ color: '#c62828', marginTop: 0 }}>Excluir Cadastro e Faturas?</h3>
-                <p>Esta aÃ§Ã£o Ã© irreversÃ­vel.</p>
+                <p>Esta ação é irreversível.</p>
                 <div style={{ background: '#ffebee', padding: '10px', borderRadius: '8px', border: '1px solid #ffcdd2', marginTop: '10px' }}>
                     <div style={{ fontWeight: 'bold', color: '#b71c1c', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <AlertTriangle size={20} /> ATENÃ‡ÃƒO
+                        <AlertTriangle size={20} /> ATENÇÃO
                     </div>
                     <ul style={{ margin: '5px 0 0 20px', color: '#c62828', fontSize: '0.9rem' }}>
-                        <li>O cadastro do aluno será excluÃ­do.</li>
-                        <li><strong>Todas as faturas pendentes ou atrasadas no Asaas serÃ£o excluÃ­das.</strong></li>
-                        <li>Faturas já pagas permanecerÃ£o no Asaas (mas sem vÃ­nculo).</li>
+                        <li>O cadastro do aluno será excluído.</li>
+                        <li><strong>Todas as faturas pendentes ou atrasadas no {providerLabel} serão excluídas.</strong></li>
+                        <li>Faturas já pagas permanecerão no {providerLabel} (mas sem vínculo).</li>
                     </ul>
                 </div>
             </div>,
@@ -869,13 +945,14 @@ export function useAdminDetails() {
         deleteProgress, showDeleteOverlay, setShowDeleteOverlay, deleteStatus, setDeleteStatus, handleDelete,
         turmas, availableTurmas,
         showTransferModal, setShowTransferModal, selectedTurmaId, setSelectedTurmaId, isTransferring, handleTransfer, openTransferModal,
+        handleBirthDateAutoAssign,
         showApprovalModal, setShowApprovalModal, showSuccessModal, setShowSuccessModal, plans, approvalConfig, setApprovalConfig, isProcessingApproval,
         confirmApprove, handleApprove, handleSendWhatsApp,
         showAddModalityModal, setShowAddModalityModal, isCreatingModality, handleAddModality,
         handleRemoveModality,
         handleDeactivate,
         handleReactivate,
-        generateCard: (student: any) => generateStudentCardPDF(student, data.responsavel, showAlert),
+        generateCard: (student: any) => generateStudentCardPDF(student, data.responsavel, showAlert, data.modalidade, data.numeroCota),
         workerUrl,
         allRegistrations,
         saveNow

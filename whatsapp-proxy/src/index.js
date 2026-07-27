@@ -210,6 +210,18 @@ export default {
       });
     }
 
+    // --- PÁGINA DE FATURA (SANDBOX CORA) VISÍVEL PELO CLIENTE ---
+    if (path.startsWith("/sandbox/cora/payments/") && request.method === "GET") {
+      const invoiceId = decodeURIComponent(path.split("/").filter(Boolean).slice(3).join("/"));
+      const htmlHeaders = { "Content-Type": "text/html; charset=utf-8", ...corsHeaders };
+      try {
+        const payment = await getSandboxPayment(env, invoiceId);
+        return new Response(renderSandboxInvoiceHtml(payment), { headers: htmlHeaders });
+      } catch (err) {
+        return new Response(renderSandboxInvoiceNotFoundHtml(invoiceId), { status: 404, headers: htmlHeaders });
+      }
+    }
+
     if ((path === "/send-whatsapp" || path === "/api/whatsapp/send") && request.method === "POST") {
       try {
         const body = await request.json();
@@ -1130,6 +1142,150 @@ async function deleteSandboxPayment(env, id) {
   await env.RAE_STORAGE.delete(sandboxPaymentKey(id));
   await env.RAE_STORAGE.delete(sandboxPaymentListKey(id));
   return { ...payment, deleted: true, status: "DELETED" };
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sandboxInvoiceStatusInfo(status) {
+  const s = String(status || "").toUpperCase();
+  if (["RECEIVED", "CONFIRMED", "PAID", "RECEIVED_IN_CASH"].includes(s)) {
+    return { label: "PAGO", color: "#0a7a34", bg: "#e6f7ec" };
+  }
+  if (s === "OVERDUE") {
+    return { label: "VENCIDA", color: "#b91c1c", bg: "#fdecec" };
+  }
+  return { label: "PENDENTE", color: "#b45309", bg: "#fdf3e2" };
+}
+
+function renderSandboxInvoiceHtml(payment) {
+  const value = Number(payment.value || 0);
+  const valueStr = value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const due = payment.dueDate
+    ? new Date(`${payment.dueDate}T12:00:00`).toLocaleDateString("pt-BR")
+    : "-";
+  const status = sandboxInvoiceStatusInfo(payment.status);
+  const isPaid = status.label === "PAGO";
+  const pix = String(payment.pixQrCode || "");
+  const billing = String(payment.billingType || "PIX").toUpperCase() === "BOLETO" ? "Boleto" : "Pix";
+
+  const row = (label, val) => `
+        <div class="row">
+          <span class="row-label">${escapeHtml(label)}</span>
+          <span class="row-value">${escapeHtml(val)}</span>
+        </div>`;
+
+  const pixBlock = (!isPaid && pix) ? `
+      <div class="pix">
+        <div class="pix-title">Pague com ${escapeHtml(billing)} — copia e cola</div>
+        <textarea id="pixCode" readonly onclick="this.select()">${escapeHtml(pix)}</textarea>
+        <button id="copyBtn" onclick="copyPix()">Copiar código ${escapeHtml(billing)}</button>
+      </div>` : "";
+
+  const paidBlock = isPaid ? `<div class="paid-banner">Pagamento confirmado ✓</div>` : "";
+
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fatura — Rumo ao Esporte</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Roboto, Arial, sans-serif; background: #eef2f7; color: #1f2937; padding: 20px; display: flex; justify-content: center; }
+  .card { width: 100%; max-width: 440px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.12); }
+  .header { background: linear-gradient(135deg, #0b3a8c, #1560d6); color: #fff; padding: 22px 24px; }
+  .header .brand { font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85; }
+  .header .title { font-size: 1.25rem; font-weight: 800; margin-top: 2px; }
+  .amount { padding: 24px; text-align: center; border-bottom: 1px solid #eef2f7; }
+  .amount .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
+  .amount .value { font-size: 2.2rem; font-weight: 800; color: #0b3a8c; margin-top: 4px; }
+  .status { display: inline-block; margin-top: 10px; padding: 4px 14px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px; color: ${status.color}; background: ${status.bg}; }
+  .body { padding: 20px 24px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+  .row:last-child { border-bottom: none; }
+  .row-label { color: #6b7280; }
+  .row-value { font-weight: 600; text-align: right; }
+  .pix { margin: 4px 24px 20px; padding: 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; }
+  .pix-title { font-size: 0.8rem; font-weight: 700; color: #0b3a8c; margin-bottom: 8px; }
+  .pix textarea { width: 100%; height: 74px; resize: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.72rem; font-family: monospace; color: #334155; background: #fff; }
+  .pix button { width: 100%; margin-top: 10px; padding: 12px; border: none; border-radius: 8px; background: #0a7a34; color: #fff; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+  .pix button:active { transform: scale(0.99); }
+  .paid-banner { margin: 4px 24px 20px; padding: 14px; background: #e6f7ec; color: #0a7a34; border-radius: 12px; text-align: center; font-weight: 800; }
+  .foot { padding: 14px 24px 22px; text-align: center; font-size: 0.72rem; color: #9ca3af; }
+  .badge-test { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 6px; background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="brand">Rumo ao Esporte 2026</div>
+      <div class="title">Fatura de Pagamento</div>
+    </div>
+    <div class="amount">
+      <div class="label">Valor</div>
+      <div class="value">${escapeHtml(valueStr)}</div>
+      <span class="status">${escapeHtml(status.label)}</span>
+    </div>
+    ${paidBlock}
+    <div class="body">
+      ${row("Descrição", payment.description || "-")}
+      ${row("Vencimento", due)}
+      ${row("Pagador", payment.customerName || "-")}
+      ${payment.customerDocument ? row("CPF", payment.customerDocument) : ""}
+      ${row("Forma de pagamento", billing)}
+    </div>
+    ${pixBlock}
+    <div class="foot">
+      Fatura gerada pelo sistema Rumo ao Esporte.
+      <br /><span class="badge-test">AMBIENTE DE TESTE</span>
+    </div>
+  </div>
+  <script>
+    function copyPix() {
+      var el = document.getElementById('pixCode');
+      var btn = document.getElementById('copyBtn');
+      el.select();
+      el.setSelectionRange(0, 99999);
+      var done = function () { var t = btn.textContent; btn.textContent = 'Copiado!'; setTimeout(function () { btn.textContent = t; }, 1800); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(el.value).then(done).catch(function () { try { document.execCommand('copy'); done(); } catch (e) {} });
+      } else { try { document.execCommand('copy'); done(); } catch (e) {} }
+    }
+  </script>
+</body>
+</html>`;
+}
+
+function renderSandboxInvoiceNotFoundHtml(id) {
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fatura não encontrada</title>
+<style>
+  body { font-family: "Segoe UI", Roboto, Arial, sans-serif; background: #eef2f7; color: #1f2937; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .box { background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); padding: 32px; max-width: 420px; text-align: center; }
+  h1 { color: #0b3a8c; font-size: 1.3rem; margin-bottom: 10px; }
+  p { color: #6b7280; font-size: 0.9rem; line-height: 1.5; }
+  code { font-size: 0.72rem; color: #9ca3af; word-break: break-all; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>Fatura não encontrada</h1>
+    <p>Esta fatura não está mais disponível ou já foi removida. Entre em contato com a secretaria do Rumo ao Esporte.</p>
+    <p style="margin-top:12px"><code>${escapeHtml(id)}</code></p>
+  </div>
+</body>
+</html>`;
 }
 
 function getPaymentProviderStatus(env) {

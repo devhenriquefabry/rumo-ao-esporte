@@ -1,6 +1,6 @@
 import React from 'react';
 import PageTitle from '../../../components/PageTitle';
-import { Download, Trash2 } from 'lucide-react';
+import { Download, Trash2, CheckCircle2 } from 'lucide-react';
 import type { AdminDashboardProps } from '../types';
 
 interface HeaderProps extends AdminDashboardProps {
@@ -11,6 +11,7 @@ interface HeaderProps extends AdminDashboardProps {
     selectionEnabled?: boolean;
     deletingSelected?: boolean;
     onDeleteSelected?: () => void;
+    onApproveSelected?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,7 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
     selectedCount = 0,
     selectionEnabled = false,
     deletingSelected = false,
-    onDeleteSelected
+    onDeleteSelected,
+    onApproveSelected
 }) => {
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '8px' : '12px' }}>
@@ -33,6 +35,27 @@ export const Header: React.FC<HeaderProps> = ({
 
             {!isMobile && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {selectionEnabled && selectedCount > 0 && (
+                        <button
+                            onClick={onApproveSelected}
+                            className="touch-feedback"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 14px',
+                                background: '#00a63a',
+                                border: 'none',
+                                borderRadius: '4px',
+                                color: '#fff',
+                                fontWeight: '800',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <CheckCircle2 size={14} /> {`APROVAR (${selectedCount})`}
+                        </button>
+                    )}
                     {selectionEnabled && selectedCount > 0 && (
                         <button
                             onClick={onDeleteSelected}

@@ -155,6 +155,7 @@ export default function StudentCarteirinha() {
                         student={selectedStudent}
                         responsavel={selectedStudent.parentResponsavel}
                         numeroCota={selectedStudent.parentCota}
+                        modalidade={selectedStudent.modalidades}
                     />
                 </div>
 

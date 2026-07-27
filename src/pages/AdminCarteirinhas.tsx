@@ -6,11 +6,12 @@ import StudentCard from '../components/StudentCard';
 import { Download, Search, FileDown, Eye } from 'lucide-react';
 import PageTitle from '../components/PageTitle';
 import PageContainer from '../components/PageContainer';
+import { formatModalidade } from '../utils/modalidadeUtils';
 
 const CARD_QR_SIZE_MM = 12.4;
 const CARD_QR_RIGHT_MM = 4.6;
 const CARD_QR_TOP_MM = 3.7;
-const CARD_BACK_LOGO_URL = '/real-logo-transparente.svg';
+const CARD_BACK_LOGO_URL = '/escudo-futsal.svg';
 const CARD_BACK_LOGO_SIZE_MM = 13.4;
 const CARD_BACK_LOGO_X_MM = 67.2;
 const CARD_BACK_LOGO_Y_MM = 34.8;
@@ -129,7 +130,7 @@ export default function AdminCarteirinhas() {
         return parts.join(' ');
     };
 
-    const generateSinglePDF = async (student: any, numeroCota: string, responsavel?: any) => {
+    const generateSinglePDF = async (student: any, numeroCota: string, responsavel?: any, modalidade?: string) => {
         const { default: jsPDF } = await import('jspdf');
         const docPDF = new jsPDF({
             orientation: 'l',
@@ -201,13 +202,16 @@ export default function AdminCarteirinhas() {
             docPDF.setFontSize(6.5);
 
             // Cota: (50.8%, 52.5%)
-            docPDF.text(numeroCota || '-', 45.0, 29.6);
+            docPDF.text(numeroCota || '-', 45.0, 28.9);
 
             // CPF: (60.6%, 43.0%)
-            docPDF.text(student.cpf || '-', 36.8, 34.8);
+            docPDF.text(student.cpf || '-', 36.8, 34.0);
 
             // Birth: (70.8%, 68.0%)
-            docPDF.text(student.dataNascimento || '-', 58.2, 40.2);
+            docPDF.text(student.dataNascimento || '-', 58.2, 38.9);
+
+            // Modalidade: (81.4%, 55.0%)
+            docPDF.text(formatModalidade(modalidade), 47.1, 43.9);
 
             // QR Code Generation for PDF
             try {
@@ -354,9 +358,10 @@ export default function AdminCarteirinhas() {
 
                 docPDF.setTextColor(50, 50, 50);
                 docPDF.setFontSize(6.5);
-                docPDF.text(item.numeroCota ? String(item.numeroCota) : '-', 45.0, 29.6);
-                docPDF.text(item.aluno.cpf || '-', 36.8, 34.8);
-                docPDF.text(item.aluno.dataNascimento || '-', 58.2, 40.2);
+                docPDF.text(item.numeroCota ? String(item.numeroCota) : '-', 45.0, 28.9);
+                docPDF.text(item.aluno.cpf || '-', 36.8, 34.0);
+                docPDF.text(item.aluno.dataNascimento || '-', 58.2, 38.9);
+                docPDF.text(formatModalidade(item.modalidade), 47.1, 43.9);
 
                 try {
                     const qrData = `${item.aluno.cpf || ''}|${item.aluno.dataNascimento || ''}|${item.aluno.nome || ''}`;
@@ -556,12 +561,13 @@ export default function AdminCarteirinhas() {
                                             student={item.aluno}
                                             responsavel={item.responsavel}
                                             numeroCota={item.numeroCota}
+                                            modalidade={item.modalidade}
                                         />
                                     </div>
 
                                     <div style={{ display: 'flex', gap: '10px' }}>
                                         <button
-                                            onClick={() => generateSinglePDF(item.aluno, item.numeroCota, item.responsavel)}
+                                            onClick={() => generateSinglePDF(item.aluno, item.numeroCota, item.responsavel, item.modalidade)}
                                             style={{
                                                 flex: 1,
                                                 padding: '8px',

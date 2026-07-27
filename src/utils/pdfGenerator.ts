@@ -1,11 +1,12 @@
 
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
+import { formatModalidade } from './modalidadeUtils';
 
 const CARD_QR_SIZE_MM = 12.4;
 const CARD_QR_RIGHT_MM = 4.6;
 const CARD_QR_TOP_MM = 3.7;
-const CARD_BACK_LOGO_URL = '/real-logo-transparente.svg';
+const CARD_BACK_LOGO_URL = '/escudo-futsal.svg';
 const CARD_BACK_LOGO_SIZE_MM = 13.4;
 const CARD_BACK_LOGO_X_MM = 67.2;
 const CARD_BACK_LOGO_Y_MM = 34.8;
@@ -27,7 +28,7 @@ const loadImageAsPngDataUrl = async (src: string) => {
     return canvas.toDataURL('image/png');
 };
 
-export const generateStudentCardPDF = async (student: any, responsible: any, showAlert: (msg: string, type: 'success' | 'error' | 'warning' | 'info') => void) => {
+export const generateStudentCardPDF = async (student: any, responsible: any, showAlert: (msg: string, type: 'success' | 'error' | 'warning' | 'info') => void, modalidade?: string | string[], numeroCota?: string) => {
     const docPDF = new jsPDF({
         orientation: 'l',
         unit: 'mm',
@@ -107,8 +108,10 @@ export const generateStudentCardPDF = async (student: any, responsible: any, sho
         docPDF.setTextColor(50, 50, 50);
         docPDF.setFontSize(6.5);
 
-        docPDF.text(student.cpf || '-', 36.8, 34.8);
-        docPDF.text(student.dataNascimento || '-', 58.2, 40.2);
+        docPDF.text(numeroCota || '-', 45.0, 28.9);
+        docPDF.text(student.cpf || '-', 36.8, 34.0);
+        docPDF.text(student.dataNascimento || '-', 58.2, 38.9);
+        docPDF.text(formatModalidade(modalidade), 47.1, 43.9);
 
         // QR Code Generation
         try {

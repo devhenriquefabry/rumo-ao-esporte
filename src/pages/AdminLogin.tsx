@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { Eye, EyeOff } from 'lucide-react';
+import {
+    signInWithEmailAndPassword
+} from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useDialog } from '../context/CustomDialogContext';
 import { useLoading } from '../components/LoadingService';
+import RememberSessionCheckbox from '../components/RememberSessionCheckbox';
+import { configureAuthPersistence } from '../utils/authPersistence';
+import { DIRETORIA_PROFILE, DIRETORIA_PASSWORD, isDiretoriaEmail } from '../config/accessProfiles';
 import '../App.css';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
@@ -13,6 +19,8 @@ const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || '
 export default function AdminLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [keepSignedIn, setKeepSignedIn] = useState(() => localStorage.getItem('rae_admin_keep_signed_in') !== 'false');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { showAlert } = useDialog();
@@ -24,6 +32,33 @@ export default function AdminLogin() {
         const normalizedEmail = email.trim().toLowerCase();
 
         try {
+            await configureAuthPersistence(auth, keepSignedIn);
+            localStorage.setItem('rae_admin_keep_signed_in', String(keepSignedIn));
+
+            if (keepSignedIn) {
+                sessionStorage.removeItem('rae_admin_session_active');
+            } else {
+                sessionStorage.setItem('rae_admin_session_active', 'true');
+            }
+        } catch (error) {
+            console.error('Admin persistence error:', error);
+            showAlert('Não foi possível configurar a duração da sessão. Tente novamente.', 'error');
+            setLoading(false);
+            return;
+        }
+
+        // 0. Perfil "Diretoria" (login fixo compartilhado, acesso restrito)
+        if (isDiretoriaEmail(normalizedEmail) && password.trim() === DIRETORIA_PASSWORD) {
+            localStorage.setItem('rae_admin_auth', JSON.stringify(DIRETORIA_PROFILE));
+            showLoading(3000, 'Acessando Painel da Diretoria...');
+            setTimeout(() => {
+                navigate('/admin/aniversariantes');
+            }, 3000);
+            setLoading(false);
+            return;
+        }
+
+        try {
             // 1. Try Firebase Auth (Main Admin)
             await signInWithEmailAndPassword(auth, normalizedEmail, password);
             localStorage.setItem('rae_admin_auth', 'true'); // Legacy/Simple flag for main admin
@@ -31,7 +66,7 @@ export default function AdminLogin() {
             console.log("DEBUG: Login ADMIN sucesso. Disparando loading...");
             showLoading(3000, 'Acessando Painel Administrativo...');
             setTimeout(() => {
-                navigate('/admin/dashboard');
+                navigate('/admin/stats');
             }, 3000);
         } catch (authError: any) {
             console.log("Firebase Auth failed, checking Employee DB...", authError);
@@ -59,7 +94,7 @@ export default function AdminLogin() {
 
                     showLoading(3000, `Bem-vindo(a), ${employeeData.nome?.split(' ')[0] || 'Funcionário'}!`);
                     setTimeout(() => {
-                        navigate('/admin/dashboard');
+                        navigate('/admin/stats');
                     }, 3000);
                 } else {
                     // Both failed
@@ -130,7 +165,11 @@ export default function AdminLogin() {
                     <h2 style={{ color: '#10213f', marginBottom: '8px', fontWeight: '900', fontSize: '1.6rem' }}>Login administrativo</h2>
                     <p style={{ margin: '0 0 28px', color: '#63708a', fontSize: '0.95rem' }}>Acesse o centro de controle do projeto.</p>
 
-                    <form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <form
+                        onSubmit={handleLogin}
+                        autoComplete="on"
+                        style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}
+                    >
                         <div className="form-group" style={{ width: '100%' }}>
                             <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Email</label>
                             <input
@@ -139,6 +178,8 @@ export default function AdminLogin() {
                                 onChange={e => setEmail(e.target.value)}
                                 required
                                 placeholder="seu@email.com"
+                                autoComplete="username"
+                                name="username"
                                 style={{
                                     width: '100%',
                                     padding: '14px',
@@ -155,25 +196,57 @@ export default function AdminLogin() {
 
                         <div className="form-group" style={{ width: '100%' }}>
                             <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Senha</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                required
-                                placeholder="••••••••"
-                                style={{
-                                    width: '100%',
-                                    padding: '14px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #dce7f3',
-                                    fontSize: '1rem',
-                                    outline: 'none',
-                                    transition: 'border-color 0.3s'
-                                }}
-                                onFocus={(e) => e.target.style.borderColor = '#17428f'}
-                                onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
-                            />
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                    autoComplete="current-password"
+                                    name="password"
+                                    style={{
+                                        width: '100%',
+                                        padding: '14px',
+                                        paddingRight: '46px',
+                                        borderRadius: '8px',
+                                        border: '2px solid #dce7f3',
+                                        fontSize: '1rem',
+                                        outline: 'none',
+                                        transition: 'border-color 0.3s',
+                                        boxSizing: 'border-box'
+                                    }}
+                                    onFocus={(e) => e.target.style.borderColor = '#17428f'}
+                                    onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(prev => !prev)}
+                                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '12px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        padding: '4px',
+                                        cursor: 'pointer',
+                                        color: '#63708a',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
                         </div>
+
+                        <RememberSessionCheckbox
+                            id="admin-keep-signed-in"
+                            checked={keepSignedIn}
+                            onChange={setKeepSignedIn}
+                        />
 
                         <button
                             type="submit"

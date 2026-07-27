@@ -32,6 +32,7 @@ import ChamadaTurma from './pages/ChamadaTurma';
 import StudentContract from './pages/StudentContract';
 import { CustomDialogProvider } from './context/CustomDialogContext';
 import MaintenanceGuard from './components/MaintenanceGuard';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import './App.css';
 
 // Student Portal Imports
@@ -75,6 +76,7 @@ import AdminSimuladorPage from './pages/AdminSimuladorPage';
 import AdminConvocacaoList from './pages/AdminConvocacaoList';
 import AdminConvocacaoDetails from './pages/AdminConvocacaoDetails';
 import AdminMidias from './pages/AdminMidias';
+import AdminDocumentos from './pages/AdminDocumentos';
 import AdminMensagens from './pages/AdminMensagens';
 import AdminMensagensCobrancas from './pages/AdminMensagens/AdminMensagensCobrancas';
 import AdminMensagensAutomacao from './pages/AdminMensagens/AdminMensagensAutomacao';
@@ -89,6 +91,7 @@ function App() {
     <CustomDialogProvider>
       <LoadingProvider>
         <BrowserRouter>
+          <PWAInstallPrompt />
           <Routes>
             <Route path="/" element={<PublicForm />} />
             <Route path="/solicitar-sistema-escola" element={<SchoolSystemRequestForm />} />
@@ -169,6 +172,7 @@ function App() {
               <Route path="contract/:id/:studentIndex?" element={<StudentContract />} />
               <Route path="jogos/convocacao" element={<AdminConvocacaoList />} />
               <Route path="midias" element={<AdminMidias />} />
+              <Route path="documentos" element={<AdminDocumentos />} />
               <Route path="store" element={<AdminStore />} />
               <Route path="jogos/convocacao/:id" element={<AdminConvocacaoDetails />} />
               <Route path="mensagens" element={<AdminMensagens />} />

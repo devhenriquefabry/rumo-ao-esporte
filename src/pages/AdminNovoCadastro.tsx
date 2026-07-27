@@ -7,6 +7,7 @@ import { useDialog } from '../context/CustomDialogContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { findOrCreateTurma } from '../utils/turmaService';
 import { SCHEDULE_OPTIONS } from '../utils/turmasConstants';
+import { normalizeNameKey } from '../utils/nameUtils';
 
 // Types
 interface Student {
@@ -232,6 +233,10 @@ const AdminNovoCadastro: React.FC = () => {
 
             await addDoc(collection(db, 'rumo_ao_esporte_2026_registrations'), {
                 ...data,
+                responsavel: {
+                    ...data.responsavel,
+                    nomeBusca: normalizeNameKey(data.responsavel.nome)
+                },
                 alunos: updatedAlunos,
                 status: 'confirmado',
                 createdAt: serverTimestamp(),

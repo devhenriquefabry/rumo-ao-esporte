@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import StudentCard from '../components/StudentCard';
-import { User, FileText, AlertTriangle, IdCard, Download, Camera, Loader } from 'lucide-react';
+import { User, FileText, AlertTriangle, IdCard, Download, Camera, Loader, X } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
 import { useDialog } from '../context/CustomDialogContext';
 import StudentGalleryTab from './StudentGalleryTab';
@@ -20,6 +20,7 @@ interface StudentDetailsProps {
     canEdit?: boolean;
     activeTab: 'overview' | 'galerie';
     setActiveTab: (tab: 'overview' | 'galerie') => void;
+    onBirthDateSet?: (alunoIndex: number, birthDate: string) => void;
 }
 
 export default function StudentDetailsSection({
@@ -36,9 +37,10 @@ export default function StudentDetailsSection({
     onRemoveModality,
     canEdit = true,
     activeTab,
-    setActiveTab
+    setActiveTab,
+    onBirthDateSet
 }: StudentDetailsProps) {
-    const { showAlert } = useDialog();
+    const { showAlert, showConfirm } = useDialog();
     const [uploading, setUploading] = useState(false);
 
     const handlePhotoUpload = async (e: any) => {
@@ -79,6 +81,21 @@ export default function StudentDetailsSection({
         }
     };
 
+    const handleRemovePhoto = () => {
+        if (!canEdit) return;
+        showConfirm(
+            'Tem certeza que deseja remover a foto deste aluno?',
+            () => {
+                const updatedAlunos = [...data.alunos];
+                updatedAlunos[index] = { ...updatedAlunos[index], fotoUrl: '' };
+                setData({ ...data, alunos: updatedAlunos });
+                showAlert('Foto removida com sucesso!', 'success');
+            },
+            'warning',
+            'Remover Foto'
+        );
+    };
+
     const getAge = (birthDate: string) => {
         const birth = parseBirthDate(birthDate);
         if (!birth) return '-';
@@ -117,6 +134,8 @@ export default function StudentDetailsSection({
         const parsed = parseBirthDate(birthDate);
         return parsed ? parsed.toLocaleDateString('pt-BR') : birthDate || '-';
     };
+
+    const maskDate = (v: string) => v.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})(\d)/, '$1/$2').slice(0, 10);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '20px' }}>
@@ -200,6 +219,33 @@ export default function StudentDetailsSection({
                                     </div>
                                 )}
                             </label>
+
+                            {/* REMOVE PHOTO BUTTON - ONLY IF CAN EDIT AND HAS PHOTO */}
+                            {canEdit && aluno.fotoUrl && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemovePhoto(); }}
+                                    title="Remover foto"
+                                    style={{
+                                        position: 'absolute',
+                                        top: '6px',
+                                        right: '6px',
+                                        width: '24px',
+                                        height: '24px',
+                                        borderRadius: '50%',
+                                        background: 'rgba(0,0,0,0.6)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        zIndex: 20
+                                    }}
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
                         </div>
 
                         {/* 2. DETAILS (Middle) */}
@@ -230,10 +276,36 @@ export default function StudentDetailsSection({
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
                                 <div>
                                     <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '2px', fontWeight: 'bold', textTransform: 'uppercase' }}>Nascimento</label>
-                                    <div style={{ fontSize: '1rem', color: '#fff', fontWeight: '600' }}>
-                                        {formatBirthDate(aluno.dataNascimento)}
-                                        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginLeft: '5px' }}>({getAge(aluno.dataNascimento)})</span>
-                                    </div>
+                                    {_isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={aluno.dataNascimento || ''}
+                                            placeholder="DD/MM/AAAA"
+                                            onChange={(e) => {
+                                                const updatedAlunos = [...data.alunos];
+                                                updatedAlunos[index] = { ...updatedAlunos[index], dataNascimento: maskDate(e.target.value) };
+                                                setData({ ...data, alunos: updatedAlunos });
+                                            }}
+                                            onBlur={(e) => onBirthDateSet?.(index, e.target.value)}
+                                            style={{
+                                                width: '110px',
+                                                background: '#fff',
+                                                border: '2px solid #ccc',
+                                                borderRadius: '6px',
+                                                color: '#333',
+                                                padding: '6px 10px',
+                                                fontSize: '1rem',
+                                                fontWeight: 'bold',
+                                                outline: 'none',
+                                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{ fontSize: '1rem', color: '#fff', fontWeight: '600' }}>
+                                            {formatBirthDate(aluno.dataNascimento)}
+                                            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginLeft: '5px' }}>({getAge(aluno.dataNascimento)})</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: '15px' }}>
                                     <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '2px', fontWeight: 'bold', textTransform: 'uppercase' }}>Nº Camisa</label>
@@ -263,6 +335,33 @@ export default function StudentDetailsSection({
                                     ) : (
                                         <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: '800' }}>
                                             {aluno.camisa || '-'}
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: '15px' }}>
+                                    <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '2px', fontWeight: 'bold', textTransform: 'uppercase' }}>Nº da Cota</label>
+                                    {_isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={data.numeroCota || ''}
+                                            placeholder="Ex: 123"
+                                            onChange={(e) => setData({ ...data, numeroCota: e.target.value })}
+                                            style={{
+                                                width: '90px',
+                                                background: '#fff',
+                                                border: '2px solid #ccc',
+                                                borderRadius: '6px',
+                                                color: '#333',
+                                                padding: '6px 10px',
+                                                fontSize: '1rem',
+                                                fontWeight: 'bold',
+                                                outline: 'none',
+                                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: '800' }}>
+                                            {data.numeroCota || '-'}
                                         </div>
                                     )}
                                 </div>
@@ -435,7 +534,7 @@ export default function StudentDetailsSection({
                                 boxSizing: 'border-box'
                             }}>
                                 <div style={{ width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #eee' }}>
-                                    <StudentCard student={aluno} responsavel={data.responsavel} numeroCota={data.numeroCota} />
+                                    <StudentCard student={aluno} responsavel={data.responsavel} numeroCota={data.numeroCota} modalidade={data.modalidade} />
                                 </div>
                             </div>
                         </div>

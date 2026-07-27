@@ -39,6 +39,10 @@ temp_cfg.json
 /*.jpeg
 /*.png
 
+# Backups/dados de migração com informações reais de alunos
+/migracao-associados/
+/migracao-financeira/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

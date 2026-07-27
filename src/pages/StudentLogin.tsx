@@ -1,39 +1,268 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { Eye, EyeOff } from 'lucide-react';
+import {
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signInWithEmailAndPassword
+} from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { useDialog } from '../context/CustomDialogContext';
 import { useLoading } from '../components/LoadingService';
+import RememberSessionCheckbox from '../components/RememberSessionCheckbox';
+import { configureAuthPersistence } from '../utils/authPersistence';
+import { normalizeNameKey, buildSyntheticEmail } from '../utils/nameUtils';
+import { DIRETORIA_PROFILE, DIRETORIA_PASSWORD, isDiretoriaEmail } from '../config/accessProfiles';
 import '../App.css';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
 
 export default function StudentLogin() {
-    const [email, setEmail] = useState('');
+    const [loginInput, setLoginInput] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [keepSignedIn, setKeepSignedIn] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [checkingSavedSession, setCheckingSavedSession] = useState(true);
+    const loginAttemptStarted = useRef(false);
     const navigate = useNavigate();
     const { showAlert } = useDialog();
     const { showLoading } = useLoading();
 
     const workerUrl = import.meta.env.VITE_WORKER_URL;
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    const proceedToDashboard = useCallback(async (userEmail: string, restoredSession = false) => {
+        showLoading(restoredSession ? 900 : 3500, restoredSession ? 'Restaurando seu acesso...' : 'Identificando perfil de acesso...');
+        const normalizedEmail = userEmail.toLowerCase().trim();
 
-        const normalizedEmail = email.toLowerCase().trim();
-        const rawEmail = email.trim();
+        if (restoredSession) {
+            const hasStudentRole = Boolean(localStorage.getItem('rae_student_auth'));
+            const hasTeacherRole = Boolean(localStorage.getItem('rae_teacher_auth'));
+
+            if (hasStudentRole && !hasTeacherRole) {
+                localStorage.removeItem('rae_admin_auth');
+                navigate('/aluno/dashboard', { replace: true });
+                return;
+            }
+
+            if (hasTeacherRole && !hasStudentRole) {
+                localStorage.removeItem('rae_admin_auth');
+                navigate('/professor/turmas', { replace: true });
+                return;
+            }
+        }
+
+        if (normalizedEmail === MAIN_ADMIN_EMAIL) {
+            localStorage.removeItem('rae_student_auth');
+            localStorage.removeItem('rae_teacher_auth');
+            localStorage.setItem('rae_admin_auth', 'true');
+            if (restoredSession) {
+                navigate('/admin/dashboard', { replace: true });
+            } else {
+                showLoading(1500, 'Acessando Painel Administrativo...');
+                setTimeout(() => navigate('/admin/dashboard'), 1500);
+            }
+            return;
+        }
+
+        const emailVariants = Array.from(new Set([normalizedEmail, userEmail.trim()]));
+
+        const teacherQueries = emailVariants.map(v => query(collection(db, "teachers"), where("email", "==", v)));
+        const teacherSnaps = await Promise.all(teacherQueries.map(q => getDocs(q)));
+        const teacherDocs = teacherSnaps.flatMap(s => s.docs);
+
+        localStorage.removeItem('rae_admin_auth');
+
+        if (teacherDocs.length > 0) {
+            const teacher = teacherDocs[0].data() as any;
+            if (teacher.active === false) {
+                await auth.signOut();
+                localStorage.removeItem('rae_teacher_auth');
+                localStorage.removeItem('teacherName');
+                showAlert("Seu acesso de professor está desativado.", "error");
+                return;
+            }
+            localStorage.removeItem('rae_student_auth');
+            localStorage.setItem('rae_teacher_auth', 'true');
+            localStorage.setItem('teacherName', teacher.nome);
+            if (restoredSession) {
+                navigate('/professor/turmas', { replace: true });
+            } else {
+                showLoading(3000, 'Acessando Portal do Professor...');
+                setTimeout(() => navigate('/professor/turmas'), 3000);
+            }
+        } else {
+            localStorage.removeItem('rae_teacher_auth');
+            localStorage.setItem('rae_student_auth', 'true');
+            if (restoredSession) {
+                navigate('/aluno/dashboard', { replace: true });
+            } else {
+                showLoading(1500, 'Acessando Painel do Aluno...');
+                setTimeout(() => navigate('/aluno/dashboard'), 1500);
+            }
+        }
+    }, [navigate, showAlert, showLoading]);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (loginAttemptStarted.current) return;
+
+            if (!user?.email) {
+                setCheckingSavedSession(false);
+                return;
+            }
+
+            loginAttemptStarted.current = true;
+            setLoading(true);
+
+            const shouldKeepSession = localStorage.getItem('rae_keep_signed_in') !== 'false';
+
+            void configureAuthPersistence(auth, shouldKeepSession)
+                .then(() => proceedToDashboard(user.email!, true))
+                .catch((error) => {
+                    console.error('Session restore error:', error);
+                    showAlert('Não foi possível restaurar sua sessão. Tente entrar novamente.', 'error');
+                })
+                .finally(() => {
+                    loginAttemptStarted.current = false;
+                    setCheckingSavedSession(false);
+                    setLoading(false);
+                });
+        });
+
+        return unsubscribe;
+    }, [proceedToDashboard, showAlert]);
+
+    // Login por Nome completo do Responsável (fluxo principal para pais/responsáveis)
+    const handleNameLogin = async (rawName: string) => {
+        const nomeBusca = normalizeNameKey(rawName);
         const cleanPassword = password.replace(/\D/g, '');
 
+        const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.nomeBusca", "==", nomeBusca));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+            showAlert("Nome não encontrado. Digite o nome completo do responsável exatamente como no cadastro.", "error");
+            return;
+        }
+
+        // 1. Tenta login direto: cobre o caso do responsável já ter trocado a senha antes.
+        const candidateEmails = Array.from(new Set(snap.docs.map(d => {
+            const data = d.data() as any;
+            const email = (data.responsavel?.email || '').toLowerCase().trim();
+            if (email) return email;
+            const cpfClean = (data.responsavel?.cpf || '').replace(/\D/g, '');
+            return buildSyntheticEmail(cpfClean, d.id);
+        })));
+
+        for (const candidateEmail of candidateEmails) {
+            try {
+                await signInWithEmailAndPassword(auth, candidateEmail, password);
+                await proceedToDashboard(candidateEmail);
+                return;
+            } catch { /* tenta o próximo ou cai no fluxo de primeiro acesso */ }
+        }
+
+        // 2. Ainda não tem conta (ou senha digitada não confere): valida contra a senha
+        // padrão (CPF) ou senha customizada salva no cadastro.
+        const matchedDoc = snap.docs.find(d => {
+            const data = d.data() as any;
+            const cpfClean = (data.responsavel?.cpf || '').replace(/\D/g, '');
+            return (data.senha && data.senha === password) || (cpfClean.length === 11 && cpfClean === cleanPassword);
+        });
+
+        if (!matchedDoc) {
+            showAlert("Senha incorreta. Se for seu primeiro acesso, use seu CPF (somente números) como senha.", "error");
+            return;
+        }
+
+        const matchedData = matchedDoc.data() as any;
+        const cpfClean = (matchedData.responsavel?.cpf || '').replace(/\D/g, '');
+        const usingCustomSenha = Boolean(matchedData.senha) && matchedData.senha === password;
+        const passwordForAuth = usingCustomSenha ? password : cleanPassword;
+
+        let targetEmail = (matchedData.responsavel?.email || '').toLowerCase().trim();
+        if (!targetEmail) {
+            targetEmail = buildSyntheticEmail(cpfClean, matchedDoc.id);
+            // Persiste o e-mail (interno) em todos os cadastros da mesma família para
+            // manter consistente o resto do sistema, que identifica o responsável pelo e-mail.
+            const siblingIds = snap.docs
+                .filter(d => ((d.data() as any).responsavel?.cpf || '').replace(/\D/g, '') === cpfClean)
+                .map(d => d.id);
+            await Promise.all(siblingIds.map(id =>
+                updateDoc(doc(db, 'rumo_ao_esporte_2026_registrations', id), { 'responsavel.email': targetEmail })
+            ));
+        }
+
+        // A senha digitada é válida (CPF ou senha customizada), mas pode estar em um
+        // formato diferente do que foi realmente salvo no Firebase Auth (ex: CPF com
+        // pontuação). Tenta a forma canônica antes de assumir que é primeiro acesso.
+        if (passwordForAuth !== password) {
+            try {
+                await signInWithEmailAndPassword(auth, targetEmail, passwordForAuth);
+                await proceedToDashboard(targetEmail);
+                return;
+            } catch { /* conta ainda não existe com essa senha: segue para criação */ }
+        }
+
         try {
+            await createUserWithEmailAndPassword(auth, targetEmail, passwordForAuth);
+            showAlert("Primeiro acesso confirmado! Sua conta foi criada.", "success");
+            await proceedToDashboard(targetEmail);
+        } catch (createError: any) {
+            if (createError.code === 'auth/email-already-in-use') {
+                showAlert("Senha incorreta. Se você já alterou sua senha antes, use a nova senha. Esqueceu? Contate a secretaria.", "error");
+            } else {
+                throw createError;
+            }
+        }
+    };
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        loginAttemptStarted.current = true;
+        setLoading(true);
+
+        const rawInput = loginInput.trim();
+        const isEmailInput = rawInput.includes('@');
+
+        try {
+            await configureAuthPersistence(auth, keepSignedIn);
+            localStorage.setItem('rae_keep_signed_in', String(keepSignedIn));
+
+            if (!isEmailInput) {
+                // Fluxo novo: login de responsáveis pelo Nome Completo
+                await handleNameLogin(rawInput);
+                return;
+            }
+
+            // === Fluxo por e-mail (professores, administração e compatibilidade) ===
+            const normalizedEmail = rawInput.toLowerCase();
+            const rawEmail = rawInput;
+            const cleanPassword = password.replace(/\D/g, '');
+
             if (normalizedEmail === MAIN_ADMIN_EMAIL) {
                 localStorage.removeItem('rae_student_auth');
                 localStorage.removeItem('rae_teacher_auth');
                 localStorage.setItem('rae_admin_auth', 'true');
                 showLoading(1500, 'Acessando Painel Administrativo...');
                 setTimeout(() => navigate('/admin/dashboard'), 1500);
+                return;
+            }
+
+            // Perfil "Diretoria": login fixo compartilhado, acesso restrito a poucos painéis
+            if (isDiretoriaEmail(normalizedEmail)) {
+                if (password.trim() === DIRETORIA_PASSWORD) {
+                    localStorage.removeItem('rae_student_auth');
+                    localStorage.removeItem('rae_teacher_auth');
+                    localStorage.setItem('rae_admin_auth', JSON.stringify(DIRETORIA_PROFILE));
+                    showLoading(1500, 'Acessando Painel da Diretoria...');
+                    setTimeout(() => navigate('/admin/aniversariantes'), 1500);
+                } else {
+                    showAlert('Senha incorreta.', 'error');
+                    setLoading(false);
+                }
                 return;
             }
 
@@ -232,50 +461,35 @@ export default function StudentLogin() {
             console.error('Login error:', error);
             showAlert('Erro no sistema: ' + error.message, 'error');
         } finally {
+            loginAttemptStarted.current = false;
             setLoading(false);
         }
     };
 
-    const proceedToDashboard = async (userEmail: string) => {
-        showLoading(3500, 'Identificando perfil de acesso...');
-        const normalizedEmail = userEmail.toLowerCase().trim();
-
-        if (normalizedEmail === MAIN_ADMIN_EMAIL) {
-            localStorage.removeItem('rae_student_auth');
-            localStorage.removeItem('rae_teacher_auth');
-            localStorage.setItem('rae_admin_auth', 'true');
-            showLoading(1500, 'Acessando Painel Administrativo...');
-            setTimeout(() => navigate('/admin/dashboard'), 1500);
-            return;
-        }
-
-        const emailVariants = Array.from(new Set([normalizedEmail, userEmail.trim()]));
-
-        const teacherQueries = emailVariants.map(v => query(collection(db, "teachers"), where("email", "==", v)));
-        const teacherSnaps = await Promise.all(teacherQueries.map(q => getDocs(q)));
-        const teacherDocs = teacherSnaps.flatMap(s => s.docs);
-
-        localStorage.removeItem('rae_admin_auth');
-
-        if (teacherDocs.length > 0) {
-            const teacher = teacherDocs[0].data() as any;
-            if (teacher.active === false) {
-                await auth.signOut();
-                localStorage.removeItem('rae_teacher_auth');
-                localStorage.removeItem('teacherName');
-                showAlert("Seu acesso de professor está desativado.", "error");
-                return;
-            }
-            localStorage.setItem('rae_teacher_auth', 'true');
-            localStorage.setItem('teacherName', teacher.nome);
-            showLoading(3000, 'Acessando Portal do Professor...');
-            setTimeout(() => navigate('/professor/turmas'), 3000);
-        } else {
-            localStorage.setItem('rae_student_auth', 'true');
-            showLoading(1500, 'Acessando Painel do Aluno...');
-            setTimeout(() => navigate('/aluno/dashboard'), 1500);
-        }
-    };
+    if (checkingSavedSession) {
+        return (
+            <div
+                className="landing-page"
+                style={{
+                    minHeight: '100vh',
+                    display: 'grid',
+                    placeItems: 'center',
+                    padding: '24px',
+                    textAlign: 'center'
+                }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', color: '#17428f' }}>
+                    <img
+                        src="/pwa/icon-192.png"
+                        alt=""
+                        aria-hidden="true"
+                        style={{ width: '76px', height: '76px', borderRadius: '18px' }}
+                    />
+                    <strong>Restaurando seu acesso...</strong>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="landing-page" style={{ padding: '20px' }}>
@@ -333,15 +547,22 @@ export default function StudentLogin() {
                     <h2 style={{ color: '#10213f', marginBottom: '8px', fontWeight: '900', fontSize: '1.6rem' }}>Acesso ao portal</h2>
                     <p style={{ margin: '0 0 28px', color: '#63708a', fontSize: '0.95rem' }}>Entre para acompanhar pagamentos, dados, turmas e comunicação.</p>
 
-                    <form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <form
+                        onSubmit={handleLogin}
+                        autoComplete="on"
+                        style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}
+                    >
                         <div className="form-group" style={{ width: '100%' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Email</label>
+                            <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Nome completo do responsável</label>
                             <input
-                                type="email"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
+                                type="text"
+                                value={loginInput}
+                                onChange={e => setLoginInput(e.target.value)}
                                 required
-                                placeholder="seu@email.com"
+                                placeholder="Ex: Maria da Silva"
+                                autoCapitalize="words"
+                                autoComplete="username"
+                                name="username"
                                 style={{
                                     width: '100%',
                                     padding: '14px',
@@ -354,28 +575,72 @@ export default function StudentLogin() {
                                 onFocus={(e) => e.target.style.borderColor = '#17428f'}
                                 onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
                             />
+                            <span style={{ display: 'block', marginTop: '6px', color: '#95a1b8', fontSize: '0.75rem' }}>
+                                Professores e funcionários: use seu e-mail de cadastro.
+                            </span>
                         </div>
 
                         <div className="form-group" style={{ width: '100%' }}>
                             <label style={{ display: 'block', marginBottom: '8px', color: '#17428f', fontSize: '0.82rem', fontWeight: '800' }}>Senha</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                required
-                                placeholder="••••••••"
-                                style={{
-                                    width: '100%',
-                                    padding: '14px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #dce7f3',
-                                    fontSize: '1rem',
-                                    outline: 'none',
-                                    transition: 'border-color 0.3s'
-                                }}
-                                onFocus={(e) => e.target.style.borderColor = '#17428f'}
-                                onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
-                            />
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                    autoComplete="current-password"
+                                    name="password"
+                                    style={{
+                                        width: '100%',
+                                        padding: '14px',
+                                        paddingRight: '46px',
+                                        borderRadius: '8px',
+                                        border: '2px solid #dce7f3',
+                                        fontSize: '1rem',
+                                        outline: 'none',
+                                        transition: 'border-color 0.3s',
+                                        boxSizing: 'border-box'
+                                    }}
+                                    onFocus={(e) => e.target.style.borderColor = '#17428f'}
+                                    onBlur={(e) => e.target.style.borderColor = '#dce7f3'}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(prev => !prev)}
+                                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '12px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        padding: '4px',
+                                        cursor: 'pointer',
+                                        color: '#63708a',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <RememberSessionCheckbox
+                            id="student-keep-signed-in"
+                            checked={keepSignedIn}
+                            onChange={setKeepSignedIn}
+                        />
+
+                        <div style={{
+                            display: 'flex', gap: '8px', padding: '10px 12px',
+                            background: '#fff9e6', border: '1px solid #ffeeba', borderRadius: '8px'
+                        }}>
+                            <span style={{ fontSize: '0.78rem', color: '#856404', lineHeight: 1.4 }}>
+                                <strong>Primeiro acesso?</strong> Use seu CPF (somente números) como senha. Depois você pode trocá-la em Configurações.
+                            </span>
                         </div>
 
                         <button

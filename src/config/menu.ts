@@ -7,6 +7,7 @@ import {
     DollarSign,
     GraduationCap,
     FileText,
+    FolderOpen,
     ScanLine,
     MessageCircle
 } from 'lucide-react';
@@ -19,6 +20,16 @@ export interface MenuItem {
 }
 
 export const ADMIN_MENU_ITEMS: MenuItem[] = [
+    {
+        path: '/admin/stats',
+        label: 'Estatísticas',
+        icon: BarChart2,
+        subItems: [
+            { to: '/admin/stats', label: 'Visão Geral' },
+            { to: '/admin/relatorios', label: 'Relatórios' },
+            { to: '/admin/simulador', label: 'Simulador de Receita' }
+        ]
+    },
     {
         path: '/admin/dashboard',
         label: 'Cadastros',
@@ -76,14 +87,9 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
         icon: CreditCard
     },
     {
-        path: '/admin/stats',
-        label: 'Estatísticas',
-        icon: BarChart2,
-        subItems: [
-            { to: '/admin/stats', label: 'Visão Geral' },
-            { to: '/admin/relatorios', label: 'Relatórios' },
-            { to: '/admin/simulador', label: 'Simulador de Receita' }
-        ]
+        path: '/admin/documentos',
+        label: 'Documentos',
+        icon: FolderOpen
     },
     {
         path: '/admin/settings',
