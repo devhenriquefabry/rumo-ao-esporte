@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'rae-pwa-v6';
+const CACHE_VERSION = 'rae-pwa-v10';
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
@@ -27,8 +27,17 @@ self.addEventListener('install', (event) => {
             }
         }));
 
-        await self.skipWaiting();
+        // Não chama skipWaiting aqui: a versão nova fica aguardando até o usuário
+        // aceitar no aviso "Nova versão disponível" (evita trocar o código embaixo
+        // de uma tela em uso, ex: no meio de um cadastro).
     })());
+});
+
+// Enviado pelo aviso de nova versão quando o usuário clica em "Recarregar".
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 self.addEventListener('activate', (event) => {

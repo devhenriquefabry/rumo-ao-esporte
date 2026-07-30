@@ -16,10 +16,5 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((error) => {
-      console.error('[PWA] Não foi possível registrar o aplicativo.', error)
-    })
-  })
-}
+// O registro do service worker vive em <NewVersionPrompt />, que também detecta
+// e aplica atualizações. Registrar aqui de novo duplicaria os listeners.

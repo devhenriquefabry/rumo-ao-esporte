@@ -33,6 +33,7 @@ import StudentContract from './pages/StudentContract';
 import { CustomDialogProvider } from './context/CustomDialogContext';
 import MaintenanceGuard from './components/MaintenanceGuard';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import NewVersionPrompt from './components/NewVersionPrompt';
 import './App.css';
 
 // Student Portal Imports
@@ -92,6 +93,7 @@ function App() {
       <LoadingProvider>
         <BrowserRouter>
           <PWAInstallPrompt />
+          <NewVersionPrompt />
           <Routes>
             <Route path="/" element={<PublicForm />} />
             <Route path="/solicitar-sistema-escola" element={<SchoolSystemRequestForm />} />
