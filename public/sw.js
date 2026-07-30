@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'rae-pwa-v5';
+const CACHE_VERSION = 'rae-pwa-v6';
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
@@ -49,7 +49,9 @@ const networkFirstNavigation = async (request) => {
     const cache = await caches.open(APP_SHELL_CACHE);
 
     try {
-        const response = await fetch(request);
+        // 'reload' ignora o cache HTTP do navegador: garante que um deploy novo
+        // chegue no app instalado sem esperar o Cache-Control expirar.
+        const response = await fetch(request, { cache: 'reload' });
 
         if (response.ok) {
             await cache.put(request, response.clone());
