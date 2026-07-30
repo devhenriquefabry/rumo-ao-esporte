@@ -264,7 +264,10 @@ export default function AdminLayout() {
                 </Sidebar>
 
                 {/* Main Content */}
-                <main style={{ flex: 1, padding: isMobile ? '10px' : '10px', overflowX: 'hidden' }}>
+                {/* minWidth: 0 é necessário para o item flex poder encolher; sem isso, ele
+                    nunca cede espaço para conteúdo largo (como a tabela do financeiro) e o
+                    overflowX: hidden acaba cortando em vez de deixar o filho rolar. */}
+                <main style={{ flex: 1, minWidth: 0, padding: isMobile ? '10px' : '10px', overflowX: 'hidden' }}>
                     <Outlet />
                 </main>
             </div>
