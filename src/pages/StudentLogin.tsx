@@ -57,6 +57,12 @@ export default function StudentLogin() {
             localStorage.removeItem('rae_student_auth');
             localStorage.removeItem('rae_teacher_auth');
             localStorage.setItem('rae_admin_auth', 'true');
+            // Sessão Firebase restaurada => persistência durável estava ativa.
+            // Cura um 'false' antigo da chave, que faria o main.tsx apagar a
+            // sessão na próxima abertura do app.
+            if (sessionStorage.getItem('rae_admin_session_active') !== 'true') {
+                localStorage.setItem('rae_admin_keep_signed_in', 'true');
+            }
             if (restoredSession) {
                 navigate('/admin/dashboard', { replace: true });
             } else {
@@ -243,9 +249,27 @@ export default function StudentLogin() {
             const cleanPassword = password.replace(/\D/g, '');
 
             if (normalizedEmail === MAIN_ADMIN_EMAIL) {
+                // Autentica no Firebase de verdade: valida a senha e cria uma sessão
+                // durável, que sobrevive ao fechamento do aplicativo.
+                try {
+                    await signInWithEmailAndPassword(auth, normalizedEmail, password);
+                } catch {
+                    showAlert('Senha incorreta. Redirecionando para o Login Administrativo...', 'error');
+                    setTimeout(() => navigate('/admin/login'), 2000);
+                    return;
+                }
                 localStorage.removeItem('rae_student_auth');
                 localStorage.removeItem('rae_teacher_auth');
                 localStorage.setItem('rae_admin_auth', 'true');
+                // Grava a preferência na MESMA chave que o main.tsx usa na limpeza de
+                // sessão de admin. Sem isso, um 'false' antigo dessa chave derruba o
+                // login a cada abertura do app, mesmo com "manter conectado" marcado.
+                localStorage.setItem('rae_admin_keep_signed_in', String(keepSignedIn));
+                if (keepSignedIn) {
+                    sessionStorage.removeItem('rae_admin_session_active');
+                } else {
+                    sessionStorage.setItem('rae_admin_session_active', 'true');
+                }
                 showLoading(1500, 'Acessando Painel Administrativo...');
                 setTimeout(() => navigate('/admin/dashboard'), 1500);
                 return;
@@ -257,6 +281,12 @@ export default function StudentLogin() {
                     localStorage.removeItem('rae_student_auth');
                     localStorage.removeItem('rae_teacher_auth');
                     localStorage.setItem('rae_admin_auth', JSON.stringify(DIRETORIA_PROFILE));
+                    localStorage.setItem('rae_admin_keep_signed_in', String(keepSignedIn));
+                    if (keepSignedIn) {
+                        sessionStorage.removeItem('rae_admin_session_active');
+                    } else {
+                        sessionStorage.setItem('rae_admin_session_active', 'true');
+                    }
                     showLoading(1500, 'Acessando Painel da Diretoria...');
                     setTimeout(() => navigate('/admin/aniversariantes'), 1500);
                 } else {

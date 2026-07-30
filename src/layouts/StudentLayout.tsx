@@ -84,6 +84,11 @@ export default function StudentLayout() {
                 localStorage.removeItem('rae_student_auth');
                 localStorage.removeItem('rae_teacher_auth');
                 localStorage.setItem('rae_admin_auth', 'true');
+                // Sessão Firebase viva no relançamento => persistência durável.
+                // Cura um 'false' antigo que faria o main.tsx derrubar o admin.
+                if (sessionStorage.getItem('rae_admin_session_active') !== 'true') {
+                    localStorage.setItem('rae_admin_keep_signed_in', 'true');
+                }
                 navigate('/admin/dashboard');
                 return;
             }
