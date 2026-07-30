@@ -88,12 +88,16 @@ export default function StudentLayout() {
                 return;
             }
 
-            // Also ensure we DO NOT have admin auth
+            // Sessão de admin/funcionário/diretoria salva: envia para o painel correto
+            // em vez de derrubar a sessão (o PWA abre em /aluno/dashboard para todos).
             if (localStorage.getItem('rae_admin_auth')) {
-                localStorage.removeItem('rae_admin_auth');
-                localStorage.removeItem('rae_student_auth');
-                if (user) await signOut(auth);
-                navigate('/aluno/login');
+                navigate('/admin/dashboard', { replace: true });
+                return;
+            }
+
+            // Sessão de professor salva: idem, redireciona sem deslogar.
+            if (localStorage.getItem('rae_teacher_auth')) {
+                navigate('/professor/turmas', { replace: true });
                 return;
             }
 

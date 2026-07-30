@@ -31,12 +31,12 @@ interface ProviderStatus {
 const providerCopy: Record<ProviderId, { color: string; description: string; docs: string }> = {
     asaas: {
         color: '#0030b8',
-        description: 'Gateway atual do sistema. Continua como padrão e mantém PIX, boleto, cartão, carnê, baixa manual e saldo.',
+        description: 'Gateway anterior, hoje suspenso. Segue configurado e pode voltar a ser o provedor ativo a qualquer momento, com PIX, boleto, cartão, carnê, baixa manual e saldo.',
         docs: 'https://docs.asaas.com/'
     },
     cora: {
         color: '#ff3f70',
-        description: 'Novo banco integrado como segundo provedor. Usa Integração Direta com client-id, certificado e private key via mTLS.',
+        description: 'Banco ativo do sistema, na conta do cliente. Usa Integração Direta com client-id, certificado e private key via mTLS.',
         docs: 'https://developers.cora.com.br/docs/client-credentials-int-direta'
     }
 };
@@ -45,8 +45,8 @@ const workerUrl = import.meta.env.VITE_WORKER_URL || import.meta.env.VITE_PAYMEN
 
 export default function AdminPaymentProviderSettings() {
     const [providers, setProviders] = useState<ProviderStatus[]>([]);
-    const [selectedProvider, setSelectedProvider] = useState<ProviderId>('asaas');
-    const [environment, setEnvironment] = useState<EnvironmentId>('stage');
+    const [selectedProvider, setSelectedProvider] = useState<ProviderId>('cora');
+    const [environment, setEnvironment] = useState<EnvironmentId>('production');
     const [amount, setAmount] = useState('5.00');
     const [description, setDescription] = useState('Teste Rumo ao Esporte');
     const [billingType, setBillingType] = useState<'PIX' | 'BOLETO'>('PIX');
@@ -87,7 +87,6 @@ export default function AdminPaymentProviderSettings() {
 
     useEffect(() => {
         if (selectedProvider === 'asaas') setEnvironment('production');
-        if (selectedProvider === 'cora') setEnvironment(previous => previous === 'production' ? 'stage' : previous);
     }, [selectedProvider]);
 
     const callWorker = async (path: string, options?: RequestInit) => {

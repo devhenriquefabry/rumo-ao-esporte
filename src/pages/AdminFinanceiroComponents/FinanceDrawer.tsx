@@ -442,7 +442,7 @@ export function FinanceDrawer({
                                             )}
                                         </div>
                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                            {['PIX', 'BOLETO', 'CREDIT_CARD'].map(type => (
+                                            {['PIX', 'BOLETO'].map(type => (
                                                 <button
                                                     key={type}
                                                     onClick={() => setChargeBillingType(type)}
@@ -468,7 +468,7 @@ export function FinanceDrawer({
                                             }}
                                         >
                                             <RefreshCw size={18} className={isCreatingCharge ? 'spin' : ''} />
-                                            {isCreatingCharge ? 'GERANDO COBRANÇA...' : 'GERAR LANÇAMENTO NO ASAAS'}
+                                            {isCreatingCharge ? 'GERANDO COBRANÇA...' : 'GERAR LANÇAMENTO NA CORA'}
                                         </button>
                                     </div>
                                 )}

@@ -10,8 +10,10 @@ export interface PaymentProviderConfig {
     testMode: boolean;
 }
 
+// Cora é o provedor ativo desde 30/07/2026 (conta do cliente).
+// O Asaas continua suportado e pode ser reativado pela tela de bancos.
 export const DEFAULT_PAYMENT_PROVIDER_CONFIG: PaymentProviderConfig = {
-    provider: 'asaas',
+    provider: 'cora',
     environment: 'production',
     testMode: false
 };

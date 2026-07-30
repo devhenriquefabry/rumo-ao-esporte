@@ -11,10 +11,12 @@ id = "b742c8f51783484c9aa22238542a4fb3"
 FIREBASE_PROJECT_ID = "rumo-ao-esporte"
 FIREBASE_API_KEY = "AIzaSyB5p94AGRA75Y8KsdAs1lgi4bmO_hcwcpM"
 WORKER_PUBLIC_URL = "https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev"
-PAYMENT_PROVIDER = "asaas"
-CORA_DEFAULT_ENVIRONMENT = "stage"
+# Provedor ativo = Cora (conta do cliente). Asaas segue configurado e selecionável.
+PAYMENT_PROVIDER = "cora"
+CORA_DEFAULT_ENVIRONMENT = "production"
 CORA_STAGE_CLIENT_ID = "int-2GlPPaOKqVarPWJqZqGyRB"
-CORA_PRODUCTION_CLIENT_ID = "int-2GlPPaOKqVarPWJqZqGyRB"
+# Produção = conta Cora do cliente (cert emitido em 30/07/2026, expira 30/07/2027)
+CORA_PRODUCTION_CLIENT_ID = "int-4IohW5C29e7xFk3tzgaI7D"
 
 [[mtls_certificates]]
 binding = "CORA_STAGE_CERT"
@@ -22,7 +24,7 @@ certificate_id = "157f5982-81c4-43e6-95db-acd531e87755"
 
 [[mtls_certificates]]
 binding = "CORA_PRODUCTION_CERT"
-certificate_id = "112d1013-bb8a-407a-b4bc-938af26bb158"
+certificate_id = "d23b09be-b329-4a44-84a8-fc0f7afc3843"
 
 # Para ativar a Cora de verdade, suba os certificados fora do Git:
 # npx wrangler mtls-certificate upload --cert caminho/certificate.pem --key caminho/private-key.key --name cora-stage
