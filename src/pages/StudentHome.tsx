@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { Activity, Calendar, User, CreditCard } from 'lucide-react';
+import { Activity, Calendar, User, CreditCard, FileSignature, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import PageContainer from '../components/PageContainer';
 import PageTitle from '../components/PageTitle';
 import { PaymentCard } from '../components/PaymentCard';
 import { syncStudentFinancialData } from '../utils/financialSync';
+import { listarAutorizacoesDeConvocacoes, listarConvocacoesComAutorizacao } from '../utils/autorizacaoService';
 import React from 'react';
 
 const workerUrl = import.meta.env.VITE_WORKER_URL;
@@ -17,6 +19,7 @@ export default function StudentHome() {
     const [turmas, setTurmas] = useState<Record<string, any>>({});
     const [loading, setLoading] = useState(true);
     const [pendingPayments, setPendingPayments] = useState<any[]>([]);
+    const [autorizacoesPendentes, setAutorizacoesPendentes] = useState(0);
 
     useEffect(() => {
         // Use onAuthStateChanged to ensure we wait for Firebase to initialize
@@ -92,6 +95,36 @@ export default function StudentHome() {
 
                         setAllStudents(studentsAggregated);
                         setResponsavel(respInfo);
+
+                        // Autorizações de convocação ainda não assinadas por este responsável
+                        (async () => {
+                            try {
+                                const meusIds = new Set<string>();
+                                querySnapshot.forEach(docSnap => {
+                                    meusIds.add(docSnap.id);
+                                    (docSnap.data().alunos || []).forEach((_: unknown, index: number) =>
+                                        meusIds.add(`${docSnap.id}_${index}`)
+                                    );
+                                });
+
+                                const convocacoes = await listarConvocacoesComAutorizacao();
+                                const pares = convocacoes.flatMap(conv =>
+                                    (conv.jogadores || [])
+                                        .filter(j => meusIds.has(j.id))
+                                        .map(j => `${conv.id}__${j.id}`)
+                                );
+
+                                if (pares.length === 0) return;
+
+                                const respostas = await listarAutorizacoesDeConvocacoes(
+                                    Array.from(new Set(convocacoes.map(c => c.id!).filter(Boolean)))
+                                );
+                                const respondidos = new Set(respostas.map(r => `${r.convocacaoId}__${r.jogadorId}`));
+                                setAutorizacoesPendentes(pares.filter(p => !respondidos.has(p)).length);
+                            } catch (e) {
+                                console.error('Erro ao verificar autorizações:', e);
+                            }
+                        })();
 
                         // 2. TRIGGER SYNC (Parallel) - Check if payments were made recently to update Firestore status
                         if (querySnapshot.size > 0) {
@@ -376,6 +409,38 @@ export default function StudentHome() {
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* AUTORIZAÇÃO DE CONVOCAÇÃO PENDENTE */}
+                    {autorizacoesPendentes > 0 && (
+                        <Link
+                            to="/aluno/autorizacoes"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '15px',
+                                background: '#fff8e1',
+                                border: '1px solid #ffe6a1',
+                                borderLeft: '5px solid #f4c20d',
+                                borderRadius: '12px',
+                                padding: '16px 20px',
+                                marginBottom: '25px',
+                                textDecoration: 'none'
+                            }}
+                        >
+                            <FileSignature size={24} color="#a06f00" style={{ flexShrink: 0 }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: 800, color: '#a06f00', fontSize: '0.95rem' }}>
+                                    {autorizacoesPendentes === 1
+                                        ? '1 autorização aguardando sua assinatura'
+                                        : `${autorizacoesPendentes} autorizações aguardando sua assinatura`}
+                                </div>
+                                <div style={{ fontSize: '0.82rem', color: '#8a6100' }}>
+                                    Seu atleta foi convocado. Leia o termo e autorize a participação.
+                                </div>
+                            </div>
+                            <ChevronRight size={20} color="#a06f00" style={{ flexShrink: 0 }} />
+                        </Link>
                     )}
 
                     {/* CURRENT PAYMENT CARDS GROUPED BY STUDENT */}

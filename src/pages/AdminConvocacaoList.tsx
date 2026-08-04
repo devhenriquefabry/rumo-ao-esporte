@@ -2,11 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, addDoc, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Plus, Users, Search, X, Trophy, Calendar, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Plus, Users, Search, X, Trophy, Calendar, ChevronRight, Image as ImageIcon, FileSignature } from 'lucide-react';
 import { useLoading } from '../components/LoadingService';
 import { useDialog } from '../context/CustomDialogContext';
 import { useDashboardData } from './AdminDashboard/hooks/useDashboardData';
 import type { Convocacao, ConvocacaoJogador } from '../types/convocacao';
+import PageContainer from '../components/PageContainer';
+import PageTitle from '../components/PageTitle';
+import { ConvocacaoToggle, CONV_UI } from '../components/convocacao/ConvocacaoToggle';
 
 import { ConvocacaoImageModal } from '../components/ConvocacaoImageModal';
 
@@ -24,6 +27,7 @@ export default function AdminConvocacaoList() {
 
     // Form states
     const [jogoName, setJogoName] = useState('');
+    const [categoria, setCategoria] = useState('');
     const [tecnicoName, setTecnicoName] = useState('');
     const [rivalNome, setRivalNome] = useState('');
     const [rivalLogo, setRivalLogo] = useState('');
@@ -33,6 +37,7 @@ export default function AdminConvocacaoList() {
 
     // Switches para campos opcionais
     const [useDataJogo, setUseDataJogo] = useState(false);
+    const [useCategoria, setUseCategoria] = useState(false);
     const [useTecnico, setUseTecnico] = useState(false);
     const [useCasaInfo, setUseCasaInfo] = useState(false);
     const [useRivalInfo, setUseRivalInfo] = useState(false);
@@ -48,7 +53,7 @@ export default function AdminConvocacaoList() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const isMobile = windowWidth < 1024; // Aumentado para cobrir tablets e evitar scroll horizontal
+    const isMobile = windowWidth < 1024; // Cobre tablets e evita scroll horizontal
 
     const { allStudents, turmas, loading: studentsLoading } = useDashboardData();
 
@@ -76,8 +81,6 @@ export default function AdminConvocacaoList() {
         }
     }, [activeModalidades, searchModalidade]);
 
-
-
     useEffect(() => {
         fetchConvocacoes();
     }, []);
@@ -99,6 +102,7 @@ export default function AdminConvocacaoList() {
 
     const handleOpenModal = () => {
         setJogoName('');
+        setCategoria('');
         setTecnicoName('');
         setRivalNome('');
         setRivalLogo('');
@@ -106,6 +110,7 @@ export default function AdminConvocacaoList() {
         setCasaLogo('');
         setShowNumbers(true);
         setUseDataJogo(false);
+        setUseCategoria(false);
         setUseTecnico(false);
         setUseCasaInfo(false);
         setUseRivalInfo(false);
@@ -120,7 +125,7 @@ export default function AdminConvocacaoList() {
         setIsModalOpen(false);
     };
 
-    const handleAddJogador = (studentRaw: any, categoria: 'titular' | 'reserva') => {
+    const handleAddJogador = (studentRaw: any, categoriaJogador: 'titular' | 'reserva') => {
         if (!studentRaw.aluno) return;
 
         // Prevent adding same student twice
@@ -137,7 +142,7 @@ export default function AdminConvocacaoList() {
             nome: studentRaw.aluno.nome,
             photo: studentRaw.aluno.fotoUrl || '',
             turma: turmaName,
-            categoria,
+            categoria: categoriaJogador,
             numero: studentRaw.aluno.camisa || '', // Auto-fill with jersey number
             responsavel: studentRaw.responsavel?.nome || ''
         };
@@ -149,14 +154,12 @@ export default function AdminConvocacaoList() {
         setSelectedJogadores(prev => prev.filter(j => j.id !== id));
     };
 
-
-
     const resizeImage = (base64Str: string, maxWidth = 400, maxHeight = 400): Promise<string> => {
         return new Promise((resolve) => {
-            let img = new Image();
+            const img = new Image();
             img.src = base64Str;
             img.onload = () => {
-                let canvas = document.createElement('canvas');
+                const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
 
@@ -173,7 +176,7 @@ export default function AdminConvocacaoList() {
                 }
                 canvas.width = width;
                 canvas.height = height;
-                let ctx = canvas.getContext('2d');
+                const ctx = canvas.getContext('2d');
                 ctx?.drawImage(img, 0, 0, width, height);
                 resolve(canvas.toDataURL('image/jpeg', 0.7));
             };
@@ -206,8 +209,6 @@ export default function AdminConvocacaoList() {
         reader.readAsDataURL(file);
     };
 
-
-
     const handleSaveConvocacao = async () => {
         if (!jogoName.trim()) {
             showAlert('Informe o nome do jogo.', 'warning');
@@ -218,6 +219,7 @@ export default function AdminConvocacaoList() {
             setLoading(true, 'Salvando...');
             const novaConvocacao: Omit<Convocacao, 'id'> = {
                 jogo: jogoName,
+                categoria: useCategoria ? categoria.trim() : '',
                 tecnico: useTecnico ? tecnicoName.trim() : '',
                 rivalNome: useRivalInfo ? rivalNome.trim() : '',
                 rivalLogo: useRivalInfo ? (rivalLogo || '') : '',
@@ -273,70 +275,136 @@ export default function AdminConvocacaoList() {
         ).slice(0, 10);
     }, [searchTerm, allStudents, searchModalidade]);
 
+    const renderPlayerPanel = (
+        titulo: string,
+        lista: ConvocacaoJogador[],
+        cor: string,
+        fundo: string
+    ) => (
+        <div style={{ background: '#fff', padding: '20px' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: CONV_UI.navy, display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
+                {titulo} <span style={{ background: fundo, color: cor, padding: '2px 10px', borderRadius: '10px', fontSize: '0.8rem' }}>{lista.length}</span>
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
+                {lista.length === 0 && <span style={{ color: '#8ea3c0', fontSize: '0.9rem', fontStyle: 'italic' }}>Nenhum atleta selecionado</span>}
+                {lista.map(j => (
+                    <div key={j.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: CONV_UI.surfaceSoft, padding: '10px', borderRadius: '8px', border: `1px solid ${CONV_UI.border}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: cor, textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.nome}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '0.75rem', color: '#63708a' }}>{j.turma}</span>
+                                    {!j.numero && (
+                                        <Link
+                                            to={`/admin/details/${j.regId}`}
+                                            style={{
+                                                fontSize: '0.7rem',
+                                                color: CONV_UI.blue,
+                                                fontWeight: 'bold',
+                                                background: CONV_UI.blueSoft,
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                border: `1px solid ${CONV_UI.border}`,
+                                                textDecoration: 'none'
+                                            }}
+                                        >
+                                            Sem número +Adicionar
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                            {j.numero ? (
+                                <div style={{
+                                    width: '45px',
+                                    padding: '6px 4px',
+                                    textAlign: 'center',
+                                    border: `2px solid ${cor}`,
+                                    borderRadius: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 'bold',
+                                    background: '#fff',
+                                    color: CONV_UI.navy
+                                }}>
+                                    {j.numero}
+                                </div>
+                            ) : (
+                                <div style={{ width: '45px' }} />
+                            )}
+                            <button onClick={() => handleRemoveJogador(j.id)} style={{ background: 'none', border: 'none', color: CONV_UI.danger, cursor: 'pointer', padding: '5px' }}><X size={18} /></button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
     return (
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            {/* Header */}
-            <header style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                justifyContent: 'space-between',
-                alignItems: isMobile ? 'flex-start' : 'center',
-                marginBottom: '30px',
-                gap: '20px'
-            }}>
-                <div>
-                    <h1 style={{ fontSize: isMobile ? '1.5rem' : '1.8rem', color: '#00a63a', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Trophy size={isMobile ? 24 : 28} /> CONVOCAÇÕES
-                    </h1>
-                    <p style={{ color: '#666', margin: '5px 0 0 0', fontSize: isMobile ? '0.85rem' : '1rem' }}>Gerencie escalações para as partidas</p>
-                </div>
+        <PageContainer>
+            <PageTitle
+                title="Convocações"
+                subtitle="Monte as escalações e gere a arte oficial da partida"
+                count={convocacoes.length}
+            >
                 <button
                     onClick={handleOpenModal}
                     style={{
-                        width: isMobile ? '100%' : 'auto',
-                        background: '#00a63a', color: '#fff', border: 'none', padding: '12px 24px',
+                        background: CONV_UI.green, color: '#fff', border: 'none', padding: '12px 24px',
                         borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(195,34,40,0.3)'
+                        alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(0,166,58,0.25)'
                     }}
                 >
                     <Plus size={20} /> NOVA CONVOCAÇÃO
                 </button>
-            </header>
+            </PageTitle>
 
             {/* List */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(350px, 100%), 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))', gap: '20px' }}>
                 {convocacoes.map(conv => (
                     <div
                         key={conv.id}
                         onClick={() => navigate(`${pathPrefix}/jogos/convocacao/${conv.id}`)}
                         style={{
-                            background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '20px',
-                            cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                            background: '#fff', border: `1px solid ${CONV_UI.border}`, borderRadius: '12px', padding: '20px',
+                            cursor: 'pointer', transition: 'all 0.2s', boxShadow: CONV_UI.shadow,
                             display: 'flex', flexDirection: 'column', gap: '10px'
                         }}
-                        onMouseOver={e => e.currentTarget.style.borderColor = '#00a63a'}
-                        onMouseOut={e => e.currentTarget.style.borderColor = '#eee'}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = CONV_UI.green; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = CONV_UI.border; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
-                        <h3 style={{ margin: 0, color: '#333', fontSize: '1.2rem', fontWeight: '800' }}>{conv.jogo}</h3>
-                        <div style={{ display: 'flex', gap: '15px', color: '#666', fontSize: '0.9rem' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <Calendar size={16} /> {new Date(conv.dataUnix).toLocaleDateString('pt-BR')}
-                            </span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <Users size={16} /> {conv.jogadores.length} Atletas
-                            </span>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+                            <h3 style={{ margin: 0, color: CONV_UI.navy, fontSize: '1.15rem', fontWeight: 800 }}>{conv.jogo}</h3>
+                            {conv.categoria && (
+                                <span style={{ background: CONV_UI.blueSoft, color: CONV_UI.blue, padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                                    {conv.categoria}
+                                </span>
+                            )}
                         </div>
-                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', color: '#00a63a', fontWeight: 'bold', alignItems: 'center', gap: '5px' }}>
+                        <div style={{ display: 'flex', gap: '15px', color: '#63708a', fontSize: '0.9rem', flexWrap: 'wrap' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <Calendar size={16} /> {conv.showDataJogo === false ? 'Data a confirmar' : new Date(conv.dataUnix).toLocaleDateString('pt-BR')}
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <Users size={16} /> {(conv.jogadores || []).length} Atletas
+                            </span>
+                            {conv.autorizacao?.ativa && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: CONV_UI.green, fontWeight: 700 }}>
+                                    <FileSignature size={16} /> Autorização enviada
+                                </span>
+                            )}
+                        </div>
+                        <div style={{ marginTop: 'auto', paddingTop: '10px', borderTop: `1px solid ${CONV_UI.border}`, display: 'flex', justifyContent: 'space-between', color: CONV_UI.green, fontWeight: 'bold', alignItems: 'center', gap: '5px' }}>
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedConvocacaoForImage(conv);
                                     setIsImageModalOpen(true);
                                 }}
-                                style={{ background: 'none', border: 'none', color: '#00a63a', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', padding: '5px' }}
-                                title="Baixar Imagem"
+                                style={{ background: CONV_UI.blueSoft, border: 'none', color: CONV_UI.blue, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem' }}
+                                title="Gerar arte da convocação"
                             >
-                                <ImageIcon size={18} />
+                                <ImageIcon size={16} /> ARTE
                             </button>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>Ver Escalação <ChevronRight size={18} /></span>
                         </div>
@@ -344,301 +412,202 @@ export default function AdminConvocacaoList() {
                 ))}
 
                 {convocacoes.length === 0 && (
-                    <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: '#999', background: '#fff', borderRadius: '12px', border: '1px dashed #ccc' }}>
-                        Nenhuma convocação registrada.
+                    <div style={{ gridColumn: '1 / -1', padding: '50px 20px', textAlign: 'center', color: '#8ea3c0', background: '#fff', borderRadius: '12px', border: `1px dashed ${CONV_UI.border}` }}>
+                        <Trophy size={40} color="#c3d3e8" style={{ marginBottom: '10px' }} />
+                        <div style={{ fontWeight: 700 }}>Nenhuma convocação registrada.</div>
+                        <div style={{ fontSize: '0.9rem', marginTop: '4px' }}>Clique em "Nova Convocação" para montar a primeira escalação.</div>
                     </div>
                 )}
             </div>
 
             {/* Nova Convocação Modal */}
             {isModalOpen && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: isMobile ? '10px' : '40px 20px', backdropFilter: 'blur(3px)' }}>
-                    <div style={{ background: '#fff', width: '100%', maxWidth: '800px', maxHeight: '90vh', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,26,64,0.55)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: isMobile ? '10px' : '40px 20px', backdropFilter: 'blur(3px)' }}>
+                    <div style={{ background: '#fff', width: '100%', maxWidth: '820px', maxHeight: '90vh', borderRadius: '16px', boxShadow: '0 18px 50px rgba(9,36,92,0.28)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
                         {/* Modal Header (Fixo) */}
-                        <div style={{ padding: '20px 25px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fdfdfd', zIndex: 10 }}>
-                            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: '15px' }}>
-                                <h2 style={{ margin: 0, color: '#333', fontSize: isMobile ? '1.1rem' : '1.4rem', fontWeight: '800' }}>Nova Convocação</h2>
-                            </div>
-                            <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', padding: '5px' }}>
-                                <X size={24} />
+                        <div style={{ padding: '18px 25px', borderBottom: `1px solid ${CONV_UI.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #17428f 0%, #09245c 100%)' }}>
+                            <h2 style={{ margin: 0, color: '#fff', fontSize: isMobile ? '1.05rem' : '1.3rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Trophy size={20} color={CONV_UI.gold} /> Nova Convocação
+                            </h2>
+                            <button onClick={closeModal} style={{ background: 'rgba(255,255,255,0.14)', border: 'none', cursor: 'pointer', color: '#fff', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+                                <X size={22} />
                             </button>
                         </div>
 
                         {/* Modal Body (Rolagem) */}
                         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '20px', background: '#fcfcfc' }}>
+                            <div style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '18px', background: CONV_UI.surfaceSoft }}>
                                 {/* Nome do Jogo */}
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '800', color: '#666', marginBottom: '8px' }}>NOME DO JOGO / EVENTO</label>
+                                    <label style={CONV_UI.label}>NOME DO JOGO / EVENTO</label>
                                     <input
                                         type="text"
                                         value={jogoName}
                                         onChange={e => setJogoName(e.target.value)}
-                                        placeholder="Ex: Amistoso vs Time A"
-                                        style={{ width: '100%', padding: '12px 15px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
+                                        placeholder="Ex: Copa Regional de Futsal"
+                                        style={CONV_UI.input}
                                     />
                                 </div>
 
-                                {/* Data e Hora */}
-                                <div style={{ background: useDataJogo ? '#fff' : '#f5f5f5', padding: '15px', borderRadius: '12px', border: useDataJogo ? '1px solid #ddd' : '1px solid #eee', transition: 'all 0.3s' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: useDataJogo ? '15px' : '0' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#666' }}>DATA E HORA DO JOGO (Opcional)</label>
-                                        <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={useDataJogo}
-                                                onChange={e => {
-                                                    setUseDataJogo(e.target.checked);
-                                                    if (!e.target.checked) setDataJogo(new Date().toISOString().slice(0, 16));
-                                                }}
-                                                style={{ opacity: 0, width: 0, height: 0 }}
-                                            />
-                                            <span style={{
-                                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                backgroundColor: useDataJogo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
-                                            }}></span>
-                                            <span style={{
-                                                position: 'absolute', height: '14px', width: '14px', left: useDataJogo ? '23px' : '3px', bottom: '3px',
-                                                backgroundColor: 'white', borderRadius: '50%', transition: '.4s'
-                                            }}></span>
-                                        </label>
-                                    </div>
-                                    {useDataJogo && (
-                                        <input
-                                            type="datetime-local"
-                                            value={dataJogo}
-                                            onChange={e => setDataJogo(e.target.value)}
-                                            style={{ width: '100%', padding: '12px 15px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
-                                        />
-                                    )}
-                                </div>
+                                {/* Categoria */}
+                                <ConvocacaoToggle
+                                    label="CATEGORIA (Opcional)"
+                                    hint="Aparece no selo azul da arte. Ex.: SUB-9"
+                                    checked={useCategoria}
+                                    onChange={(v) => {
+                                        setUseCategoria(v);
+                                        if (!v) setCategoria('');
+                                    }}
+                                >
+                                    <input
+                                        type="text"
+                                        value={categoria}
+                                        onChange={e => setCategoria(e.target.value)}
+                                        placeholder="Ex: SUB-9"
+                                        style={CONV_UI.input}
+                                        autoFocus
+                                    />
+                                </ConvocacaoToggle>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                                    {/* Técnico Opcional */}
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#666' }}>TÉCNICO</label>
-                                            <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useTecnico}
-                                                    onChange={e => {
-                                                        setUseTecnico(e.target.checked);
-                                                        if (!e.target.checked) setTecnicoName('');
-                                                    }}
-                                                    style={{ opacity: 0, width: 0, height: 0 }}
-                                                />
-                                                <span style={{
-                                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                    backgroundColor: useTecnico ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
-                                                }}></span>
-                                                <span style={{
-                                                    position: 'absolute', height: '14px', width: '14px', left: useTecnico ? '23px' : '3px', bottom: '3px',
-                                                    backgroundColor: 'white', borderRadius: '50%', transition: '.4s'
-                                                }}></span>
-                                            </label>
+                                {/* Data e Hora */}
+                                <ConvocacaoToggle
+                                    label="DATA E HORA DO JOGO (Opcional)"
+                                    hint="Desligado, a arte mostra “DATA A CONFIRMAR”"
+                                    checked={useDataJogo}
+                                    onChange={(v) => {
+                                        setUseDataJogo(v);
+                                        if (!v) setDataJogo(new Date().toISOString().slice(0, 16));
+                                    }}
+                                >
+                                    <input
+                                        type="datetime-local"
+                                        value={dataJogo}
+                                        onChange={e => setDataJogo(e.target.value)}
+                                        style={CONV_UI.input}
+                                    />
+                                </ConvocacaoToggle>
+
+                                {/* Técnico */}
+                                <ConvocacaoToggle
+                                    label="TÉCNICO (Opcional)"
+                                    checked={useTecnico}
+                                    onChange={(v) => {
+                                        setUseTecnico(v);
+                                        if (!v) setTecnicoName('');
+                                    }}
+                                >
+                                    <input
+                                        type="text"
+                                        value={tecnicoName}
+                                        onChange={e => setTecnicoName(e.target.value)}
+                                        placeholder="Ex: Prof. Plinio"
+                                        style={CONV_UI.input}
+                                        autoFocus
+                                    />
+                                </ConvocacaoToggle>
+
+                                <ConvocacaoToggle
+                                    label="MOSTRAR NÚMEROS DAS CAMISAS NA ARTE"
+                                    checked={showNumbers}
+                                    onChange={setShowNumbers}
+                                />
+
+                                {/* Time da casa */}
+                                <ConvocacaoToggle
+                                    label="INFORMAÇÕES DO TIME DA CASA (Opcional)"
+                                    checked={useCasaInfo}
+                                    onChange={(v) => {
+                                        setUseCasaInfo(v);
+                                        if (!v) {
+                                            setCasaNome('Rumo ao Esporte');
+                                            setCasaLogo('');
+                                        }
+                                    }}
+                                >
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '18px' }}>
+                                        <div>
+                                            <label style={CONV_UI.label}>NOME DO TIME</label>
+                                            <input
+                                                type="text"
+                                                value={casaNome}
+                                                onChange={e => setCasaNome(e.target.value)}
+                                                placeholder="Ex: Rumo ao Esporte"
+                                                style={CONV_UI.input}
+                                                autoFocus
+                                            />
                                         </div>
-                                        {useTecnico && (
-                                            <div style={{ position: 'relative', marginTop: '10px' }}>
-                                                <input
-                                                    type="text"
-                                                    value={tecnicoName}
-                                                    onChange={e => setTecnicoName(e.target.value)}
-                                                    placeholder="Ex: Prof. Plinio"
-                                                    style={{ width: '100%', padding: '12px 15px', paddingRight: '40px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
-                                                    autoFocus
-                                                />
-                                                {tecnicoName && (
-                                                    <button
-                                                        onClick={() => setTecnicoName('')}
-                                                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#999', cursor: 'pointer', display: 'flex' }}
-                                                    >
-                                                        <X size={18} />
-                                                    </button>
+                                        <div>
+                                            <label style={CONV_UI.label}>LOGO (substitui o escudo na arte)</label>
+                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                <input type="file" accept="image/*" onChange={handleCasaLogoUpload} style={{ flex: 1, fontSize: '0.8rem' }} />
+                                                {casaLogo && (
+                                                    <div style={{ position: 'relative' }}>
+                                                        <img src={casaLogo} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', border: `1px solid ${CONV_UI.border}` }} />
+                                                        <button
+                                                            onClick={() => setCasaLogo('')}
+                                                            style={{ position: 'absolute', top: '-6px', right: '-6px', background: CONV_UI.danger, color: '#fff', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', display: 'flex' }}
+                                                        >
+                                                            <X size={10} />
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
+                                </ConvocacaoToggle>
 
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f9f9f9', padding: '15px', borderRadius: '8px', border: '1px solid #eee' }}>
-                                    <label style={{ fontSize: '0.9rem', fontWeight: '800', color: '#666' }}>MOSTRAR NÚMEROS DAS CAMISAS NA ARTE</label>
-                                    <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={showNumbers}
-                                            onChange={e => setShowNumbers(e.target.checked)}
-                                            style={{ opacity: 0, width: 0, height: 0 }}
-                                        />
-                                        <span style={{
-                                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                            backgroundColor: showNumbers ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
-                                        }}></span>
-                                        <span style={{
-                                            position: 'absolute', height: '14px', width: '14px', left: showNumbers ? '23px' : '3px', bottom: '3px',
-                                            backgroundColor: 'white', borderRadius: '50%', transition: '.4s'
-                                        }}></span>
-                                    </label>
-                                </div>
-
-                                <div style={{ background: useCasaInfo ? '#fff1f0' : '#f5f5f5', padding: '15px', borderRadius: '12px', border: useCasaInfo ? '1px solid #ffccc7' : '1px solid #eee', transition: 'all 0.3s' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: useCasaInfo ? '15px' : '0' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '800', color: useCasaInfo ? '#00a63a' : '#666' }}>INFORMAÇÕES DO TIME DA CASA</label>
-                                        <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
+                                {/* Time rival */}
+                                <ConvocacaoToggle
+                                    label="INFORMAÇÕES DO TIME RIVAL (Opcional)"
+                                    checked={useRivalInfo}
+                                    onChange={(v) => {
+                                        setUseRivalInfo(v);
+                                        if (!v) {
+                                            setRivalNome('');
+                                            setRivalLogo('');
+                                        }
+                                    }}
+                                >
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '18px' }}>
+                                        <div>
+                                            <label style={CONV_UI.label}>NOME DO TIME</label>
                                             <input
-                                                type="checkbox"
-                                                checked={useCasaInfo}
-                                                onChange={e => {
-                                                    setUseCasaInfo(e.target.checked);
-                                                    if (!e.target.checked) {
-                                                        setCasaNome('Rumo ao Esporte');
-                                                        setCasaLogo('');
-                                                    }
-                                                }}
-                                                style={{ opacity: 0, width: 0, height: 0 }}
+                                                type="text"
+                                                value={rivalNome}
+                                                onChange={e => setRivalNome(e.target.value)}
+                                                placeholder="Ex: Aliança FC"
+                                                style={CONV_UI.input}
+                                                autoFocus
                                             />
-                                            <span style={{
-                                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                backgroundColor: useCasaInfo ? '#00a63a' : '#ccc', borderRadius: '34px', transition: '.4s'
-                                            }}></span>
-                                            <span style={{
-                                                position: 'absolute', height: '14px', width: '14px', left: useCasaInfo ? '23px' : '3px', bottom: '3px',
-                                                backgroundColor: 'white', borderRadius: '50%', transition: '.4s'
-                                            }}></span>
-                                        </label>
-                                    </div>
-                                    {useCasaInfo && (
-                                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#00a63a', marginBottom: '8px' }}>NOME DO TIME</label>
-                                                <div style={{ position: 'relative' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={casaNome}
-                                                        onChange={e => setCasaNome(e.target.value)}
-                                                        placeholder="Ex: Rumo ao Esporte"
-                                                        style={{ width: '100%', padding: '12px', paddingRight: '40px', border: '2px solid #ffccc7', borderRadius: '8px', outline: 'none', boxSizing: 'border-box' }}
-                                                        autoFocus
-                                                    />
-                                                    {casaNome && (
+                                        </div>
+                                        <div>
+                                            <label style={CONV_UI.label}>LOGO</label>
+                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ flex: 1, fontSize: '0.8rem' }} />
+                                                {rivalLogo && (
+                                                    <div style={{ position: 'relative' }}>
+                                                        <img src={rivalLogo} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', border: `1px solid ${CONV_UI.border}` }} />
                                                         <button
-                                                            onClick={() => setCasaNome('')}
-                                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#ff7875', cursor: 'pointer', display: 'flex' }}
+                                                            onClick={() => setRivalLogo('')}
+                                                            style={{ position: 'absolute', top: '-6px', right: '-6px', background: CONV_UI.danger, color: '#fff', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', display: 'flex' }}
                                                         >
-                                                            <X size={18} />
+                                                            <X size={10} />
                                                         </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#00a63a', marginBottom: '8px' }}>LOGO</label>
-                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={handleCasaLogoUpload}
-                                                        style={{ flex: 1, fontSize: '0.8rem' }}
-                                                    />
-                                                    {casaLogo && (
-                                                        <div style={{ position: 'relative' }}>
-                                                            <img src={casaLogo} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', border: '1px solid #ddd' }} />
-                                                            <button
-                                                                onClick={() => setCasaLogo('')}
-                                                                style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', display: 'flex' }}
-                                                            >
-                                                                <X size={10} />
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-
-                                <div style={{ background: useRivalInfo ? '#fff' : '#f5f5f5', padding: '15px', borderRadius: '12px', border: useRivalInfo ? '1px solid #ddd' : '1px solid #eee', transition: 'all 0.3s' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: useRivalInfo ? '15px' : '0' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#666' }}>INFORMAÇÕES DO TIME RIVAL</label>
-                                        <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={useRivalInfo}
-                                                onChange={e => {
-                                                    setUseRivalInfo(e.target.checked);
-                                                    if (!e.target.checked) {
-                                                        setRivalNome('');
-                                                        setRivalLogo('');
-                                                    }
-                                                }}
-                                                style={{ opacity: 0, width: 0, height: 0 }}
-                                            />
-                                            <span style={{
-                                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                backgroundColor: useRivalInfo ? '#52c41a' : '#ccc', borderRadius: '34px', transition: '.4s'
-                                            }}></span>
-                                            <span style={{
-                                                position: 'absolute', height: '14px', width: '14px', left: useRivalInfo ? '23px' : '3px', bottom: '3px',
-                                                backgroundColor: 'white', borderRadius: '50%', transition: '.4s'
-                                            }}></span>
-                                        </label>
                                     </div>
-                                    {useRivalInfo && (
-                                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#666', marginBottom: '8px' }}>NOME DO TIME</label>
-                                                <div style={{ position: 'relative' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={rivalNome}
-                                                        onChange={e => setRivalNome(e.target.value)}
-                                                        placeholder="Ex: Aliança FC"
-                                                        style={{ width: '100%', padding: '12px', paddingRight: '40px', border: '2px solid #eee', borderRadius: '8px', outline: 'none', boxSizing: 'border-box' }}
-                                                        autoFocus
-                                                    />
-                                                    {rivalNome && (
-                                                        <button
-                                                            onClick={() => setRivalNome('')}
-                                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#999', cursor: 'pointer', display: 'flex' }}
-                                                        >
-                                                            <X size={18} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.80rem', fontWeight: '700', color: '#666', marginBottom: '8px' }}>LOGO</label>
-                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={handleLogoUpload}
-                                                        style={{ flex: 1, fontSize: '0.8rem' }}
-                                                    />
-                                                    {rivalLogo && (
-                                                        <div style={{ position: 'relative' }}>
-                                                            <img src={rivalLogo} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', border: '1px solid #ddd' }} />
-                                                            <button
-                                                                onClick={() => setRivalLogo('')}
-                                                                style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', display: 'flex' }}
-                                                            >
-                                                                <X size={10} />
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                </ConvocacaoToggle>
 
                                 {/* Search Block */}
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '800', color: '#666', marginBottom: '8px' }}>PESQUISAR E ADICIONAR ALUNOS</label>
+                                    <label style={CONV_UI.label}>PESQUISAR E ADICIONAR ALUNOS</label>
                                     <div style={{ position: 'relative' }}>
                                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid #ddd', borderRadius: '8px', padding: '0 15px', gap: '10px' }}>
-                                                <Search size={20} color="#999" />
+                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: '#fff', border: `1px solid ${CONV_UI.border}`, borderRadius: '8px', padding: '0 15px', gap: '10px' }}>
+                                                <Search size={20} color="#8ea3c0" />
                                                 <input
                                                     type="text"
                                                     value={searchTerm}
@@ -650,7 +619,7 @@ export default function AdminConvocacaoList() {
                                             <select
                                                 value={searchModalidade}
                                                 onChange={e => setSearchModalidade(e.target.value)}
-                                                style={{ width: isMobile ? '120px' : '180px', padding: '12px 10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem', outline: 'none', background: '#fff', fontWeight: 'bold', cursor: 'pointer' }}
+                                                style={{ width: isMobile ? '120px' : '180px', padding: '12px 10px', borderRadius: '8px', border: `1px solid ${CONV_UI.border}`, fontSize: '0.85rem', outline: 'none', background: '#fff', fontWeight: 'bold', cursor: 'pointer', color: CONV_UI.navy }}
                                             >
                                                 {activeModalidades.map(m => (
                                                     <option key={m.id} value={m.id}>{m.icon} {m.label.toUpperCase()}</option>
@@ -660,26 +629,20 @@ export default function AdminConvocacaoList() {
 
                                         {/* Search Results Dropdown */}
                                         {searchTerm.length >= 2 && (
-                                            <div style={{ position: 'absolute', top: '100%', left: 0, width: '100%', background: '#fff', border: '1px solid #eee', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', marginTop: '5px', zIndex: 10, maxHeight: '250px', overflowY: 'auto' }}>
-                                                {studentsLoading && <div style={{ padding: '15px', textAlign: 'center', color: '#999' }}>Carregando base de alunos...</div>}
-                                                {!studentsLoading && filteredStudents.length === 0 && <div style={{ padding: '15px', textAlign: 'center', color: '#999' }}>Nenhum aluno encontrado.</div>}
+                                            <div style={{ position: 'absolute', top: '100%', left: 0, width: '100%', background: '#fff', border: `1px solid ${CONV_UI.border}`, borderRadius: '8px', boxShadow: '0 18px 50px rgba(9,36,92,0.16)', marginTop: '5px', zIndex: 10, maxHeight: '250px', overflowY: 'auto' }}>
+                                                {studentsLoading && <div style={{ padding: '15px', textAlign: 'center', color: '#8ea3c0' }}>Carregando base de alunos...</div>}
+                                                {!studentsLoading && filteredStudents.length === 0 && <div style={{ padding: '15px', textAlign: 'center', color: '#8ea3c0' }}>Nenhum aluno encontrado.</div>}
                                                 {filteredStudents.map(student => (
-                                                    <div key={student.uniqueId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 15px', borderBottom: '1px solid #f5f5f5' }}>
+                                                    <div key={student.uniqueId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 15px', borderBottom: `1px solid ${CONV_UI.surfaceSoft}` }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#eee', overflow: 'hidden' }}>
-                                                                {student.aluno?.fotoUrl ? <img src={student.aluno.fotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Users size={16} color="#aaa" style={{ margin: '7px' }} />}
+                                                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: CONV_UI.blueSoft, overflow: 'hidden' }}>
+                                                                {student.aluno?.fotoUrl ? <img src={student.aluno.fotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Users size={16} color="#8ea3c0" style={{ margin: '7px' }} />}
                                                             </div>
-                                                            <span style={{ fontWeight: '600', color: '#444' }}>{student.aluno?.nome}</span>
+                                                            <span style={{ fontWeight: 600, color: CONV_UI.navy }}>{student.aluno?.nome}</span>
                                                         </div>
                                                         <div style={{ display: 'flex', gap: '5px' }}>
-                                                            <button
-                                                                onClick={() => handleAddJogador(student, 'titular')}
-                                                                style={{ background: '#e6f7ff', color: '#0050b3', border: '1px solid #91d5ff', padding: '6px 10px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}
-                                                            >+ TITULAR</button>
-                                                            <button
-                                                                onClick={() => handleAddJogador(student, 'reserva')}
-                                                                style={{ background: '#f6ffed', color: '#389e0d', border: '1px solid #b7eb8f', padding: '6px 10px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}
-                                                            >+ RESERVA</button>
+                                                            <button onClick={() => handleAddJogador(student, 'titular')} style={CONV_UI.addTitular}>+ TITULAR</button>
+                                                            <button onClick={() => handleAddJogador(student, 'reserva')} style={CONV_UI.addReserva}>+ RESERVA</button>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -690,131 +653,17 @@ export default function AdminConvocacaoList() {
                             </div>
 
                             {/* Players Panels */}
-                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1px', background: '#eee', borderTop: '1px solid #eee' }}>
-                                {/* Titulares Panel */}
-                                <div style={{ background: '#fff', padding: '20px' }}>
-                                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#333', display: 'flex', justifyContent: 'space-between' }}>
-                                        TITULARES <span style={{ background: '#e6f7ff', color: '#0050b3', padding: '2px 8px', borderRadius: '10px', fontSize: '0.8rem' }}>{titulares.length}</span>
-                                    </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
-                                        {titulares.length === 0 && <span style={{ color: '#999', fontSize: '0.9rem', fontStyle: 'italic' }}>Nenhum titular selecionado</span>}
-                                        {titulares.map(t => (
-                                            <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafafa', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                                        <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#00a63a', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.nome}</span>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>{t.turma}</span>
-                                                            {!t.numero && (
-                                                                <Link
-                                                                    to={`/admin/details/${t.regId}`}
-                                                                    style={{
-                                                                        fontSize: '0.7rem',
-                                                                        color: '#00a63a',
-                                                                        fontWeight: 'bold',
-                                                                        background: '#fff1f0',
-                                                                        padding: '2px 6px',
-                                                                        borderRadius: '4px',
-                                                                        border: '1px solid #ffa39e',
-                                                                        textDecoration: 'none'
-                                                                    }}
-                                                                >
-                                                                    Sem número +Adicionar
-                                                                </Link>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                                                    {t.numero ? (
-                                                        <div style={{
-                                                            width: '45px',
-                                                            padding: '6px 4px',
-                                                            textAlign: 'center',
-                                                            border: '2px solid #00a63a',
-                                                            borderRadius: '6px',
-                                                            fontSize: '0.9rem',
-                                                            fontWeight: 'bold',
-                                                            background: '#fff',
-                                                            color: '#333'
-                                                        }}>
-                                                            {t.numero}
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ width: '45px' }} />
-                                                    )}
-                                                    <button onClick={() => handleRemoveJogador(t.id)} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', padding: '5px' }}><X size={18} /></button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                {/* Reservas Panel */}
-                                <div style={{ background: '#fff', padding: '20px' }}>
-                                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#333', display: 'flex', justifyContent: 'space-between' }}>
-                                        RESERVAS <span style={{ background: '#f6ffed', color: '#389e0d', padding: '2px 8px', borderRadius: '10px', fontSize: '0.8rem' }}>{reservas.length}</span>
-                                    </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
-                                        {reservas.length === 0 && <span style={{ color: '#999', fontSize: '0.9rem', fontStyle: 'italic' }}>Nenhum reserva selecionado</span>}
-                                        {reservas.map(r => (
-                                            <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafafa', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                                        <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#389e0d', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.nome}</span>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>{r.turma}</span>
-                                                            {!r.numero && (
-                                                                <Link
-                                                                    to={`/admin/details/${r.regId}`}
-                                                                    style={{
-                                                                        fontSize: '0.7rem',
-                                                                        color: '#389e0d',
-                                                                        fontWeight: 'bold',
-                                                                        background: '#f6ffed',
-                                                                        padding: '2px 6px',
-                                                                        borderRadius: '4px',
-                                                                        border: '1px solid #b7eb8f',
-                                                                        textDecoration: 'none'
-                                                                    }}
-                                                                >
-                                                                    Sem número +Adicionar
-                                                                </Link>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                                                    {r.numero ? (
-                                                        <div style={{
-                                                            width: '45px',
-                                                            padding: '6px 4px',
-                                                            textAlign: 'center',
-                                                            border: '2px solid #389e0d',
-                                                            borderRadius: '6px',
-                                                            fontSize: '0.9rem',
-                                                            fontWeight: 'bold',
-                                                            background: '#fff',
-                                                            color: '#333'
-                                                        }}>
-                                                            {r.numero}
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ width: '45px' }} />
-                                                    )}
-                                                    <button onClick={() => handleRemoveJogador(r.id)} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', padding: '5px' }}><X size={18} /></button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1px', background: CONV_UI.border, borderTop: `1px solid ${CONV_UI.border}` }}>
+                                {renderPlayerPanel('TITULARES', titulares, CONV_UI.blue, CONV_UI.blueSoft)}
+                                {renderPlayerPanel('RESERVAS', reservas, CONV_UI.green, CONV_UI.greenSoft)}
                             </div>
 
-                            {/* Modal Footer (Fixo) */}
-                            <div style={{ padding: '20px', background: '#fcfcfc', borderTop: '1px solid #eee', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'flex-end', gap: '10px', zIndex: 10 }}>
-                                <button onClick={closeModal} style={{ width: isMobile ? '100%' : 'auto', padding: '10px 20px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', fontWeight: 'bold', color: '#666', cursor: 'pointer' }}>
+                            {/* Modal Footer */}
+                            <div style={{ padding: '20px', background: CONV_UI.surfaceSoft, borderTop: `1px solid ${CONV_UI.border}`, display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'flex-end', gap: '10px' }}>
+                                <button onClick={closeModal} style={{ width: isMobile ? '100%' : 'auto', padding: '12px 20px', borderRadius: '8px', border: `1px solid ${CONV_UI.border}`, background: '#fff', fontWeight: 'bold', color: '#63708a', cursor: 'pointer' }}>
                                     CANCELAR
                                 </button>
-                                <button onClick={handleSaveConvocacao} style={{ width: isMobile ? '100%' : 'auto', padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#00a63a', fontWeight: 'bold', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                <button onClick={handleSaveConvocacao} style={{ width: isMobile ? '100%' : 'auto', padding: '12px 24px', borderRadius: '8px', border: 'none', background: CONV_UI.green, fontWeight: 'bold', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', boxShadow: '0 8px 24px rgba(0,166,58,0.25)' }}>
                                     SALVAR CONVOCAÇÃO
                                 </button>
                             </div>
@@ -832,6 +681,6 @@ export default function AdminConvocacaoList() {
                     setSelectedConvocacaoForImage(null);
                 }}
             />
-        </div>
+        </PageContainer>
     );
 }

@@ -54,6 +54,7 @@ import StudentRegimento from './pages/StudentRegimento';
 import StudentRadio from './pages/StudentRadio';
 import StudentHorarios from './pages/StudentHorarios';
 import StudentStore from './pages/StudentStore';
+import StudentAutorizacoes from './pages/StudentAutorizacoes';
 import MandatoryContractPage from './pages/MandatoryContractPage';
 
 // Teacher Portal Imports
@@ -121,6 +122,7 @@ function App() {
               <Route path="radio" element={<StudentRadio />} />
               <Route path="horarios" element={<StudentHorarios />} />
               <Route path="loja" element={<StudentStore />} />
+              <Route path="autorizacoes" element={<StudentAutorizacoes />} />
               <Route index element={<Navigate to="dashboard" replace />} />
             </Route>
 

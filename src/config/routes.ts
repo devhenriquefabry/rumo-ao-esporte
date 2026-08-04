@@ -62,8 +62,9 @@ export const ALL_SYSTEM_ROUTES: RouteCategory[] = [
             { path: '/admin/contratos/modelo', label: 'Modelo de Contrato' },
             { path: '/admin/portaria', label: 'Portaria' },
             { path: '/admin/alugueis', label: 'Aluguel de Espaços' },
-            { path: '/admin/midias', label: 'Mídias' },
+            { path: '/admin/midias', label: 'Mídias dos Atletas' },
             { path: '/admin/jogos/convocacao', label: 'Jogos / Convocação' },
+            { path: '/aluno/autorizacoes', label: 'Autorizações de Convocação (Portal do Aluno)' },
         ]
     },
     {

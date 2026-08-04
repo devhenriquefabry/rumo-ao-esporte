@@ -24,7 +24,8 @@ import {
     QrCode,
     Clock,
     Store,
-    Download
+    Download,
+    FileSignature
 } from 'lucide-react';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
@@ -570,6 +571,7 @@ export default function StudentLayout() {
                             <NavItem to="/aluno/dashboard" label="Meu Atleta" icon={<Home size={20} />} />
                             <NavItem to="/aluno/perfil" label="Meus Dados" icon={<User size={20} />} />
                             <NavItem to="/aluno/financeiro" label="Pagamentos" icon={<DollarSign size={20} />} />
+                            <NavItem to="/aluno/autorizacoes" label="Autorizações" icon={<FileSignature size={20} />} />
                             {storeEnabled && <NavItem to="/aluno/loja" label="Loja do Clube" icon={<Store size={20} />} />}
                             <NavItem to="/aluno/horarios" label="Horários" icon={<Clock size={20} />} />
                             <NavItem to="/aluno/configuracoes" label="Configurações" icon={<Settings size={20} />} />
@@ -738,6 +740,7 @@ export default function StudentLayout() {
                             <MenuGridItem icon={Users} label="Dependentes" link="/aluno/dashboard" />
                             <MenuGridItem icon={History} label="Meus Acessos" link="/aluno/acessos" />
                             <MenuGridItem icon={DollarSign} label="Meus Débitos" link="/aluno/financeiro" />
+                            <MenuGridItem icon={FileSignature} label="Autorizações" link="/aluno/autorizacoes" />
                             {storeEnabled && <MenuGridItem icon={Store} label="Loja" link="/aluno/loja" />}
                             <MenuGridItem icon={Lock} label="Trocar Senha" link="/aluno/configuracoes" />
                             <MenuGridItem icon={Clock} label="Horários" link="/aluno/horarios" />
