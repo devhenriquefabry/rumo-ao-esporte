@@ -80,7 +80,7 @@ export default function AdminContractList() {
                         modalidade: normalizeModality(data.modalidade || ''),
                         signed: !!aluno.signatureData,
                         signatureData: aluno.signatureData,
-                        contractGenerated: !!data.contractGenerated
+                        contractGenerated: data.contractGenerated !== false
                     });
                 });
             });

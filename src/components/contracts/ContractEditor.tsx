@@ -421,42 +421,45 @@ export default function ContractEditor({
                 ) : (
                     <>
                         <div style={{ textAlign: 'center', marginBottom: '20px' }} {...editableProps}>
-                            <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte" style={{ height: '80px', marginBottom: '10px' }} contentEditable={false} />
-                            <h2 style={{ fontSize: '14pt', fontWeight: 'bold', textTransform: 'uppercase', margin: '10px 0' }}>Itens de Contrato de Prestação de Serviços Educacionais e Esportivos – Escolinha de Futebol</h2>
+                            <img src="/rumo-ao-esporte-logo.png" alt="Rumo ao Esporte e ao Lazer - REAL" style={{ height: '80px', marginBottom: '10px' }} contentEditable={false} />
+                            <h2 style={{ fontSize: '13pt', fontWeight: 'bold', textTransform: 'uppercase', margin: '10px 0', lineHeight: '1.4' }}>
+                                Termo de Adesão e Participação nas Atividades Esportivas<br />
+                                da Associação Rumo ao Esporte e ao Lazer - REAL
+                            </h2>
                         </div>
 
                         <p style={{ textIndent: '30px', marginBottom: '15px' }} {...editableProps}>
-                            Pelo presente instrumento particular, de um lado, <strong>RUMO AO ESPORTE</strong>, escola de esportes situada em Minas Gerais, doravante denominada <strong>CONTRATADA</strong>, e, de outro lado, <strong>{displayData.responsavel.nome.toUpperCase()}</strong>, brasileiro(a), portador(a) do CPF nº <strong>{displayData.responsavel.cpf}</strong>, residente e domiciliado(a) à {displayData.responsavel.endereco.rua}, nº {displayData.responsavel.endereco.numero}, Bairro {displayData.responsavel.endereco.bairro}, {displayData.responsavel.endereco.cidade}/{displayData.responsavel.endereco.uf}, doravante denominado(a) <strong>CONTRATANTE</strong>, na qualidade de representante legal do(a) aluno(a) <strong>{displayStudent.nome.toUpperCase()}</strong>, doravante denominado(a) <strong>ALUNO(A)</strong>, resolvem firmar o presente Contrato de Prestação de Serviços Educacionais e Esportivos, que se regerá pelas cláusulas e condições a seguir descritas.
+                            Pelo presente instrumento, de um lado, <strong>RUMO AO ESPORTE E AO LAZER - REAL</strong>, associação privada sem fins lucrativos, inscrita no CNPJ sob o nº 60.642.277/0001-40, com sede na Avenida Cota Emerick, nº 87, Fundos - Loja Doce Luiza, Centro, Martins Soares/MG, CEP 36.972-000, e-mail rumoaoesporte@gmail.com e telefone (33) 9978-6088, doravante denominada <strong>ASSOCIAÇÃO</strong>, e, de outro lado, <strong>{displayData.responsavel.nome.toUpperCase()}</strong>, brasileiro(a), portador(a) do CPF nº <strong>{displayData.responsavel.cpf}</strong>, residente e domiciliado(a) à {displayData.responsavel.endereco.rua}, nº {displayData.responsavel.endereco.numero}, Bairro {displayData.responsavel.endereco.bairro}, {displayData.responsavel.endereco.cidade}/{displayData.responsavel.endereco.uf}, doravante denominado(a) <strong>ASSOCIADO(A)/RESPONSÁVEL</strong>, na qualidade de representante legal do(a) atleta <strong>{displayStudent.nome.toUpperCase()}</strong>, resolvem firmar o presente Termo de Adesão e Participação nas Atividades Esportivas, conforme o Estatuto Social e as cláusulas seguintes.
                         </p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 1 – DO OBJETO</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>1.1 O presente contrato tem por objeto a prestação de serviços educacionais e esportivos voltados à iniciação e ao desenvolvimento da prática do futebol, incluindo atividades de formação cidadã, valores éticos, disciplina e convivência em grupo, destinados a crianças entre 03 (três) e 15 (quinze) anos de idade.</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 1 - DO OBJETO</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>1.1 O presente termo tem por objeto a adesão e participação do atleta nas atividades esportivas e socioeducativas promovidas pela ASSOCIAÇÃO, especialmente na prática do futebol, visando ao desenvolvimento esportivo, social, disciplinar e cidadão de crianças e adolescentes.</p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 2 – DAS ATIVIDADES</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>2.1 As atividades consistirão em treinamentos, aulas práticas e teóricas, avaliações técnicas e comportamentais, eventos internos e externos, conforme programação elaborada pela CONTRATADA.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>2.2 Parágrafo único: A frequência às atividades será conforme cronograma a ser disponibilizado oportunamente, podendo ser ajustado pela CONTRATADA de acordo com a necessidade do projeto.</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 2 - DAS ATIVIDADES</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>2.1 As atividades consistirão em treinamentos, atividades práticas e teóricas, avaliações, amistosos, competições, eventos internos e externos e demais ações promovidas pela ASSOCIAÇÃO.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>2.2 Parágrafo único: A frequência seguirá cronograma divulgado pela ASSOCIAÇÃO, podendo ser ajustado conforme necessidade, disponibilidade e organização do projeto.</p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 3 – DAS NORMAS DE CONDUTA E DISCIPLINA</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>3.1 Os alunos deverão manter comportamento respeitoso, assiduidade e disciplina durante todas as atividades, sendo vedado:</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 3 - DAS NORMAS DE CONDUTA E DISCIPLINA</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>3.1 Os atletas deverão manter comportamento respeitoso, assiduidade e disciplina durante as atividades, sendo vedado:</p>
                         <ul style={{ listStyle: 'none', paddingLeft: '20px', margin: '10px 0' }} {...editableProps}>
                             <li>a) Uso de palavrões, agressões físicas ou verbais;</li>
-                            <li>b) Desrespeito a colegas, professores e funcionários;</li>
-                            <li>c) Danos ao patrimônio da escolinha ou de terceiros.</li>
+                            <li>b) Desrespeito a atletas, profissionais, voluntários ou responsáveis;</li>
+                            <li>c) Danos ao patrimônio da ASSOCIAÇÃO ou de terceiros.</li>
                         </ul>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>3.2 Parágrafo único: A persistência em comportamentos inadequados, após advertência verbal ou escrita, poderá ensejar sanções disciplinares graduais, a critério da CONTRATADA, incluindo advertência formal, suspensão das atividades por prazo determinado e, em casos de maior gravidade ou reiteração de conduta, o desligamento definitivo do aluno, sem prejuízo das obrigações contratuais assumidas pelo CONTRATANTE.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>3.2 Parágrafo único: O descumprimento das normas sujeitará o associado às penalidades de advertência verbal ou escrita, suspensão por até 90 (noventa) dias ou desligamento, conforme a gravidade da falta, reincidência e demais critérios previstos no Estatuto Social, assegurado o direito de defesa.</p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 4 – DAS RESPONSABILIDADES DO CONTRATANTE</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>4.1 Compete ao CONTRATANTE:</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 4 - DAS RESPONSABILIDADES DO ASSOCIADO/RESPONSÁVEL</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>4.1 Compete ao ASSOCIADO/RESPONSÁVEL:</p>
                         <ul style={{ listStyle: 'none', paddingLeft: '20px', margin: '10px 0' }} {...editableProps}>
-                            <li>a) Garantir a presença e pontualidade do aluno nas atividades;</li>
-                            <li>b) Comunicar antecipadamente eventuais faltas ou impedimentos;</li>
-                            <li>c) Zelar pela boa convivência, incentivando valores éticos e cooperativos;</li>
-                            <li>d) Informar à CONTRATADA qualquer condição de saúde ou limitação física do aluno.</li>
+                            <li>a) Garantir, sempre que possível, a presença e pontualidade do atleta;</li>
+                            <li>b) Comunicar faltas ou impedimentos relevantes;</li>
+                            <li>c) Zelar pela boa convivência e incentivar valores éticos e cooperativos;</li>
+                            <li>d) Informar à ASSOCIAÇÃO qualquer condição de saúde ou limitação física relevante do atleta.</li>
                         </ul>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 5 – DO VALOR E FORMA DE PAGAMENTO</h3>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 5 - DA CONTRIBUIÇÃO ASSOCIATIVA</h3>
                         <p style={{ marginBottom: '10px' }} {...editableProps}>
-                            5.1 O CONTRATANTE compromete-se a pagar à CONTRATADA, a título de contraprestação pelos serviços educacionais e esportivos ora contratados, os seguintes valores:
+                            5.1 O ASSOCIADO/RESPONSÁVEL contribuirá mensalmente para a manutenção das atividades da ASSOCIAÇÃO, conforme previsto em seu Estatuto Social:
                         </p>
                         {selectedPlan ? (
                             <div style={{ marginLeft: '20px', marginBottom: '10px', background: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #eee' }}>
@@ -470,81 +473,71 @@ export default function ContractEditor({
                             </div>
                         ) : null}
                         <p style={{ marginBottom: '10px' }} {...editableProps}>
-                            5.2 O inadimplemento da mensalidade na data aprazada sujeitará o CONTRATANTE à incidência de multa moratória de {selectedPlan?.multa || 2}% ({selectedPlan?.multa === 2 ? 'dois' : selectedPlan?.multa || 'dois'} por cento) sobre o valor devido, acrescida de juros de mora de {selectedPlan?.jurosMensais || 1}% ({selectedPlan?.jurosMensais === 1 ? 'um' : selectedPlan?.jurosMensais || 'um'} por cento) ao mês, além de correção monetária com base no índice IPCA ou outro que venha a substituí-lo.
+                            5.2 A mensalidade possui natureza de contribuição associativa destinada à manutenção e desenvolvimento das atividades institucionais da ASSOCIAÇÃO.
                         </p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 6 – DO UNIFORME E MATERIAIS</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>6.1 O uso do uniforme completo e padronizado da escolinha é obrigatório durante todas as aulas, treinos, amistosos, campeonatos e demais atividades promovidas pela CONTRATADA.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>6.2 O uniforme é de propriedade do aluno e deverá ser adquirido pela CONTRATANTE junto à CONTRATADA no momento da matrícula ou conforme orientação repassada pela equipe administrativa.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>6.3 O CONTRATANTE compromete-se a zelar pela conservação das peças adquiridas, ciente de que eventuais reposições por perda, extravio ou dano serão de sua responsabilidade.</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 6 - DO UNIFORME E MATERIAIS</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>6.1 O uso do uniforme completo e padronizado da ASSOCIAÇÃO será obrigatório nos treinos, amistosos, competições e demais atividades em que assim for determinado.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>6.2 O uniforme será de propriedade do atleta e deverá ser adquirido pelo ASSOCIADO/RESPONSÁVEL conforme padrão e orientações estabelecidos pela ASSOCIAÇÃO.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>6.3 O ASSOCIADO/RESPONSÁVEL deverá zelar pela conservação das peças, sendo de sua responsabilidade eventual reposição por perda, extravio ou dano.</p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 7 – DA SEGURANÇA E ISENÇÃO DE RESPONSABILIDADE</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>7.1 A CONTRATADA envidará todos os esforços para garantir um ambiente seguro, contudo, não se responsabiliza por acidentes, lesões ou enfermidades decorrentes das atividades esportivas, exceto se comprovada culpa exclusiva da equipe técnica ou gestão.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>7.2 O CONTRATANTE declara estar ciente dos riscos naturais da prática esportiva e isenta a CONTRATADA de responsabilidade civil, salvo nos casos de dolo ou negligência comprovada.</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 7 - DA SEGURANÇA E RESPONSABILIDADE</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>7.1 A ASSOCIAÇÃO adotará medidas de segurança e prevenção compatíveis com as atividades desenvolvidas.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>7.2 O ASSOCIADO/RESPONSÁVEL declara estar ciente dos riscos naturais inerentes à prática esportiva, permanecendo a responsabilidade da ASSOCIAÇÃO limitada aos casos previstos na legislação aplicável.</p>
 
                         <div className="page-break" style={{ pageBreakAfter: 'always' }}></div>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 8 – DO USO DE IMAGEM</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>8.1 O CONTRATANTE autoriza, de forma gratuita, irrevogável e por prazo indeterminado, o uso da imagem e voz do aluno em fotos, vídeos e demais materiais promocionais ou institucionais, inclusive para veiculação em redes sociais e canais oficiais da CONTRATADA.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>8.2 A presente autorização é concedida sem que caiba qualquer indenização ao aluno ou a seu representante legal.</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 8 - DO USO DE IMAGEM</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>8.1 O ASSOCIADO/RESPONSÁVEL autoriza gratuitamente o uso da imagem e voz do atleta em fotos, vídeos e materiais institucionais relacionados às atividades da ASSOCIAÇÃO, inclusive em redes sociais e canais oficiais.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>8.2 A utilização terá finalidade exclusivamente institucional, esportiva e de divulgação das atividades da ASSOCIAÇÃO, sem gerar direito a remuneração.</p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 9 – DO PRAZO E DA RESCISÃO</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.1 O presente contrato terá validade pelo prazo de 12 (doze) meses, contados a partir da data de sua assinatura, podendo ser renovado mediante acordo entre as partes, por meio de termo aditivo formal.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.2 O CONTRATANTE poderá solicitar a rescisão deste contrato a qualquer momento, mediante comunicação por escrito à administração da ESCOLINHA.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.3 No entanto em caso de rescisão contratual antecipada por iniciativa do CONTRATANTE, será aplicada, de forma imediata, multa compensatória correspondente a {selectedPlan?.rescisao ? (selectedPlan.rescisao.tipo === 'fixed' ? `R$ ${(selectedPlan.rescisao.valor / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (valor fixo)` : `${selectedPlan.rescisao.valor}% (${selectedPlan.rescisao.valor === 1 ? 'um por cento' : selectedPlan.rescisao.valor === 10 ? 'dez por cento' : selectedPlan.rescisao.valor === 20 ? 'vinte por cento' : selectedPlan.rescisao.valor === 30 ? 'trinta por cento' : selectedPlan.rescisao.valor === 50 ? 'cinquenta por cento' : selectedPlan.rescisao.valor === 70 ? 'setenta por cento' : selectedPlan.rescisao.valor + ' por cento'})`) : '70% (setenta por cento)'} do valor total das mensalidades restantes até o fim do contrato. Além dessa multa, o CONTRATANTE também será responsável pelo pagamento de todas as mensalidades já vencidas e ainda não quitadas, devendo realizar o pagamento integral no momento do cancelamento.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.4 A CONTRATADA poderá rescindir este contrato, independentemente de aviso prévio, nos seguintes casos:</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 9 - DO PRAZO E DO DESLIGAMENTO</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.1 O presente termo vigorará a partir de sua assinatura enquanto permanecer a participação do atleta e a condição associativa do responsável perante a ASSOCIAÇÃO.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.2 O ASSOCIADO/RESPONSÁVEL poderá solicitar seu desligamento e o do atleta a qualquer momento, mediante comunicação à administração.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.3 Não haverá cobrança de multa pelo pedido de desligamento, permanecendo devidos somente os valores vencidos até a data do efetivo desligamento.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.4 O desligamento por motivo disciplinar observará as penalidades e procedimentos previstos no Estatuto Social da ASSOCIAÇÃO.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.5 O desligamento por inadimplência observará exclusivamente o prazo e as condições estabelecidas no Estatuto Social.</p>
+
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 10 - DA INADIMPLÊNCIA</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>10.1 Em caso de inadimplência, será observado o período de 03 (três) meses para regularização, podendo o associado quitar os valores em aberto até o último dia desse período para evitar seu desligamento.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>10.2 Após o período de 03 (três) meses, não havendo regularização, ocorrerá o desligamento, observadas as situações excepcionais previstas no Estatuto Social.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>10.3 Para eventual retorno, os valores anteriormente devidos deverão ser quitados, sem juros ou multas, podendo haver correção monetária pelo IPCA, a critério da Diretoria.</p>
+
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 11 - DA INSCRIÇÃO E ADESÃO</h3>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>11.1 A inscrição e adesão serão formalizadas mediante aprovação pela ASSOCIAÇÃO e:</p>
                         <ul style={{ listStyle: 'none', paddingLeft: '20px', margin: '10px 0' }} {...editableProps}>
-                            <li>a) Inadimplemento de 02 (duas mensalidades);</li>
-                            <li>b) Comportamento inadequado ou ofensivo do ALUNO ou de seu responsável legal;</li>
-                            <li>c) Descumprimento de qualquer obrigação contratual relevante.</li>
+                            <li>a) Preenchimento e assinatura da Ficha de Inscrição e Adesão;</li>
+                            <li>b) Apresentação dos documentos de identificação do atleta e de seu responsável legal;</li>
+                            <li>c) Apresentação das demais informações ou autorizações necessárias à participação nas atividades.</li>
                         </ul>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>9.5 Em caso de rescisão, o aluno será desligado das atividades, sem prejuízo da cobrança das obrigações vencidas e não pagas até a data do efetivo desligamento.</p>
+                        <p style={{ marginBottom: '10px' }} {...editableProps}>11.2 A participação em deslocamentos, competições ou eventos externos dependerá das autorizações exigidas pela ASSOCIAÇÃO.</p>
 
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 10 - DAS CONSEQUÊNCIAS DO INADIMPLEMENTO</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>10.1 O não pagamento de qualquer mensalidade por prazo superior a 10 (dez) dias autoriza a CONTRATADA a suspender imediatamente a participação do aluno nas atividades, até a regularização da pendência.</p>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>10.2 O atraso superior a 30 (trinta) dias ensejará:</p>
-                        <ul style={{ listStyle: 'none', paddingLeft: '20px', margin: '10px 0' }} {...editableProps}>
-                            <li>a) Rescisão contratual por justa causa, com desligamento do aluno;</li>
-                            <li>b) Inscrição do débito nos órgãos de proteção ao crédito (SPC/Serasa) e/ou protesto em cartório;</li>
-                            <li>c) Encaminhamento para cobrança judicial ou extrajudicial, com acréscimo de honorários advocatícios de 20% (vinte por cento) sobre o valor inadimplido, sem prejuízo da multa, juros e correção monetária.</li>
-                        </ul>
-
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 11 – DA MATRÍCULA E FORMALIZAÇÃO</h3>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>11.1 A matrícula do aluno somente será efetivada após:</p>
-                        <ul style={{ listStyle: 'none', paddingLeft: '20px', margin: '10px 0' }} {...editableProps}>
-                            <li>a) O preenchimento e assinatura da Ficha de Inscrição disponibilizada pela CONTRATADA;</li>
-                            <li>b) A apresentação dos seguintes documentos:</li>
-                            <li style={{ marginLeft: '20px' }}>• RG e CPF do responsável legal;</li>
-                            <li style={{ marginLeft: '20px' }}>• Certidão de nascimento ou RG do aluno;</li>
-                            <li style={{ marginLeft: '20px' }}>• Comprovante de endereço atualizado;</li>
-                            <li style={{ marginLeft: '20px' }}>• Atestado médico autorizando a prática de atividades físicas.</li>
-                        </ul>
-                        <p style={{ marginBottom: '10px' }} {...editableProps}>11.2 A ausência de qualquer dos documentos exigidos poderá suspender o início das atividades do aluno até sua regularização, sem que isso gere obrigação de compensação de aulas pela CONTRATADA.</p>
-
-                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 12 – DO FORO</h3>
-                        <p style={{ marginBottom: '20px' }} {...editableProps}>Para dirimir quaisquer controvérsias oriundas deste contrato, as partes elegem o foro da comarca de <strong>MANHUAÇU/MG</strong>, com renúncia expressa a qualquer outro, por mais privilegiado que seja.</p>
-                        <p style={{ marginBottom: '40px' }} {...editableProps}>Parágrafo único: Para fins de comunicação formal, as partes autorizam o uso de e-mail e WhatsApp como meios válidos para envio de notificações, convocações e avisos administrativos, conferindo-lhes valor jurídico, desde que seja comprovada a integridade e a data de envio da mensagem.</p>
+                        <h3 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '20px', marginBottom: '10px' }} {...editableProps}>CLÁUSULA 12 - DO FORO</h3>
+                        <p style={{ marginBottom: '20px' }} {...editableProps}>Para dirimir eventuais controvérsias decorrentes deste termo, fica eleito o foro da Comarca de Manhumirim/MG, observadas as disposições legais aplicáveis.</p>
+                        <p style={{ marginBottom: '40px' }} {...editableProps}>Parágrafo único: Para fins de comunicação formal, poderão ser utilizados e-mail e WhatsApp para envio de notificações, avisos e comunicações administrativas.</p>
 
                         <div style={{ textAlign: 'center', marginTop: '60px', marginBottom: '60px' }} {...editableProps}>
-                            <p>Manhuaçu/MG, {currentDate}.</p>
+                            <p>Martins Soares/MG, {currentDate}.</p>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '80px', gap: '40px' }} {...editableProps}>
                             <div style={{ flex: 1, textAlign: 'center' }}>
-                                <div style={{ height: '62px', marginBottom: '4px' }}></div>
+                                <div style={{ height: '62px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '4px' }}>
+                                    <img src="/assinatura-associacao.png" alt="Assinatura da associação" style={{ height: '58px', maxWidth: '95%', objectFit: 'contain' }} />
+                                </div>
                                 <div style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>
-                                    <strong>CONTRATADA</strong><br />
-                                    RUMO AO ESPORTE
+                                    <strong>ASSOCIAÇÃO</strong><br />
+                                    ASSOCIAÇÃO RUMO AO ESPORTE E AO LAZER - REAL
                                 </div>
                             </div>
                             <div style={{ flex: 1, textAlign: 'center' }}>
                                 <div style={{ height: '62px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '4px' }}>
                                     {signatureData && (
-                                        <img src={signatureData} alt="Assinatura do contratante" style={{ height: '58px', maxWidth: '95%', objectFit: 'contain' }} />
+                                        <img src={signatureData} alt="Assinatura do associado/responsável" style={{ height: '58px', maxWidth: '95%', objectFit: 'contain' }} />
                                     )}
                                 </div>
                                 <div style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>
-                                    <strong>CONTRATANTE</strong><br />
+                                    <strong>ASSOCIADO(A)/RESPONSÁVEL</strong><br />
                                     {displayData.responsavel.nome.toUpperCase()}<br />
                                     CPF: {displayData.responsavel.cpf}
                                 </div>
@@ -562,12 +555,12 @@ export default function ContractEditor({
                         {/* ANEXO I */}
                         <div style={{ border: '1px solid #000', padding: '20px' }} {...editableProps}>
                             <h3 style={{ textAlign: 'center', fontSize: '14pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>
-                                ANEXO I – FICHA DE INSCRIÇÃO DO ALUNO<br />
-                                RUMO AO ESPORTE
+                                ANEXO I – FICHA DE INSCRIÇÃO E ADESÃO DO ATLETA<br />
+                                ASSOCIAÇÃO RUMO AO ESPORTE E AO LAZER - REAL
                             </h3>
 
                             <div style={{ marginBottom: '20px' }}>
-                                <strong>DADOS DO ALUNO(A):</strong><br />
+                                <strong>DADOS DO ATLETA:</strong><br />
                                 <div style={{ borderBottom: '1px solid #ccc', padding: '5px 0', marginBottom: '5px' }}>Nome completo: {displayStudent.nome.toUpperCase()}</div>
                                 <div style={{ display: 'flex', gap: '20px' }}>
                                     <div style={{ borderBottom: '1px solid #ccc', padding: '5px 0', flex: 1 }}>Data de Nascimento: {displayStudent.dataNascimento}</div>
@@ -597,19 +590,26 @@ export default function ContractEditor({
                             <div style={{ marginBottom: '20px' }}>
                                 <strong>TERMO DE COMPROMISSO:</strong><br />
                                 <p style={{ fontSize: '10pt', marginTop: '5px' }}>
-                                    Declaro que as informações acima prestadas são verdadeiras, e que li e estou de acordo com as cláusulas do Contrato de Prestação de Serviços Educacionais e Esportivos, firmado com a RUMO AO ESPORTE, do qual esta ficha é parte integrante.
+                                    Declaro que as informações acima são verdadeiras e que li e estou de acordo com o Estatuto Social, regulamentos e condições constantes do Termo de Adesão e Participação nas Atividades Esportivas da Associação Rumo ao Esporte e ao Lazer - REAL, do qual esta ficha é parte integrante.
                                 </p>
                                 <p style={{ fontSize: '10pt', marginTop: '5px' }}>
-                                    Autorizo o uso da imagem do aluno em materiais institucionais e promocionais, conforme previsto em contrato.
+                                    Autorizo a participação do atleta nas atividades da ASSOCIAÇÃO e o uso de sua imagem nos termos da autorização constante do referido instrumento.
                                 </p>
                             </div>
 
                             <div style={{ marginTop: '40px', textAlign: 'center' }}>
-                                Manhuaçu/MG, {currentDate}.
+                                Martins Soares/MG, {currentDate}.
                             </div>
 
-                            <div style={{ marginTop: '50px', borderTop: '1px solid #000', paddingTop: '5px', width: '80%', margin: '40px auto 0', textAlign: 'center' }}>
-                                <center>Assinatura do Responsável Legal</center>
+                            <div style={{ marginTop: '50px', width: '80%', margin: '40px auto 0', textAlign: 'center' }}>
+                                <div style={{ height: '50px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '4px' }}>
+                                    {signatureData && (
+                                        <img src={signatureData} alt="Assinatura do responsável legal" style={{ height: '46px', maxWidth: '95%', objectFit: 'contain' }} />
+                                    )}
+                                </div>
+                                <div style={{ borderTop: '1px solid #000', paddingTop: '5px' }}>
+                                    <center>Assinatura do Responsável Legal</center>
+                                </div>
                             </div>
                         </div>
                     </>
@@ -622,7 +622,7 @@ export default function ContractEditor({
                     width: 100%;
                     overflow-x: auto;
                 }
-                
+
                 /* Mobile & Tablet Scaling - Scale A4 (210mm ≈ 794px) to fit viewport */
                 @media screen and (max-width: 850px) {
                     .contract-page {
@@ -637,7 +637,7 @@ export default function ContractEditor({
                         max-width: calc(100vw - 20px) !important;
                     }
                 }
-                
+
                 @media print {
                     @page { margin: 0; size: auto; }
                     body * { visibility: hidden; }
