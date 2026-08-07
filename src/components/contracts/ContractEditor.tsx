@@ -174,8 +174,8 @@ export default function ContractEditor({
                 updatedAlunos[studentIndex] = {
                     ...updatedAlunos[studentIndex],
                     customContract: contractHTML,
-                    planoId: selectedPlan?.id, // Save selected plan
-                    signatureData: signatureData || undefined
+                    ...(selectedPlan?.id ? { planoId: selectedPlan.id } : {}), // Save selected plan
+                    ...(signatureData ? { signatureData } : {})
                 };
 
                 const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', registrationId);
