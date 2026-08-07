@@ -363,8 +363,8 @@ export default function ContractEditor({
                 </div>
             )}
 
-            {/* Floating Save Button - Only for Template and Admin Edits */}
-            {isEditable && mode !== 'student' && (
+            {/* Floating Save Button */}
+            {isEditable && (
                 <button
                     onClick={handleSave}
                     disabled={saving}
