@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
-import { AlertCircle, CheckCircle, ChevronRight, LogOut } from 'lucide-react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { AlertCircle, CheckCircle, ChevronRight, LogOut, FileText } from 'lucide-react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
 import ContractEditor from '../components/contracts/ContractEditor';
 import SignatureCanvas from '../components/SignatureCanvas';
 import { signOut } from 'firebase/auth';
@@ -16,6 +17,7 @@ export default function MandatoryContractPage() {
     const [showFullContract, setShowFullContract] = useState(false);
     const [capturedSignature, setCapturedSignature] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const [estatutoLido, setEstatutoLido] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -27,18 +29,16 @@ export default function MandatoryContractPage() {
             }
 
             try {
-                const normalizedEmail = user.email.toLowerCase().trim();
-                const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-                const snap = await getDocs(q);
+                const normalizedEmail = getSessionStudentEmail(user.email);
+                const allDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
-                if (!snap.empty) {
+                if (allDocs.length > 0) {
                     let firstPendingReg: any = null;
                     let firstPendingIdx = -1;
                     let firstRegId = "";
                     let totalPending = 0;
 
                     // Search for the first registration that has pending signatures
-                    const allDocs = snap.docs;
                     for (const d of allDocs) {
                         const data = d.data();
                         // Only count if contract is marked as generated (default to true for legacy)
@@ -89,6 +89,10 @@ export default function MandatoryContractPage() {
 
     const handleSaveSignature = async (signatureDataUrl: string) => {
         if (!registrationId || !studentData) return;
+        if (!estatutoLido) {
+            alert("Antes de assinar, é necessário confirmar que leu e concorda com o Estatuto Social da Associação.");
+            return;
+        }
         setSaving(true);
 
         try {
@@ -96,7 +100,9 @@ export default function MandatoryContractPage() {
             updatedAlunos[currentIndex] = {
                 ...updatedAlunos[currentIndex],
                 signatureData: signatureDataUrl,
-                signedAt: new Date().toISOString()
+                signedAt: new Date().toISOString(),
+                estatutoAceito: true,
+                estatutoAceitoAt: new Date().toISOString()
             };
 
             const docRef = doc(db, 'rumo_ao_esporte_2026_registrations', registrationId);
@@ -108,6 +114,7 @@ export default function MandatoryContractPage() {
                 setStudentData({ ...studentData, alunos: updatedAlunos });
                 setCurrentIndex(nextPendingIndex);
                 setCapturedSignature(null);
+                setEstatutoLido(false);
                 setShowFullContract(false);
                 window.scrollTo(0, 0);
                 alert("Assinatura salva! Temos mais um aluno pendente. Por favor, assine agora o contrato do próximo atleta.");
@@ -181,7 +188,7 @@ export default function MandatoryContractPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
                                     <div>
                                         <div style={{ fontSize: '0.7rem', color: '#718096', textTransform: 'uppercase' }}>Documento</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748' }}>Contrato Escolinha 2026</div>
+                                        <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748' }}>Termo de Adesão REAL</div>
                                     </div>
                                     <button
                                         onClick={() => setShowFullContract(true)}
@@ -197,6 +204,44 @@ export default function MandatoryContractPage() {
                                 </div>
                             </div>
 
+                            {/* Estatuto Social Box */}
+                            <div style={{
+                                background: '#f8f9fa', padding: '12px', borderRadius: '10px',
+                                border: '1px solid #edf2f7', marginBottom: '15px', textAlign: 'left'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.7rem', color: '#718096', textTransform: 'uppercase' }}>Documento</div>
+                                        <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748' }}>Estatuto Social da Associação</div>
+                                    </div>
+                                    <a
+                                        href="/estatuto-social-real.pdf"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            background: '#fff', border: '1px solid #cbd5e0', padding: '6px 12px',
+                                            borderRadius: '6px', color: '#4a5568', fontWeight: 'bold', fontSize: '0.8rem',
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
+                                            transition: 'all 0.2s', whiteSpace: 'nowrap', textDecoration: 'none'
+                                        }}
+                                    >
+                                        <FileText size={14} /> VER ESTATUTO
+                                    </a>
+                                </div>
+                                <label style={{
+                                    display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer',
+                                    fontSize: '0.85rem', color: '#4a5568', lineHeight: '1.4'
+                                }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={estatutoLido}
+                                        onChange={(e) => setEstatutoLido(e.target.checked)}
+                                        style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0 }}
+                                    />
+                                    Li e concordo com o Estatuto Social da Associação Rumo ao Esporte e ao Lazer - REAL.
+                                </label>
+                            </div>
+
                             {/* Signature Section */}
                             <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #eee' }}>
                                 <h3 style={{ fontSize: '0.95rem', marginBottom: '10px', color: '#333' }}>Sua Assinatura:</h3>
@@ -210,13 +255,18 @@ export default function MandatoryContractPage() {
                                         <div style={{ marginBottom: '10px', fontSize: '0.8rem', color: '#2e7d32', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                             <CheckCircle size={14} /> Assinatura capturada!
                                         </div>
+                                        {!estatutoLido && (
+                                            <div style={{ marginBottom: '10px', fontSize: '0.8rem', color: '#e65100', textAlign: 'center' }}>
+                                                Marque a opção "Li e concordo com o Estatuto Social" para finalizar.
+                                            </div>
+                                        )}
                                         <button
                                             onClick={() => handleSaveSignature(capturedSignature)}
-                                            disabled={saving}
+                                            disabled={saving || !estatutoLido}
                                             style={{
-                                                background: '#2e7d32', color: '#fff', border: 'none',
+                                                background: (saving || !estatutoLido) ? '#a5c9a8' : '#2e7d32', color: '#fff', border: 'none',
                                                 padding: '12px 25px', borderRadius: '50px', fontSize: '1rem',
-                                                fontWeight: 'bold', cursor: 'pointer', width: '100%',
+                                                fontWeight: 'bold', cursor: (saving || !estatutoLido) ? 'not-allowed' : 'pointer', width: '100%',
                                                 boxShadow: '0 4px 10px rgba(46, 125, 50, 0.2)'
                                             }}
                                         >

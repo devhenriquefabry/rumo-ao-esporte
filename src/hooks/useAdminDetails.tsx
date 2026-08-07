@@ -14,6 +14,7 @@ import { useFinancialOperations } from '../pages/AdminFinanceiroComponents/useFi
 import { SyncService } from '../utils/SyncService';
 import { getRegistrationById, getRegistrationsFromSource } from '../utils/registrationSource';
 import { normalizeNameKey } from '../utils/nameUtils';
+import { validateCPF } from '../utils/cpfUtils';
 import {
     DEFAULT_PAYMENT_PROVIDER_CONFIG,
     getPaymentProviderConfig,
@@ -149,7 +150,11 @@ export function useAdminDetails() {
                 const studentBirth = docData.alunos?.[0]?.dataNascimento;
                 const respCpf = docData.responsavel?.cpf;
 
-                if (respCpf) {
+                // CPF invalido/placeholder (ex.: "000.000.000-00" digitado quando o admin
+                // nao tinha o documento em maos) nao pode ser usado como chave de irmandade:
+                // varias familias sem relacao nenhuma acabam com o mesmo CPF falso, e cada
+                // uma passa a exibir turma/modalidade das outras nesta tela.
+                if (respCpf && validateCPF(respCpf)) {
                     try {
                         const siblingRecords = await getRegistrationsFromSource('rumo', false);
                         const siblings = siblingRecords

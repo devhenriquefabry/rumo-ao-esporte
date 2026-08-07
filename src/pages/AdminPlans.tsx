@@ -226,6 +226,7 @@ export default function AdminPlans() {
         valores: { ...initialRule },
         uniforme: 0,
         jurosMensais: 0,
+        paymentDay: 10,
         rescisao: { tipo: 'percentage', valor: 10 }
     });
 
@@ -320,6 +321,7 @@ export default function AdminPlans() {
             uniforme: plan.uniforme || 0,
             jurosMensais: plan.jurosMensais || 0,
             multa: plan.multa || 0,
+            paymentDay: plan.paymentDay || 10,
             rescisao: plan.rescisao || { tipo: 'percentage', valor: 10 }
         });
         setShowModal(true);
@@ -335,6 +337,7 @@ export default function AdminPlans() {
             valores: { ...initialRule },
             uniforme: 0,
             jurosMensais: 0,
+            paymentDay: 10,
             rescisao: { tipo: 'percentage', valor: 10 }
         });
     };
@@ -525,6 +528,20 @@ export default function AdminPlans() {
                                     data={formData.valores}
                                     onChange={d => setFormData({ ...formData, valores: d })}
                                 />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>Dia de Vencimento Padrão</label>
+                                <input
+                                    type="number"
+                                    min={1} max={28}
+                                    value={formData.paymentDay ?? 10}
+                                    onChange={e => setFormData({ ...formData, paymentDay: Math.min(28, Math.max(1, Number(e.target.value) || 1)) })}
+                                    style={{ width: '160px', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                />
+                                <small style={{ display: 'block', marginTop: '6px', color: '#888', fontSize: '0.78rem' }}>
+                                    Dia usado para gerar o carnê (aprovação, refaturamento) quando a família não tiver um vencimento específico definido.
+                                </small>
                             </div>
 
                             <div style={{ background: '#fff', border: '1px solid #eee', padding: '15px', borderRadius: '10px' }}>

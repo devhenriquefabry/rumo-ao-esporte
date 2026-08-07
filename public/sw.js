@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'rae-pwa-v12';
+const CACHE_VERSION = 'rae-pwa-v14';
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 

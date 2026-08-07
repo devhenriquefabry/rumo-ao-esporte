@@ -9,7 +9,8 @@ import {
     FileText,
     FolderOpen,
     ScanLine,
-    MessageCircle
+    MessageCircle,
+    Trophy
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -71,6 +72,15 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
         path: '/admin/professores',
         label: 'Professores',
         icon: GraduationCap
+    },
+    {
+        path: '/admin/jogos/convocacao',
+        label: 'Jogos',
+        icon: Trophy,
+        subItems: [
+            { to: '/admin/jogos/convocacao', label: 'Convocações' },
+            { to: '/admin/midias', label: 'Mídias dos Atletas' }
+        ]
     },
     {
         path: '/admin/contratos',

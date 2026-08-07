@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
 import { RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import PageContainer from '../components/PageContainer';
 import PageTitle from '../components/PageTitle';
@@ -19,22 +19,24 @@ export default function StudentPayments() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
-            if (impersonatedEmail || (user && user.email)) {
+            const normalizedEmail = getSessionStudentEmail(user?.email);
+            if (normalizedEmail) {
                 try {
-                    // 1. Get ALL Registrations for this parent (normalized to lowercase)
-                    const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
-                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-                    const snap = await getDocs(q);
+                    // 1. Get the registrations of THIS responsible only (email + identidade)
+                    const registrationDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
-                    if (!snap.empty) {
-                        const regs = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+                    if (registrationDocs.length > 0) {
+                        const regs = registrationDocs.map(d => ({ id: d.id, ...d.data() } as any));
                         setAllRegistrations(regs);
 
-                        // 2. Fetch Asaas payments (using CPF from first registration found)
+                        // 2. Fetch payments (using CPF from first registration found)
+                        // Passa "regs" diretamente em vez de usar o estado "allRegistrations":
+                        // setAllRegistrations acima ainda não foi aplicado neste ponto (React
+                        // atualiza o estado de forma assíncrona), entao fetchPayments rodaria
+                        // com a lista vazia na primeira carga da pagina.
                         const firstWithCpf = regs.find(r => r.responsavel?.cpf);
                         if (firstWithCpf?.responsavel?.cpf) {
-                            await fetchPayments(firstWithCpf.responsavel.cpf);
+                            await fetchPayments(firstWithCpf.responsavel.cpf, regs);
                         }
                     }
                 } catch (error) {
@@ -50,12 +52,12 @@ export default function StudentPayments() {
         return () => unsubscribe();
     }, []);
 
-    const fetchPayments = async (cpf: string) => {
+    const fetchPayments = async (cpf: string, registrations: any[] = allRegistrations) => {
         setLoadingPayments(true);
         try {
-            // SYNC all registrations with Asaas (Deep Sync)
+            // SYNC all registrations with the payment provider (Deep Sync)
             // This ensures Firestore is updated with the latest status
-            for (const reg of allRegistrations) {
+            for (const reg of registrations) {
                 try {
                     await syncStudentFinancialData(
                         reg.id,
@@ -73,7 +75,7 @@ export default function StudentPayments() {
             const allPayments: any[] = [];
             const seenIds = new Set<string>();
 
-            for (const reg of allRegistrations) {
+            for (const reg of registrations) {
                 const cached = await SyncService.getCachedPayments(reg.id);
                 if (cached) {
                     cached.forEach(p => {
@@ -120,7 +122,7 @@ export default function StudentPayments() {
                 <button
                     onClick={() => {
                         const firstWithCpf = allRegistrations.find(r => r.responsavel?.cpf);
-                        if (firstWithCpf?.responsavel?.cpf) fetchPayments(firstWithCpf.responsavel.cpf);
+                        if (firstWithCpf?.responsavel?.cpf) fetchPayments(firstWithCpf.responsavel.cpf, allRegistrations);
                     }}
                     disabled={loadingPayments}
                     style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem' }}
@@ -133,7 +135,7 @@ export default function StudentPayments() {
             {loadingPayments && (
                 <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
                     <RefreshCw size={24} className="spin" />
-                    <p>Sincronizando faturas do Asaas...</p>
+                    <p>Buscando suas faturas...</p>
                 </div>
             )}
 
@@ -156,7 +158,7 @@ export default function StudentPayments() {
 
                 // Category sorting for this specific student
                 const pending = studentPayments.filter((p: any) =>
-                    !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'DONE'].includes(p.status)
+                    !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'DONE', 'DELETED', 'REFUNDED', 'REMOVED_BY_RECEIVER'].includes(p.status)
                 );
 
                 const openPlanPayment = pending.find(p => !p.externalReference?.includes('MANUAL_'));
@@ -326,7 +328,7 @@ export default function StudentPayments() {
 
                                 {studentPayments.length === 0 && !loadingPayments && (
                                     <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                                        Nenhuma mensalidade encontrada para este dependente no Asaas.
+                                        Nenhuma mensalidade encontrada para este dependente.
                                     </div>
                                 )}
                             </div>

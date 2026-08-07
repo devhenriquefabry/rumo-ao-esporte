@@ -259,7 +259,7 @@ export default function FinancialHistorySection({ id, cpf, workerUrl, plans, cur
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     {(() => {
                         const pending = displayedHistory
-                            .filter((p: any) => !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH'].includes(p.status))
+                            .filter((p: any) => !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'DELETED', 'REFUNDED', 'REMOVED_BY_RECEIVER'].includes(p.status))
                             .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 
                         const paid = displayedHistory

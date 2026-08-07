@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
 import { Activity, Calendar, User, CreditCard, FileSignature, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageContainer from '../components/PageContainer';
@@ -24,29 +25,27 @@ export default function StudentHome() {
     useEffect(() => {
         // Use onAuthStateChanged to ensure we wait for Firebase to initialize
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
-            if (impersonatedEmail || (user && user.email)) {
+            const normalizedEmail = getSessionStudentEmail(user?.email);
+            if (normalizedEmail) {
                 try {
-                    // 1. Fetch ALL Registrations for this email (normalized to lowercase)
-                    const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
+                    // 1. Fetch registrations of THIS responsible only (email + identidade)
                     console.log("[DEBUG] StudentHome: User Email:", user?.email);
                     console.log("[DEBUG] StudentHome: Normalized Email:", normalizedEmail);
 
-                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-                    const querySnapshot = await getDocs(q);
+                    const registrationDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
-                    console.log("[DEBUG] StudentHome: Records found:", querySnapshot.size);
-                    if (querySnapshot.size > 0) {
-                        console.log("[DEBUG] StudentHome: IDs found:", querySnapshot.docs.map(d => d.id));
+                    console.log("[DEBUG] StudentHome: Records found:", registrationDocs.length);
+                    if (registrationDocs.length > 0) {
+                        console.log("[DEBUG] StudentHome: IDs found:", registrationDocs.map(d => d.id));
                     }
 
                     const studentsAggregated: any[] = [];
                     let respInfo: any = null;
                     const uniqueCpfs = new Set<string>();
 
-                    if (!querySnapshot.empty) {
+                    if (registrationDocs.length > 0) {
 
-                        querySnapshot.forEach((doc) => {
+                        registrationDocs.forEach((doc) => {
                             const data = doc.data();
 
                             // Capture responsible info from the first valid document found
@@ -100,7 +99,7 @@ export default function StudentHome() {
                         (async () => {
                             try {
                                 const meusIds = new Set<string>();
-                                querySnapshot.forEach(docSnap => {
+                                registrationDocs.forEach(docSnap => {
                                     meusIds.add(docSnap.id);
                                     (docSnap.data().alunos || []).forEach((_: unknown, index: number) =>
                                         meusIds.add(`${docSnap.id}_${index}`)
@@ -127,8 +126,8 @@ export default function StudentHome() {
                         })();
 
                         // 2. TRIGGER SYNC (Parallel) - Check if payments were made recently to update Firestore status
-                        if (querySnapshot.size > 0) {
-                            querySnapshot.docs.forEach(docSnap => {
+                        if (registrationDocs.length > 0) {
+                            registrationDocs.forEach(docSnap => {
                                 const data = docSnap.data();
                                 if (data.responsavel?.cpf) {
                                     // We use the shared "Deep Sync" utility

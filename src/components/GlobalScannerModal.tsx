@@ -52,7 +52,7 @@ export const GlobalScannerModal: React.FC<GlobalScannerModalProps> = ({ modalDat
     const payments = modalData.parent?.payments || [];
 
     const pending = payments
-        .filter((p: any) => !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'DONE'].includes(p.status))
+        .filter((p: any) => !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'DONE', 'DELETED', 'REFUNDED', 'REMOVED_BY_RECEIVER'].includes(p.status))
         .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 
     const paid = payments

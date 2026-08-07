@@ -8,6 +8,7 @@ import PageTitle from '../../components/PageTitle';
 import { Plus, Search, Trash2, Edit2, Eye, Lock, CheckCircle, XCircle } from 'lucide-react';
 import { type Employee } from '../../types/user';
 import EmployeeFormModal from '../../components/employees/EmployeeFormModal';
+import { removeStaffAccess, syncStaffAccess } from '../../utils/staffAccess';
 
 
 export default function AdminEmployees() {
@@ -54,16 +55,19 @@ export default function AdminEmployees() {
             showLoading(2000, 'Salvando...');
 
             if (editingId) {
+                const previousEmail = employees.find(e => e.id === editingId)?.email;
                 await updateDoc(doc(db, 'employees', editingId), {
                     ...formData,
                     updatedAt: Timestamp.now()
                 });
+                await syncStaffAccess(formData.email || '', formData.active !== false, 'employee', previousEmail);
                 showAlert('Funcionário atualizado com sucesso!', 'success');
             } else {
                 await addDoc(collection(db, 'employees'), {
                     ...formData,
                     createdAt: Timestamp.now()
                 });
+                await syncStaffAccess(formData.email || '', formData.active !== false, 'employee');
                 showAlert('Funcionário cadastrado com sucesso!', 'success');
             }
             setShowModal(false);
@@ -78,7 +82,9 @@ export default function AdminEmployees() {
     const handleDelete = (id: string) => {
         showConfirm('Tem certeza que deseja remover este funcionário? O acesso dele será revogado imediatamente.', async () => {
             try {
+                const email = employees.find(e => e.id === id)?.email || '';
                 await deleteDoc(doc(db, 'employees', id));
+                await removeStaffAccess(email);
                 showAlert('Funcionário removido com sucesso!', 'success');
                 fetchEmployees();
             } catch (error) {
@@ -116,6 +122,7 @@ export default function AdminEmployees() {
     const toggleStatus = async (emp: Employee) => {
         try {
             await updateDoc(doc(db, 'employees', emp.id), { active: !emp.active });
+            await syncStaffAccess(emp.email, !emp.active, 'employee');
             fetchEmployees();
         } catch (e) {
             showAlert('Erro ao alterar status.', 'error');

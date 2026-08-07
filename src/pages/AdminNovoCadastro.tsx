@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { findOrCreateTurma } from '../utils/turmaService';
 import { SCHEDULE_OPTIONS } from '../utils/turmasConstants';
 import { normalizeNameKey } from '../utils/nameUtils';
+import { resolveSafeResponsavelEmail } from '../utils/responsavelIdentity';
 
 // Types
 interface Student {
@@ -235,6 +236,7 @@ const AdminNovoCadastro: React.FC = () => {
                 ...data,
                 responsavel: {
                     ...data.responsavel,
+                    email: await resolveSafeResponsavelEmail(data.responsavel),
                     nomeBusca: normalizeNameKey(data.responsavel.nome)
                 },
                 alunos: updatedAlunos,

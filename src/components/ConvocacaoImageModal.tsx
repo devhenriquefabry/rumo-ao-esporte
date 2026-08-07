@@ -9,6 +9,7 @@ import type { Midia } from '../types/midia';
 import { X, Image as ImageIcon, Save } from 'lucide-react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { CONV_UI } from './convocacao/ConvocacaoToggle';
 
 interface ConvocacaoImageModalProps {
     isOpen: boolean;
@@ -210,57 +211,88 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
 
     if (!isOpen || !convocacao) return null;
 
+    /** Miniatura clicável de um layout; mostra esqueleto enquanto a prévia é gerada. */
+    const renderLayoutOption = (label: string, preview: string | null, onClick: () => void) => (
+        <div
+            onClick={() => { if (!isLoadingPreview) onClick(); }}
+            style={{
+                position: 'relative',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                cursor: isLoadingPreview ? 'progress' : 'pointer',
+                border: `2px solid ${CONV_UI.border}`,
+                transition: 'all 0.2s',
+                background: '#fff',
+                boxShadow: CONV_UI.shadow
+            }}
+            onMouseOver={(e) => { if (!isLoadingPreview) { e.currentTarget.style.borderColor = CONV_UI.green; e.currentTarget.style.transform = 'translateY(-3px)'; } }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = CONV_UI.border; e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+            {preview ? (
+                <img src={preview} alt={`Layout ${label}`} style={{ width: '100%', display: 'block' }} />
+            ) : (
+                <div style={{ width: '100%', aspectRatio: '2 / 3', background: CONV_UI.blueSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8ea3c0', fontSize: '0.85rem', fontWeight: 700 }}>
+                    Gerando prévia...
+                </div>
+            )}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(9,36,92,0.92))', color: '#fff', padding: '22px 10px 10px', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '1px' }}>
+                {isLoadingPreview ? 'GERANDO...' : label}
+            </div>
+        </div>
+    );
+
     return (
         <>
             {/* Modal de Escolha de Layout */}
             {isImageModalOpen && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', width: '90%', maxWidth: '400px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
-                        <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <ImageIcon size={24} color="#00a63a" />
-                            Gerar Imagem
-                        </h3>
-                        <p style={{ color: '#666', marginBottom: '25px', lineHeight: '1.5' }}>
-                            Escolha o layout desejado para a arte da convocação:
-                        </p>
-                        <div style={{ display: 'flex', gap: '15px' }}>
-                            <div
-                                onClick={async () => {
-                                    setLoading(true, 'Gerando imagem geral...');
-                                    const success = await downloadImage(convocacao, 'geral');
-                                    setLoading(false);
-                                    if (success) showAlert('Arte geral baixada!', 'success');
-                                    handleCloseAll();
-                                }}
-                                style={{ flex: 1, position: 'relative', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: '2px solid transparent', transition: 'all 0.2s', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', opacity: isLoadingPreview ? 0.5 : 1 }}
-                                onMouseOver={(e) => { e.currentTarget.style.borderColor = '#00a63a'; e.currentTarget.style.transform = 'scale(1.02)'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
-                            >
-                                <img src={previewGeral || "/convocacao.png"} alt="Layout Geral" style={{ width: '100%', display: 'block' }} />
-                                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                    {isLoadingPreview ? 'GERANDO...' : 'GERAL'}
-                                </div>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,26,64,0.55)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(3px)' }}>
+                    <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: hasAnyPhoto ? '620px' : '420px', boxShadow: '0 18px 50px rgba(9,36,92,0.28)', overflow: 'hidden', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ padding: '18px 22px', background: 'linear-gradient(135deg, #17428f 0%, #09245c 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <h3 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <ImageIcon size={20} color={CONV_UI.gold} /> Arte da Convocação
+                            </h3>
+                            <button onClick={handleCloseAll} style={{ background: 'rgba(255,255,255,0.14)', border: 'none', cursor: 'pointer', color: '#fff', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ padding: '22px', overflowY: 'auto', background: CONV_UI.surfaceSoft }}>
+                            <p style={{ color: '#63708a', margin: '0 0 18px 0', lineHeight: 1.5, fontSize: '0.92rem' }}>
+                                {hasAnyPhoto
+                                    ? 'Escolha o layout. Clique na miniatura para baixar em alta resolução.'
+                                    : 'Clique na miniatura para baixar a arte em alta resolução.'}
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: hasAnyPhoto ? '1fr 1fr' : '1fr', gap: '15px' }}>
+                                {renderLayoutOption(
+                                    'GERAL',
+                                    previewGeral,
+                                    async () => {
+                                        setLoading(true, 'Gerando imagem geral...');
+                                        const success = await downloadImage(convocacao, 'geral');
+                                        setLoading(false);
+                                        if (success) showAlert('Arte geral baixada!', 'success');
+                                        else showAlert('Erro ao gerar a imagem.', 'error');
+                                        handleCloseAll();
+                                    }
+                                )}
+                                {hasAnyPhoto && renderLayoutOption('INDIVIDUAL', previewIndividual, handlePrepareIndividualImage)}
                             </div>
-                            {hasAnyPhoto && (
-                                <div
-                                    onClick={handlePrepareIndividualImage}
-                                    style={{ flex: 1, position: 'relative', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: '2px solid transparent', transition: 'all 0.2s', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', opacity: isLoadingPreview ? 0.5 : 1 }}
-                                    onMouseOver={(e) => { e.currentTarget.style.borderColor = '#00a63a'; e.currentTarget.style.transform = 'scale(1.02)'; }}
-                                    onMouseOut={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
-                                >
-                                    <img src={previewIndividual || "/convocacao-individual.png"} alt="Layout Individual" style={{ width: '100%', display: 'block' }} />
-                                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                        {isLoadingPreview ? 'GERANDO...' : 'INDIVIDUAL'}
-                                    </div>
+
+                            {!hasAnyPhoto && (
+                                <div style={{ marginTop: '16px', background: CONV_UI.blueSoft, border: `1px solid ${CONV_UI.border}`, borderRadius: '10px', padding: '12px 14px', color: CONV_UI.blue, fontSize: '0.82rem', lineHeight: 1.5 }}>
+                                    O layout <strong>individual</strong> aparece quando algum atleta escalado tiver foto marcada como
+                                    “convocação” ou “destaque” em <strong>Jogos → Mídias dos Atletas</strong>.
                                 </div>
                             )}
                         </div>
-                        <div style={{ marginTop: '25px', display: 'flex', justifyContent: 'flex-end' }}>
+
+                        <div style={{ padding: '14px 22px', borderTop: `1px solid ${CONV_UI.border}`, display: 'flex', justifyContent: 'flex-end', background: '#fff' }}>
                             <button
                                 onClick={handleCloseAll}
-                                style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontWeight: 'bold', padding: '10px' }}
+                                style={{ background: 'none', border: 'none', color: '#8ea3c0', cursor: 'pointer', fontWeight: 'bold', padding: '10px' }}
                             >
-                                CANCELAR
+                                FECHAR
                             </button>
                         </div>
                     </div>
@@ -269,14 +301,14 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
 
             {/* Modal de Escolha de Foto para Layout Individual */}
             {isHighlightModalOpen && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}>
-                    <div className="animate-scale-in" style={{ background: '#fff', borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '600px', boxShadow: '0 10px 40px rgba(0,0,0,0.3)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0, color: '#333', fontSize: '1.4rem', fontWeight: '800' }}>Escolher Foto de Convocação</h3>
-                            <button onClick={handleCloseAll} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}><X size={24} /></button>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,26,64,0.7)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(5px)' }}>
+                    <div className="animate-scale-in" style={{ background: '#fff', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '620px', boxShadow: '0 18px 50px rgba(9,36,92,0.32)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h3 style={{ margin: 0, color: CONV_UI.navy, fontSize: '1.25rem', fontWeight: 800 }}>Escolher Foto de Convocação</h3>
+                            <button onClick={handleCloseAll} style={{ background: CONV_UI.blueSoft, border: 'none', cursor: 'pointer', color: CONV_UI.blue, padding: '6px', borderRadius: '8px', display: 'flex' }}><X size={20} /></button>
                         </div>
-                        <p style={{ color: '#666', marginBottom: '20px', lineHeight: '1.5' }}>
-                            Encontramos fotos de convocação ativas para os seguintes jogadores escalados. Qual deseja estampar na arte individual?
+                        <p style={{ color: '#63708a', marginBottom: '18px', lineHeight: '1.5', fontSize: '0.92rem' }}>
+                            Encontramos fotos de convocação ativas para os atletas escalados. Selecione quais deseja estampar na arte individual.
                         </p>
 
                         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px', marginBottom: '20px' }}>
@@ -300,7 +332,7 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                                                 overflow: 'hidden',
                                                 border: isSelected ? '4px solid #00a63a' : '2px solid transparent',
                                                 transition: 'all 0.2s',
-                                                background: '#f5f5f5',
+                                                background: CONV_UI.blueSoft,
                                                 position: 'relative'
                                             }}
                                         >
@@ -321,13 +353,13 @@ export function ConvocacaoImageModal({ isOpen, onClose, convocacao }: Convocacao
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '10px', paddingTop: '20px', borderTop: '1px solid #eee', background: '#fff' }}>
+                        <div style={{ display: 'flex', gap: '10px', paddingTop: '20px', borderTop: `1px solid ${CONV_UI.border}`, background: '#fff' }}>
                             <button
                                 onClick={() => {
                                     if (selectedHighs.length === possibleHighlights.length) setSelectedHighs([]);
                                     else setSelectedHighs(possibleHighlights.map(m => m.id));
                                 }}
-                                style={{ flex: 1, padding: '12px', background: '#fff', color: '#666', border: '1px solid #ddd', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                style={{ flex: 1, padding: '12px', background: '#fff', color: '#63708a', border: `1px solid ${CONV_UI.border}`, borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
                             >
                                 {selectedHighs.length === possibleHighlights.length ? 'DESELECIONAR TUDO' : 'SELECIONAR TUDO'}
                             </button>

@@ -13,6 +13,7 @@ import { useLoading } from '../components/LoadingService';
 import RememberSessionCheckbox from '../components/RememberSessionCheckbox';
 import { configureAuthPersistence } from '../utils/authPersistence';
 import { normalizeNameKey, buildSyntheticEmail } from '../utils/nameUtils';
+import { buildResponsavelKey, clearResponsavelKey, rememberResponsavelKey } from '../utils/responsavelIdentity';
 import { DIRETORIA_PROFILE, DIRETORIA_PASSWORD, isDiretoriaEmail } from '../config/accessProfiles';
 import '../App.css';
 
@@ -140,6 +141,34 @@ export default function StudentLogin() {
         return unsubscribe;
     }, [proceedToDashboard, showAlert]);
 
+    /**
+     * Descobre e guarda qual responsável está entrando quando o login é feito por
+     * e-mail. Se o mesmo e-mail pertencer a famílias diferentes, tenta desempatar
+     * pelo CPF digitado como senha; sem desempate, não fixa identidade nenhuma.
+     */
+    const rememberIdentityByEmail = async (email: string, cpfDigitado: string) => {
+        try {
+            const snap = await getDocs(
+                query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", email))
+            );
+            if (snap.empty) return;
+
+            const keys = new Set(snap.docs.map(d => buildResponsavelKey((d.data() as any).responsavel)));
+            if (keys.size === 1) {
+                rememberResponsavelKey((snap.docs[0].data() as any).responsavel);
+                return;
+            }
+
+            const byCpf = snap.docs.find(d =>
+                ((d.data() as any).responsavel?.cpf || '').replace(/\D/g, '') === cpfDigitado
+            );
+            if (byCpf) rememberResponsavelKey((byCpf.data() as any).responsavel);
+            else clearResponsavelKey();
+        } catch (error) {
+            console.error('Erro ao identificar o responsável:', error);
+        }
+    };
+
     // Login por Nome completo do Responsável (fluxo principal para pais/responsáveis)
     const handleNameLogin = async (rawName: string) => {
         const nomeBusca = normalizeNameKey(rawName);
@@ -152,6 +181,16 @@ export default function StudentLogin() {
             showAlert("Nome não encontrado. Digite o nome completo do responsável exatamente como no cadastro.", "error");
             return;
         }
+
+        // Identidade da família que está entrando. O e-mail sozinho não serve de chave:
+        // cadastros distintos podem dividir o mesmo e-mail (fictício, digitado na
+        // secretaria) e o portal acabaria listando atletas de outros responsáveis.
+        const identityDoc = snap.docs.find(d => {
+            const data = d.data() as any;
+            const cpfClean = (data.responsavel?.cpf || '').replace(/\D/g, '');
+            return (data.senha && data.senha === password) || (cpfClean.length === 11 && cpfClean === cleanPassword);
+        }) || snap.docs[0];
+        rememberResponsavelKey((identityDoc.data() as any).responsavel);
 
         // 1. Tenta login direto: cobre o caso do responsável já ter trocado a senha antes.
         const candidateEmails = Array.from(new Set(snap.docs.map(d => {
@@ -314,6 +353,7 @@ export default function StudentLogin() {
             // 1. Try standard Firebase Auth login
             try {
                 await signInWithEmailAndPassword(auth, normalizedEmail, password);
+                await rememberIdentityByEmail(normalizedEmail, cleanPassword);
                 await proceedToDashboard(normalizedEmail);
                 return;
             } catch (authError: any) {
@@ -411,6 +451,13 @@ export default function StudentLogin() {
                     }
                 });
 
+                // Identidade da família: preferimos o cadastro cuja senha/CPF confere,
+                // já que o e-mail pode estar repetido entre responsáveis diferentes.
+                const matchedStudentDoc = matchType === 'student' && matchDocId
+                    ? finalStudentDocs.find(d => d.id === matchDocId)
+                    : null;
+                if (matchedStudentDoc) rememberResponsavelKey((matchedStudentDoc.data() as any).responsavel);
+
                 if (matchType && matchDocId) {
                     // WE HAVE A MATCH IN FIRESTORE!
                     // If Auth failed, we should sync Auth with the entered password.
@@ -462,6 +509,7 @@ export default function StudentLogin() {
                 for (const p of Array.from(potentialPasswords)) {
                     try {
                         await signInWithEmailAndPassword(auth, normalizedEmail, p);
+                        if (!matchedStudentDoc) await rememberIdentityByEmail(normalizedEmail, cleanPassword);
                         await proceedToDashboard(normalizedEmail);
                         return;
                     } catch (e) { /* ignore */ }
@@ -472,6 +520,7 @@ export default function StudentLogin() {
                     try {
                         const finalPasswordToCreate = password.trim().length >= 6 ? password.trim() : (cleanPassword.length >= 11 ? cleanPassword : password);
                         await createUserWithEmailAndPassword(auth, normalizedEmail, finalPasswordToCreate);
+                        if (!matchedStudentDoc) await rememberIdentityByEmail(normalizedEmail, cleanPassword);
                         showAlert("Primeiro acesso confirmado! Sua conta foi criada.", "success");
                         await proceedToDashboard(normalizedEmail);
                         return;

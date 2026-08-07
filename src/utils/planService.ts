@@ -20,6 +20,7 @@ export interface Plan {
     uniforme?: number; // Optional
     jurosMensais?: number; // Percentage (e.g., 2.0)
     multa?: number; // Percentage (e.g., 2.0)
+    paymentDay?: number; // Dia de vencimento padrão (1-28) usado ao gerar carnê
     frequencia: 'mensal'; // Fixed for now
     active: boolean;
     description?: string;

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { X, Copy, Loader, Check, ShoppingBag, ArrowRight, ShieldCheck, CreditCard, FileText, ChevronDown, ChevronUp, User } from 'lucide-react';
 import type { StoreProduct, PaymentMethodType } from '../../../types/store';
 import { db, auth } from '../../../firebase';
-import { collection, addDoc, doc, getDoc, query, where, getDocs, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../../../utils/responsavelIdentity';
 
 interface CheckoutPixModalProps {
     isOpen: boolean;
@@ -87,10 +88,9 @@ export default function CheckoutPixModal({ isOpen, onClose, product }: CheckoutP
             const user = auth.currentUser;
             if (user?.email) {
                 try {
-                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", user.email.toLowerCase().trim()));
-                    const snap = await getDocs(q);
-                    if (!snap.empty) {
-                        const data = snap.docs[0].data();
+                    const registrationDocs = await fetchResponsavelRegistrations(getSessionStudentEmail(user.email));
+                    if (registrationDocs.length > 0) {
+                        const data = registrationDocs[0].data();
                         setBuyerInfo({
                             name: data.responsavel?.nome || user.displayName || '',
                             cpf: data.responsavel?.cpf || '',

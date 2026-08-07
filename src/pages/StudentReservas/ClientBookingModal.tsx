@@ -3,6 +3,7 @@ import { X, CreditCard, ChevronRight, CheckCircle, AlertCircle, Copy, Loader, Ch
 import type { RentalLocation } from '../AdminRentals/types';
 import { db, auth } from '../../firebase';
 import { collection, addDoc, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../../utils/responsavelIdentity';
 
 import CustomCalendar from '../../components/CustomCalendar';
 
@@ -37,12 +38,11 @@ export default function ClientBookingModal({ isOpen, onClose, location }: Client
                         setRentalsEnabled(rSnap.data().enabled);
                     }
 
-                    const normalizedEmail = user.email.toLowerCase().trim();
-                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-                    const snap = await getDocs(q);
+                    const normalizedEmail = getSessionStudentEmail(user.email);
+                    const registrationDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
-                    if (!snap.empty) {
-                        const data = snap.docs[0].data();
+                    if (registrationDocs.length > 0) {
+                        const data = registrationDocs[0].data();
                         const info = {
                             name: data.responsavel?.nome || user.displayName || '',
                             cpf: data.responsavel?.cpf || '',

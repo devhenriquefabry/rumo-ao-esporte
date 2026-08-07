@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import {
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -10,7 +11,10 @@ import { useDialog } from '../context/CustomDialogContext';
 import { useLoading } from '../components/LoadingService';
 import RememberSessionCheckbox from '../components/RememberSessionCheckbox';
 import { configureAuthPersistence } from '../utils/authPersistence';
-import { DIRETORIA_PROFILE, DIRETORIA_PASSWORD, isDiretoriaEmail } from '../config/accessProfiles';
+import { DIRETORIA_EMAIL, DIRETORIA_PROFILE, DIRETORIA_PASSWORD, isDiretoriaEmail } from '../config/accessProfiles';
+import { authenticateTeacher, isResponsibleEmail } from '../utils/teacherAuth';
+import { authenticateEmployee } from '../utils/employeeAuth';
+import { syncStaffAccess } from '../utils/staffAccess';
 import '../App.css';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
@@ -47,8 +51,26 @@ export default function AdminLogin() {
             return;
         }
 
-        // 0. Perfil "Diretoria" (login fixo compartilhado, acesso restrito)
+        // 0. Perfil "Diretoria" (login fixo compartilhado, acesso restrito).
+        // A senha é fixa e definida aqui no código, mas por trás disso também
+        // abrimos uma sessão real no Firebase Auth (mesma conta sempre) — sem
+        // isso, o acesso da diretoria seria anônimo para o Firestore, e as
+        // regras de segurança não teriam como reconhecê-lo.
         if (isDiretoriaEmail(normalizedEmail) && password.trim() === DIRETORIA_PASSWORD) {
+            try {
+                try {
+                    await signInWithEmailAndPassword(auth, DIRETORIA_EMAIL, DIRETORIA_PASSWORD);
+                } catch {
+                    await createUserWithEmailAndPassword(auth, DIRETORIA_EMAIL, DIRETORIA_PASSWORD);
+                }
+                await syncStaffAccess(DIRETORIA_EMAIL, true, 'diretoria');
+            } catch (error) {
+                console.error('Erro ao autenticar sessão da diretoria:', error);
+                showAlert('Não foi possível acessar. Tente novamente.', 'error');
+                setLoading(false);
+                return;
+            }
+
             localStorage.setItem('rae_admin_auth', JSON.stringify(DIRETORIA_PROFILE));
             showLoading(3000, 'Acessando Painel da Diretoria...');
             setTimeout(() => {
@@ -59,51 +81,107 @@ export default function AdminLogin() {
         }
 
         try {
-            // 1. Try Firebase Auth (Main Admin)
-            await signInWithEmailAndPassword(auth, normalizedEmail, password);
-            localStorage.setItem('rae_admin_auth', 'true'); // Legacy/Simple flag for main admin
+            // 1. Professores entram com o mesmo e-mail/senha do cadastro e vão
+            // para o portal deles. Vem antes do Firebase Auth porque professor
+            // com conta no Auth cairia no painel administrativo por engano.
+            const teacherResult = await authenticateTeacher(normalizedEmail, password);
 
-            console.log("DEBUG: Login ADMIN sucesso. Disparando loading...");
+            if (teacherResult.status === 'inactive') {
+                showAlert('Seu acesso de professor está desativado. Entre em contato com a secretaria.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            if (teacherResult.status === 'authenticated') {
+                showLoading(3000, `Bem-vindo(a), ${teacherResult.nome?.split(' ')[0] || 'Professor'}!`);
+                setTimeout(() => {
+                    navigate('/professor/turmas');
+                }, 3000);
+                setLoading(false);
+                return;
+            }
+
+            if (teacherResult.status === 'wrong-password') {
+                showAlert('Senha incorreta. Confira a senha cadastrada com a secretaria.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            if (teacherResult.status === 'auth-out-of-sync') {
+                showAlert('Não foi possível entrar com a senha do cadastro. Peça à secretaria para redefinir sua senha para rumo2026 e tente de novo.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            // 2. Funcionários com acesso administrativo (coleção employees).
+            // Mesmo padrão do professor: a senha cadastrada é a fonte da verdade,
+            // e por trás disso mantemos uma sessão real no Firebase Auth.
+            const employeeResult = await authenticateEmployee(normalizedEmail, password);
+
+            if (employeeResult.status === 'inactive') {
+                showAlert('Seu acesso está desativado. Entre em contato com a administração.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            if (employeeResult.status === 'wrong-password') {
+                showAlert('Senha incorreta.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            if (employeeResult.status === 'authenticated') {
+                const employeeData = employeeResult.employee;
+                if (normalizedEmail === MAIN_ADMIN_EMAIL) {
+                    localStorage.setItem('rae_admin_auth', 'true');
+                } else {
+                    localStorage.setItem('rae_admin_auth', JSON.stringify(employeeData));
+                }
+
+                showLoading(3000, `Bem-vindo(a), ${employeeData.nome?.split(' ')[0] || 'Funcionário'}!`);
+                setTimeout(() => {
+                    navigate('/admin/stats');
+                }, 3000);
+                setLoading(false);
+                return;
+            }
+
+            // 3. Administração autenticada pelo Firebase Auth.
+            try {
+                await signInWithEmailAndPassword(auth, normalizedEmail, password);
+            } catch (authError: any) {
+                console.log('Firebase Auth falhou:', authError?.code);
+                showAlert('Credenciais inválidas ou acesso não autorizado.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            // Ter conta no Firebase Auth não é permissão de administrador: todo
+            // responsável do portal tem uma. Sem esta checagem, qualquer pai
+            // entraria no painel usando o mesmo login do portal do aluno.
+            // Quem está cadastrado em 'employees' é equipe e passa direto.
+            const isRegisteredEmployee = !(await getDocs(query(
+                collection(db, 'employees'),
+                where('email', '==', normalizedEmail)
+            ))).empty;
+
+            if (normalizedEmail !== MAIN_ADMIN_EMAIL && !isRegisteredEmployee && await isResponsibleEmail(normalizedEmail)) {
+                await auth.signOut();
+                localStorage.removeItem('rae_admin_auth');
+                showAlert('Este acesso é do portal do responsável. Entre em rumoaoesporte.com.br/aluno/login.', 'info');
+                setTimeout(() => navigate('/aluno/login'), 2500);
+                setLoading(false);
+                return;
+            }
+
+            localStorage.setItem('rae_admin_auth', 'true');
             showLoading(3000, 'Acessando Painel Administrativo...');
             setTimeout(() => {
                 navigate('/admin/stats');
             }, 3000);
-        } catch (authError: any) {
-            console.log("Firebase Auth failed, checking Employee DB...", authError);
-
-            // 2. If blocked or not found, try Employee Collection
-            try {
-                const q = query(
-                    collection(db, 'employees'),
-                    where('email', '==', normalizedEmail),
-                    where('senha', '==', password), // Plain text match
-                    where('active', '==', true)
-                );
-                const snapshot = await getDocs(q);
-
-                if (!snapshot.empty) {
-                    const employeeDoc = snapshot.docs[0];
-                    const employeeData = { id: employeeDoc.id, ...employeeDoc.data() } as any;
-
-                    // Store full employee object in auth
-                    if (normalizedEmail === MAIN_ADMIN_EMAIL) {
-                        localStorage.setItem('rae_admin_auth', 'true');
-                    } else {
-                        localStorage.setItem('rae_admin_auth', JSON.stringify(employeeData));
-                    }
-
-                    showLoading(3000, `Bem-vindo(a), ${employeeData.nome?.split(' ')[0] || 'Funcionário'}!`);
-                    setTimeout(() => {
-                        navigate('/admin/stats');
-                    }, 3000);
-                } else {
-                    // Both failed
-                    throw new Error('Credenciais inválidas ou acesso não autorizado.');
-                }
-            } catch (dbError: any) {
-                console.error('Employee Login error:', dbError);
-                showAlert(dbError.message || 'Erro ao realizar login.', 'error');
-            }
+        } catch (error: any) {
+            console.error('Erro no login administrativo:', error);
+            showAlert(error.message || 'Erro ao realizar login.', 'error');
         } finally {
             setLoading(false);
         }

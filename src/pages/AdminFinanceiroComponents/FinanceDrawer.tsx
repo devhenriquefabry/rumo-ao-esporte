@@ -71,6 +71,7 @@ export function FinanceDrawer({
     const [pricingAction, setPricingAction] = useState<PricingAction | null>(null);
     const [pricingMode, setPricingMode] = useState<CarnetPricingMode>('standard');
     const [customMonthlyValue, setCustomMonthlyValue] = useState('');
+    const [limitToYearEnd, setLimitToYearEnd] = useState(false);
 
     useEffect(() => {
         if (registration) {
@@ -109,6 +110,7 @@ export function FinanceDrawer({
         }
         setPricingMode('standard');
         setCustomMonthlyValue('');
+        setLimitToYearEnd(false);
         setPricingAction({ type: 'migrate', plan, modality: migrationModality, planId: migrationPlanId });
     };
 
@@ -160,6 +162,7 @@ export function FinanceDrawer({
 
         setPricingMode('standard');
         setCustomMonthlyValue('');
+        setLimitToYearEnd(false);
         setPricingAction({ type: 'refaturar', plan, modality: registration.modalidade });
     };
 
@@ -167,8 +170,19 @@ export function FinanceDrawer({
         return (value / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
 
+    // Proximo 10/12: se hoje ja passou do dia, usa o do ano seguinte para nao gerar zero faturas.
+    const nextYearEndDate = () => {
+        const today = new Date();
+        const thisYear = new Date(today.getFullYear(), 11, 10);
+        const target = today <= thisYear ? thisYear : new Date(today.getFullYear() + 1, 11, 10);
+        const y = target.getFullYear();
+        return { iso: `${y}-12-10`, label: `10/12/${y}` };
+    };
+
     const buildPricingChoice = (): CarnetPricingChoice | null => {
-        if (pricingMode !== 'custom') return { mode: pricingMode };
+        const endDate = limitToYearEnd ? nextYearEndDate().iso : undefined;
+
+        if (pricingMode !== 'custom') return { mode: pricingMode, endDate };
 
         const parsed = parseFloat(customMonthlyValue.replace(',', '.'));
         if (isNaN(parsed) || parsed <= 0) {
@@ -176,7 +190,7 @@ export function FinanceDrawer({
             return null;
         }
 
-        return { mode: 'custom', customMonthlyValue: Math.round(parsed * 100) };
+        return { mode: 'custom', customMonthlyValue: Math.round(parsed * 100), endDate };
     };
 
     const handleConfirmPricingAction = async () => {
@@ -203,7 +217,7 @@ export function FinanceDrawer({
     const currentHistory = paymentHistory;
 
     const allPending = currentHistory
-        .filter((p: any) => !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH'].includes(p.status))
+        .filter((p: any) => !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'DELETED', 'REFUNDED', 'REMOVED_BY_RECEIVER'].includes(p.status))
         .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 
     const paid = currentHistory
@@ -637,6 +651,34 @@ export function FinanceDrawer({
                                     />
                                 </div>
                             )}
+
+                            <button
+                                type="button"
+                                onClick={() => setLimitToYearEnd(!limitToYearEnd)}
+                                style={{
+                                    width: '100%', padding: '13px 14px', borderRadius: '8px', textAlign: 'left',
+                                    border: `1px solid ${limitToYearEnd ? '#00a63a' : '#ddd'}`,
+                                    background: limitToYearEnd ? '#f0fdf4' : '#fff',
+                                    cursor: 'pointer', display: 'flex', gap: '12px', alignItems: 'flex-start'
+                                }}
+                            >
+                                <div style={{
+                                    width: '18px', height: '18px', borderRadius: '5px', flexShrink: 0, marginTop: '2px',
+                                    border: `2px solid ${limitToYearEnd ? '#00a63a' : '#bbb'}`,
+                                    background: limitToYearEnd ? '#00a63a' : 'transparent',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.7rem', fontWeight: 900
+                                }}>
+                                    {limitToYearEnd ? '✓' : ''}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: limitToYearEnd ? '#00a63a' : '#333' }}>
+                                        Gerar apenas até {nextYearEndDate().label} (fechamento da temporada)
+                                    </div>
+                                    <div style={{ fontSize: '0.76rem', color: '#777', marginTop: '2px' }}>
+                                        Em vez de 12 meses corridos, para as mensalidades no dia 10/12. Ideal para matrículas no meio do ano.
+                                    </div>
+                                </div>
+                            </button>
                         </div>
 
                         <div style={{ padding: '16px 22px', borderTop: '1px solid #eee', display: 'flex', gap: '10px' }}>

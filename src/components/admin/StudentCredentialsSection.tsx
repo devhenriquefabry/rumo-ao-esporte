@@ -4,6 +4,7 @@ import { useDialog } from '../../context/CustomDialogContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { buildSyntheticEmail } from '../../utils/nameUtils';
+import { isEmailUsedByAnotherResponsavel, rememberResponsavelKey } from '../../utils/responsavelIdentity';
 
 interface StudentCredentialsSectionProps {
     data: any;
@@ -40,6 +41,15 @@ export default function StudentCredentialsSection({
                     setLoading(false);
                     return;
                 }
+                // Dois responsáveis com o mesmo e-mail dividem a MESMA conta do portal:
+                // um passa a ver os atletas, carteirinhas e faturas do outro.
+                const emailEmUso = await isEmailUsedByAnotherResponsavel(normalizedEmail, data.responsavel);
+                if (emailEmUso) {
+                    setError('Este e-mail já pertence a outro responsável. Use um e-mail diferente.');
+                    setLoading(false);
+                    return;
+                }
+
                 payload.newEmail = normalizedEmail;
                 setEmailValue(normalizedEmail); // Update local state with normalized value
             } else {
@@ -398,6 +408,9 @@ export default function StudentCredentialsSection({
 
                         localStorage.setItem('rae_impersonated_student_email', email);
                         localStorage.setItem('rae_impersonated_student_back_id', data.id);
+                        // Fixa QUAL responsável está sendo simulado: e-mails repetidos entre
+                        // famílias diferentes fariam o portal listar atletas de outros pais.
+                        rememberResponsavelKey(data.responsavel);
                         localStorage.setItem('rae_student_auth', 'true');
                         window.location.href = '/aluno/dashboard';
                     } catch (err: any) {

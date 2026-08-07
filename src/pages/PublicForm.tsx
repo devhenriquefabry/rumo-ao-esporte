@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, CheckCircle, Clock } from 'lucide-react';
+import { Camera, CheckCircle, Clock, FileText, Loader, X } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
 import { db } from '../firebase';
 import { useDialog } from '../context/CustomDialogContext';
@@ -9,6 +9,7 @@ import { SCHEDULE_OPTIONS } from '../utils/turmasConstants';
 import SignatureCanvas from '../components/SignatureCanvas';
 import { notifyPendingApprovalRegistration } from './AdminEvolutionMessages/messagingApi';
 import { normalizeNameKey } from '../utils/nameUtils';
+import { resolveSafeResponsavelEmail } from '../utils/responsavelIdentity';
 
 type ModalityId = 'futebol' | 'natacao' | 'voleibol' | 'hidro';
 
@@ -154,6 +155,7 @@ export default function PublicForm() {
   const [success, setSuccess] = useState(false);
   const [successSummary, setSuccessSummary] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
   const [showCoupleModal, setShowCoupleModal] = useState(false);
   const [checkingPlans, setCheckingPlans] = useState(true);
   const [activePlans, setActivePlans] = useState<PublicPlan[]>([]);
@@ -671,6 +673,56 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
     // Resetting ref is tricky for multiple inputs. We can rely on unique IDs.
   };
 
+  // Identity Document Upload (RG / Certidão) — optional, admin pode anexar depois se faltar.
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingDoc(true);
+    try {
+      // PDFs vao direto; so imagens (foto do documento) sao comprimidas.
+      const fileToSend = file.type.startsWith('image/') ? await compressImage(file) : file;
+
+      const workerUrl = import.meta.env.VITE_WORKER_URL;
+      if (!workerUrl) throw new Error('URL do Worker não configurada (VITE_WORKER_URL).');
+
+      const formData = new FormData();
+      formData.append('file', fileToSend, file.name);
+      formData.append('folder', 'rumo_ao_esporte_2026_docs');
+
+      const response = await fetch(`${workerUrl}/images/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const uploadResult = await response.json();
+      if (!response.ok) throw new Error(uploadResult.error || 'Falha no upload (Erro do servidor)');
+
+      const uploadedUrl = uploadResult.data?.url || uploadResult.url;
+      if (uploadedUrl) {
+        setData(prev => {
+          const newAlunos = [...prev.alunos];
+          newAlunos[index] = { ...newAlunos[index], documentoUrl: uploadedUrl };
+          return { ...prev, alunos: newAlunos };
+        });
+      }
+    } catch (error: any) {
+      console.error('Erro no upload do documento:', error);
+      showAlert(`Erro ao enviar documento: ${error.message || 'Erro desconhecido'}`, 'error');
+    } finally {
+      setUploadingDoc(false);
+      e.target.value = '';
+    }
+  };
+
+  const removeDocument = (index: number) => {
+    setData(prev => {
+      const newAlunos = [...prev.alunos];
+      newAlunos[index] = { ...newAlunos[index], documentoUrl: '' };
+      return { ...prev, alunos: newAlunos };
+    });
+  };
+
   // Submit
   // Submit
   const handleSubmit = async (e: React.FormEvent) => {
@@ -744,7 +796,7 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
         ...data,
         responsavel: {
           ...data.responsavel,
-          email: data.responsavel.email.toLowerCase().trim(),
+          email: await resolveSafeResponsavelEmail(data.responsavel),
           nomeBusca: normalizeNameKey(data.responsavel.nome)
         }
       };
@@ -1266,6 +1318,54 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Documento de Identidade (RG / Certidão) — opcional */}
+            <div className="photo-section-card" style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '10px', background: '#fff' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', color: '#333', marginBottom: '15px' }}>
+                <FileText size={24} color="#333" />
+                Documento de Identidade (RG ou Certidão) — Opcional
+              </label>
+              <p style={{ fontSize: '0.85rem', color: '#777', marginTop: '-10px', marginBottom: '15px' }}>
+                Se não tiver em mãos agora, pode enviar depois — fale com a secretaria.
+              </p>
+
+              {aluno.documentoUrl ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '8px', background: '#e9f8ef', border: '1px solid #00a63a', borderRadius: '8px', padding: '10px 14px', color: '#00a63a', fontWeight: 'bold' }}>
+                    <FileText size={18} /> Documento anexado
+                  </div>
+                  <button type="button" onClick={() => removeDocument(index)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      background: '#fdeeec', border: '1px solid #f8cfc9', color: '#e74c3c',
+                      padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem'
+                    }}>
+                    <X size={14} /> Remover
+                  </button>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <input type="file" id={`doc-upload-${index}`}
+                    accept="image/*,application/pdf"
+                    onChange={(e) => handleDocumentUpload(e, index)}
+                    disabled={uploadingDoc}
+                    style={{ display: 'none' }} />
+
+                  <label htmlFor={`doc-upload-${index}`} className="upload-label" style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+                    padding: '30px', border: '2px dashed #006d77', borderRadius: '10px',
+                    cursor: uploadingDoc ? 'default' : 'pointer', background: '#f0fbfc'
+                  }}>
+                    {uploadingDoc ? <Loader className="doc-upload-spin" size={40} color="#006d77" /> : <FileText size={40} color="#006d77" />}
+                    <span style={{ color: '#006d77', fontWeight: 'bold' }}>{uploadingDoc ? 'Enviando...' : 'Clique para anexar foto ou PDF do documento'}</span>
+                  </label>
+                </div>
+              )}
+              <style>{`
+                .doc-upload-spin { animation: doc-upload-rotate 1s linear infinite; }
+                @keyframes doc-upload-rotate { 100% { transform: rotate(360deg); } }
+              `}</style>
             </div>
 
           </div>

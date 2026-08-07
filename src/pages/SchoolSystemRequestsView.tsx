@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Lock, RefreshCw } from 'lucide-react';
 import { auth, db } from '../firebase';
 import { useDialog } from '../context/CustomDialogContext';
+import { authenticateEmployee } from '../utils/employeeAuth';
 
 type RequestItem = {
   id: string;
@@ -140,17 +141,19 @@ export default function SchoolSystemRequestsView() {
         await signInWithEmailAndPassword(auth, email, password);
         localStorage.setItem('rae_admin_auth', 'true');
       } catch {
-        const employeeQuery = query(
-          collection(db, 'employees'),
-          where('email', '==', email),
-          where('senha', '==', password),
-          where('active', '==', true)
-        );
-        const employeeSnapshot = await getDocs(employeeQuery);
-        if (employeeSnapshot.empty) throw new Error('Credenciais inválidas ou acesso não autorizado.');
-
-        const employeeDoc = employeeSnapshot.docs[0];
-        localStorage.setItem('rae_admin_auth', JSON.stringify({ id: employeeDoc.id, ...employeeDoc.data() }));
+        // Mesmo fluxo do login administrativo: a senha cadastrada é a fonte da
+        // verdade, e por trás disso abrimos uma sessão real no Firebase Auth
+        // (sem isso, o Firestore não teria como saber que este é um acesso
+        // autorizado ao ler `school_system_requests` logo abaixo).
+        const employeeResult = await authenticateEmployee(email, password);
+        if (employeeResult.status !== 'authenticated') {
+          throw new Error(
+            employeeResult.status === 'inactive'
+              ? 'Seu acesso está desativado.'
+              : 'Credenciais inválidas ou acesso não autorizado.'
+          );
+        }
+        localStorage.setItem('rae_admin_auth', JSON.stringify(employeeResult.employee));
       }
 
       setAuthenticated(true);

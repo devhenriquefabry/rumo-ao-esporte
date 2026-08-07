@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import StudentCard from '../components/StudentCard';
-import { User, FileText, AlertTriangle, IdCard, Download, Camera, Loader, X } from 'lucide-react';
+import { User, FileText, AlertTriangle, IdCard, Download, Camera, Loader, X, RefreshCw } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
 import { useDialog } from '../context/CustomDialogContext';
 import StudentGalleryTab from './StudentGalleryTab';
+import { validateCPF } from '../utils/cpfUtils';
 
 interface StudentDetailsProps {
     aluno: any;
@@ -42,6 +43,7 @@ export default function StudentDetailsSection({
 }: StudentDetailsProps) {
     const { showAlert, showConfirm } = useDialog();
     const [uploading, setUploading] = useState(false);
+    const [uploadingDoc, setUploadingDoc] = useState(false);
 
     const handlePhotoUpload = async (e: any) => {
         if (!canEdit) return;
@@ -96,6 +98,60 @@ export default function StudentDetailsSection({
         );
     };
 
+    const handleDocumentUpload = async (e: any) => {
+        if (!canEdit) return;
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingDoc(true);
+        try {
+            // PDFs vao direto; so imagens (foto do RG) sao comprimidas.
+            const fileToSend = file.type.startsWith('image/') ? await compressImage(file) : file;
+            const formData = new FormData();
+            formData.append('file', fileToSend, file.name);
+            formData.append('folder', 'rumo_ao_esporte_2026_docs');
+
+            const workerUrl = import.meta.env.VITE_WORKER_URL || 'https://rumo-ao-esporte-whatsapp-proxy.rumoaoesporte.workers.dev';
+            const response = await fetch(`${workerUrl}/images/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const uploadedUrl = result.data?.url || result.url || result.photoUrl;
+
+            if (response.ok && uploadedUrl) {
+                const updatedAlunos = [...data.alunos];
+                updatedAlunos[index] = { ...updatedAlunos[index], documentoUrl: uploadedUrl };
+                setData({ ...data, alunos: updatedAlunos });
+                showAlert('Documento de identidade atualizado com sucesso!', 'success');
+            } else {
+                showAlert(result.error || 'Erro ao atualizar documento.', 'error');
+            }
+        } catch (error: any) {
+            console.error(error);
+            showAlert(`Erro ao enviar documento: ${error.message || 'Erro desconhecido'}`, 'error');
+        } finally {
+            setUploadingDoc(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleRemoveDocument = () => {
+        if (!canEdit) return;
+        showConfirm(
+            'Tem certeza que deseja remover o documento de identidade deste aluno?',
+            () => {
+                const updatedAlunos = [...data.alunos];
+                updatedAlunos[index] = { ...updatedAlunos[index], documentoUrl: '' };
+                setData({ ...data, alunos: updatedAlunos });
+                showAlert('Documento removido com sucesso!', 'success');
+            },
+            'warning',
+            'Remover Documento'
+        );
+    };
+
     const getAge = (birthDate: string) => {
         const birth = parseBirthDate(birthDate);
         if (!birth) return '-';
@@ -136,6 +192,8 @@ export default function StudentDetailsSection({
     };
 
     const maskDate = (v: string) => v.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})(\d)/, '$1/$2').slice(0, 10);
+
+    const maskCPF = (v: string) => v.replace(/\D/g, '').slice(0, 11).replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2');
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '20px' }}>
@@ -251,7 +309,33 @@ export default function StudentDetailsSection({
                         {/* 2. DETAILS (Middle) */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#fff', fontWeight: '800', letterSpacing: '-0.5px' }}>{aluno.nome}</h3>
+                                {_isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={aluno.nome || ''}
+                                        placeholder="Nome completo do aluno"
+                                        onChange={(e) => {
+                                            const updatedAlunos = [...data.alunos];
+                                            updatedAlunos[index] = { ...updatedAlunos[index], nome: e.target.value };
+                                            setData({ ...data, alunos: updatedAlunos });
+                                        }}
+                                        style={{
+                                            fontSize: '1.2rem',
+                                            fontWeight: '800',
+                                            background: '#fff',
+                                            border: '2px solid #ccc',
+                                            borderRadius: '6px',
+                                            color: '#333',
+                                            padding: '6px 10px',
+                                            outline: 'none',
+                                            minWidth: '260px',
+                                            flex: '1 1 260px',
+                                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                                        }}
+                                    />
+                                ) : (
+                                    <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#fff', fontWeight: '800', letterSpacing: '-0.5px' }}>{aluno.nome}</h3>
+                                )}
                                 {data.contractStatus === 'desativado' && (
                                     <span style={{
                                         fontSize: '0.7rem', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '12px',
@@ -335,6 +419,45 @@ export default function StudentDetailsSection({
                                     ) : (
                                         <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: '800' }}>
                                             {aluno.camisa || '-'}
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: '15px' }}>
+                                    <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '2px', fontWeight: 'bold', textTransform: 'uppercase' }}>CPF do Aluno</label>
+                                    {_isEditing ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={aluno.cpf || ''}
+                                                placeholder="000.000.000-00"
+                                                maxLength={14}
+                                                onChange={(e) => {
+                                                    const updatedAlunos = [...data.alunos];
+                                                    updatedAlunos[index] = { ...updatedAlunos[index], cpf: maskCPF(e.target.value) };
+                                                    setData({ ...data, alunos: updatedAlunos });
+                                                }}
+                                                style={{
+                                                    width: '135px',
+                                                    background: '#fff',
+                                                    border: `2px solid ${aluno.cpf && (aluno.cpf.replace(/\D/g, '').length === 11) && !validateCPF(aluno.cpf) ? '#e74c3c' : '#ccc'}`,
+                                                    borderRadius: '6px',
+                                                    color: '#333',
+                                                    padding: '6px 10px',
+                                                    fontSize: '1rem',
+                                                    fontWeight: 'bold',
+                                                    outline: 'none',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                                                }}
+                                            />
+                                            {aluno.cpf && (aluno.cpf.replace(/\D/g, '').length === 11) && !validateCPF(aluno.cpf) && (
+                                                <div style={{ fontSize: '0.7rem', color: '#ffcdd2', marginTop: '3px', fontWeight: 'bold' }}>
+                                                    CPF inválido
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div style={{ fontSize: '1rem', color: '#fff', fontWeight: '600' }}>
+                                            {aluno.cpf || '-'}
                                         </div>
                                     )}
                                 </div>
@@ -505,13 +628,74 @@ export default function StudentDetailsSection({
                                 })}
                             </div>
 
-                            {
-                                aluno.documentoUrl && (
-                                    <a href={aluno.documentoUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#333', textDecoration: 'none', background: '#f5f5f5', padding: '8px 12px', borderRadius: '6px', alignSelf: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
+                            {/* IDENTITY DOCUMENT */}
+                            {aluno.documentoUrl ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                    <a href={aluno.documentoUrl} target="_blank" rel="noreferrer" style={{ flex: 1, minWidth: 0, display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#333', textDecoration: 'none', background: '#f5f5f5', padding: '8px 12px', borderRadius: '6px', boxSizing: 'border-box' }}>
                                         <FileText size={14} /> Ver Documento de Identidade
                                     </a>
-                                )
-                            }
+                                    {canEdit && (
+                                        <>
+                                            <input
+                                                type="file"
+                                                id={`doc-upload-${index}`}
+                                                style={{ display: 'none' }}
+                                                accept="image/*,application/pdf"
+                                                onChange={handleDocumentUpload}
+                                                disabled={uploadingDoc}
+                                            />
+                                            <label
+                                                htmlFor={`doc-upload-${index}`}
+                                                title="Substituir documento"
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    width: '32px', height: '32px', flexShrink: 0,
+                                                    background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '6px',
+                                                    color: '#333', cursor: uploadingDoc ? 'default' : 'pointer'
+                                                }}
+                                            >
+                                                {uploadingDoc ? <Loader className="spin" size={14} /> : <RefreshCw size={14} />}
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={handleRemoveDocument}
+                                                title="Remover documento"
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    width: '32px', height: '32px', flexShrink: 0,
+                                                    background: '#fdeeec', border: '1px solid #f8cfc9', borderRadius: '6px',
+                                                    color: '#e74c3c', cursor: 'pointer'
+                                                }}
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            ) : canEdit ? (
+                                <div>
+                                    <input
+                                        type="file"
+                                        id={`doc-upload-${index}`}
+                                        style={{ display: 'none' }}
+                                        accept="image/*,application/pdf"
+                                        onChange={handleDocumentUpload}
+                                        disabled={uploadingDoc}
+                                    />
+                                    <label
+                                        htmlFor={`doc-upload-${index}`}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem',
+                                            color: '#006d77', background: '#f0fbfc', border: '1px dashed #006d77',
+                                            padding: '8px 12px', borderRadius: '6px', width: '100%', boxSizing: 'border-box',
+                                            cursor: uploadingDoc ? 'default' : 'pointer', fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {uploadingDoc ? <Loader className="spin" size={14} /> : <FileText size={14} />}
+                                        {uploadingDoc ? 'Enviando...' : 'Adicionar Documento de Identidade'}
+                                    </label>
+                                </div>
+                            ) : null}
                         </div>
 
                         {/* 3. CARD PREVIEW (Right) */}

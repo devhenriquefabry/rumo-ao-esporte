@@ -1,0 +1,197 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore — rumo-ao-esporte.
+//
+// Contexto: até 05/08/2026 este banco não tinha regra nenhuma (leitura E
+// escrita liberadas para qualquer pessoa, sem autenticação). Este arquivo
+// fecha isso, respeitando como o app realmente autentica cada tipo de usuário:
+//
+//  - Responsável (portal do aluno) e professor: Firebase Auth de verdade.
+//  - Funcionário (employees) e Diretoria: senha comparada no Firestore, mas
+//    agora também abrem uma sessão real no Firebase Auth (ver
+//    utils/employeeAuth.ts e AdminLogin.tsx) — sem isso, o Firestore não tem
+//    como diferenciar esse acesso de um visitante anônimo.
+//  - `employees`/`teachers` têm o e-mail como CAMPO, não como id do
+//    documento, e regras não fazem "query por campo" — por isso existe o
+//    índice `staff_access/{email}`, mantido pelo app (utils/staffAccess.ts)
+//    sempre que um cadastro de funcionário/professor é criado/editado.
+//  - O Worker (Cloudflare) acessa via API REST direta. Enquanto ele não tiver
+//    uma credencial de serviço (service account), esse acesso conta como
+//    anônimo para estas regras também.
+//
+// Qualquer coisa fora do que está listado abaixo é NEGADA por padrão
+// (ver o bloco final `match /{document=**}`).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers de identidade ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function callerEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // E-mail fixo do administrador principal (VITE_MAIN_ADMIN_EMAIL).
+    function isMainAdmin() {
+      return signedIn() && callerEmail() == 'rumoaoesporte@admin.com';
+    }
+
+    // Funcionário/professor/diretoria ativo, via índice staff_access.
+    function isStaff() {
+      return isMainAdmin() || (
+        signedIn() &&
+        get(/databases/$(database)/documents/staff_access/$(callerEmail())).data.active == true
+      );
+    }
+
+    // Responsável dono deste cadastro específico (compara com o e-mail já
+    // gravado no documento, não com o que o cliente alega).
+    function isOwnerOf(data) {
+      return signedIn()
+        && 'responsavel' in data
+        && 'email' in data.responsavel
+        && data.responsavel.email.lower() == callerEmail();
+    }
+
+    // ---------- Cadastros (dado mais sensível do sistema: CPF, saúde, endereço) ----------
+
+    match /rumo_ao_esporte_2026_registrations/{regId} {
+      // Formulário público de inscrição — qualquer um pode criar o próprio cadastro.
+      allow create: if true;
+      allow read, update: if isStaff() || isOwnerOf(resource.data);
+      allow delete: if isStaff();
+    }
+
+    // ---------- Identidade de staff ----------
+
+    match /teachers/{id} {
+      // Precisa ser legível sem login: é assim que o login do professor
+      // confere a senha cadastrada antes de existir sessão no Firebase Auth.
+      allow get, list: if true;
+      allow create, update, delete: if isStaff();
+    }
+
+    match /employees/{id} {
+      allow get, list: if true;
+      allow create, update, delete: if isStaff();
+    }
+
+    match /staff_access/{email} {
+      // Só existe para uso interno das regras (get() acima). Nunca precisa
+      // ser lido direto pelo cliente.
+      allow read: if false;
+      allow write: if isStaff();
+    }
+
+    // ---------- Financeiro ----------
+
+    match /financial_payments/{id} {
+      allow read, write: if isStaff();
+    }
+
+    // ---------- Loja ----------
+
+    match /rae_store_products/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    match /rae_store_orders/{id} {
+      allow create: if signedIn();
+      allow read, update, delete: if isStaff();
+    }
+
+    // ---------- Aluguéis ----------
+
+    match /rentals_locations/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    match /rentals_bookings/{id} {
+      allow read, create: if signedIn();
+      allow update, delete: if isStaff();
+    }
+
+    // ---------- Turmas e chamada ----------
+
+    match /turmas/{id} {
+      // Legível sem login: a tela pública de chamada (/chamada/:id) precisa
+      // ler o nome/horário da turma antes de qualquer autenticação.
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /rumo_ao_esporte_2026_chamadas/{id} {
+      // Mesma tela pública de chamada: hoje ela lê TODOS os cadastros sem
+      // login para montar a lista de presença. Por padrão, exigimos que quem
+      // bate a chamada esteja autenticado como staff (professor/funcionário) —
+      // veja a mensagem sobre esta troca antes de publicar.
+      allow read, create, update: if isStaff();
+      allow delete: if isStaff();
+    }
+
+    // ---------- Convocações e autorizações ----------
+
+    match /rumo_ao_esporte_2026_convocacoes/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    match /rumo_ao_esporte_2026_convocacao_autorizacoes/{id} {
+      allow read, create, update: if signedIn();
+      allow delete: if isStaff();
+    }
+
+    match /rumo_ao_esporte_2026_midias/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    // ---------- Solicitações do formulário "sistema para escola" ----------
+
+    match /school_system_requests/{id} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
+    // ---------- Configurações ----------
+
+    match /system_settings/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    match /rae_settings/{id} {
+      allow read, write: if isStaff();
+    }
+
+    match /rumo_ao_esporte_2026_settings/{id} {
+      allow read, write: if isStaff();
+    }
+
+    // ---------- WhatsApp ----------
+
+    match /whatsapp_contacts/{id} {
+      allow read, write: if isStaff();
+    }
+
+    match /whatsapp_logs/{id} {
+      allow read, write: if isStaff();
+    }
+
+    match /whatsapp_disparos/{id} {
+      allow read, write: if isStaff();
+    }
+
+    // ---------- Tudo mais: negado por padrão ----------
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

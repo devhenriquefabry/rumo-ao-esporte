@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
 import { useDialog } from '../context/CustomDialogContext';
 import {
     User, Mail, Phone, MapPin,
@@ -113,9 +114,9 @@ export default function StudentProfile() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
-            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
-            if (impersonatedEmail || user) {
-                fetchData(impersonatedEmail || user!.email!);
+            const sessionEmail = getSessionStudentEmail(user?.email);
+            if (sessionEmail) {
+                fetchData(sessionEmail);
             } else {
                 setLoading(false);
             }
@@ -125,10 +126,8 @@ export default function StudentProfile() {
 
     const fetchData = async (email: string) => {
         try {
-            const normalizedEmail = email.toLowerCase().trim();
-            const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-            const snap = await getDocs(q);
-            const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+            const registrationDocs = await fetchResponsavelRegistrations(email);
+            const docs = registrationDocs.map(d => ({ id: d.id, ...d.data() } as any));
             setRegistrations(docs);
 
             // TRIGGER SYNC (Parallel) - Update registration status if paid

@@ -17,14 +17,26 @@ export const BulkApproveModal: React.FC<BulkApproveModalProps> = ({
 }) => {
     const [planId, setPlanId] = useState('');
     const [paymentDay, setPaymentDay] = useState(10);
-    const [gerarCobranca, setGerarCobranca] = useState(false);
+    // Ligado por padrao: aprovar sem gerar cobranca deixa o aluno "SEM COBRANÇA"
+    // no financeiro ate alguem lembrar de refaturar manualmente depois.
+    const [gerarCobranca, setGerarCobranca] = useState(true);
 
     useEffect(() => {
         if (isOpen && !planId) {
             const defaultPlan = plans.find(p => p.isDefault) || plans[0];
-            if (defaultPlan) setPlanId(defaultPlan.id);
+            if (defaultPlan) {
+                setPlanId(defaultPlan.id);
+                setPaymentDay(defaultPlan.paymentDay || 10);
+            }
         }
     }, [isOpen, plans, planId]);
+
+    const handlePlanChange = (id: string) => {
+        setPlanId(id);
+        // Preenche com o dia de vencimento padrão do plano; o admin ainda pode ajustar abaixo.
+        const selectedPlan = plans.find(p => p.id === id);
+        if (selectedPlan?.paymentDay) setPaymentDay(selectedPlan.paymentDay);
+    };
 
     if (!isOpen) return null;
 
@@ -73,7 +85,7 @@ export const BulkApproveModal: React.FC<BulkApproveModalProps> = ({
                             </label>
                             <select
                                 value={planId}
-                                onChange={(e) => setPlanId(e.target.value)}
+                                onChange={(e) => handlePlanChange(e.target.value)}
                                 style={{
                                     width: '100%', padding: '10px 12px', borderRadius: '8px',
                                     border: '1px solid #ddd', fontSize: '0.85rem', color: '#444',

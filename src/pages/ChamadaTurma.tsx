@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { collection, query, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
 import { useDialog } from '../context/CustomDialogContext';
 import { FAIXAS_ETARIAS, normalizeModality, calculateClass } from '../utils/turmasConstants';
-import { CheckCircle, Users, Calendar, Save, AlertCircle } from 'lucide-react';
+import { CheckCircle, Users, Calendar, Save, AlertCircle, Lock } from 'lucide-react';
 
 interface Student {
     id: string;
@@ -26,12 +26,27 @@ export default function ChamadaTurma() {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
 
+    // Precisa de login (professor/funcionário): a chamada lê o cadastro
+    // completo dos alunos da turma, então essa tela não pode mais ser aberta
+    // só com o link, sem senha nenhuma.
+    const [checkingAuth, setCheckingAuth] = useState(true);
+    const [signedIn, setSignedIn] = useState(false);
+
     // To handle "editing" or "already done today", we check existing call
     const queryParams = new URLSearchParams(window.location.search);
     const dateParam = queryParams.get('date');
     const today = dateParam || new Date().toLocaleDateString('en-CA');
 
     useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setSignedIn(Boolean(user));
+            setCheckingAuth(false);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (checkingAuth || !signedIn) return;
         if (id) {
             // New explicit system
             fetchExplicitTurma(id);
@@ -45,7 +60,7 @@ export default function ChamadaTurma() {
                 setLoading(false);
             }
         }
-    }, [modalidadeId, turmaId, id]);
+    }, [modalidadeId, turmaId, id, checkingAuth, signedIn]);
 
     const fetchExplicitTurma = async (explicitId: string) => {
         try {
@@ -208,6 +223,28 @@ export default function ChamadaTurma() {
             setSaving(false);
         }
     };
+
+    if (checkingAuth) return <div style={{ padding: '20px', textAlign: 'center' }}>Verificando acesso...</div>;
+
+    if (!signedIn) return (
+        <div style={{ padding: '40px 20px', textAlign: 'center', maxWidth: '420px', margin: '0 auto' }}>
+            <Lock size={40} color="#17428f" style={{ marginBottom: '16px' }} />
+            <h3 style={{ color: '#10213f', marginBottom: '8px' }}>Faça login para bater a chamada</h3>
+            <p style={{ color: '#63708a', marginBottom: '20px' }}>
+                Esta tela mostra dados dos alunos da turma, então agora só abre para professores e
+                funcionários com login. Entre e volte a este mesmo link.
+            </p>
+            <a
+                href="/admin/login"
+                style={{
+                    display: 'inline-block', padding: '12px 24px', background: '#17428f',
+                    color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold'
+                }}
+            >
+                Fazer login
+            </a>
+        </div>
+    );
 
     if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>Carregando turma...</div>;
     if (!info) return <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>Turma não encontrada. Verifique o link.</div>;

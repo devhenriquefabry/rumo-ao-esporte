@@ -1,4 +1,5 @@
 import { ExternalLink, Send, Trash2, Calendar, Barcode, CreditCard, Pencil, Wallet } from 'lucide-react';
+import { PixPaymentBox } from './PixPaymentBox';
 
 interface PaymentCardProps {
     payment: {
@@ -581,6 +582,17 @@ export function PaymentCard({
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* PIX: QR Code e copia e cola. Para o responsável, é pra pagar sem sair da
+                tela; para o admin, é pra copiar e mandar no WhatsApp de quem está devendo. */}
+            {isPending && showPaymentMethods && !hidePayButton && p.billingType !== 'CREDIT_CARD' && (
+                <PixPaymentBox
+                    paymentId={p.id}
+                    pixQrCode={p.pixQrCode}
+                    pixQrCodeUrl={p.pixQrCodeUrl}
+                    isAdmin={isAdmin}
+                />
             )}
         </div>
     );

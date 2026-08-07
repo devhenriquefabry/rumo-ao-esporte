@@ -663,7 +663,18 @@ export default {
           const invoices = await coraListInvoices(env, { search: cpf, environment: resolveCoraEnvironment(url.searchParams.get("environment"), env) });
           const list = invoices.data || invoices.items || [];
           if (!list.length) return jsonResponse({ success: false, error: "Cliente não encontrado na Cora", customers: [] }, 404, corsHeaders);
-          return jsonResponse({ success: true, customer: normalizeCoraCustomerFromInvoice(list[0], cpf), customers: list.map(item => normalizeCoraCustomerFromInvoice(item, cpf)) }, 200, corsHeaders);
+          // A Cora nao tem cadastro de cliente: derivamos o cliente das faturas.
+          // Sem deduplicar, um CPF com 15 faturas virava 15 "clientes" iguais e o
+          // Deep Sync repetia a mesma busca de pagamentos 15 vezes.
+          const uniqueCustomers = [];
+          const seenCustomerIds = new Set();
+          for (const item of list) {
+            const customer = normalizeCoraCustomerFromInvoice(item, cpf);
+            if (seenCustomerIds.has(customer.id)) continue;
+            seenCustomerIds.add(customer.id);
+            uniqueCustomers.push(customer);
+          }
+          return jsonResponse({ success: true, customer: uniqueCustomers[0], customers: uniqueCustomers }, 200, corsHeaders);
         }
         const cpf = path.split("/customers-by-cpf/")[1]?.replace(/\D/g, "");
         const customers = await asaasJson(env, `/customers?cpfCnpj=${encodeURIComponent(cpf || "")}`);
@@ -771,7 +782,7 @@ export default {
             });
             return jsonResponse({ provider, environment: "stage", sandbox: true, data: payments, raw: { totalItems: payments.length, items: payments } }, 200, corsHeaders);
           }
-          const invoices = await coraListInvoices(env, {
+          const listParams = {
             environment: resolveCoraEnvironment(url.searchParams.get("environment"), env),
             search: url.searchParams.get("customer") || url.searchParams.get("search"),
             start: url.searchParams.get("start"),
@@ -779,12 +790,15 @@ export default {
             state: url.searchParams.get("status") || url.searchParams.get("state"),
             page: url.searchParams.get("page") || "1",
             perPage: url.searchParams.get("limit") || url.searchParams.get("perPage") || "50"
-          });
-          return jsonResponse({
-            provider,
-            data: (invoices.data || invoices.items || invoices.invoices || []).map(normalizeCoraPayment),
-            raw: invoices
-          }, 200, corsHeaders);
+          };
+          // detailed=false desliga o enriquecimento quando so importam valores/datas.
+          const detailed = url.searchParams.get("detailed") !== "false";
+          const invoices = await coraListInvoices(env, listParams);
+          const items = invoices.data || invoices.items || invoices.invoices || [];
+          const data = detailed
+            ? await enrichCoraInvoices(env, items, listParams.environment)
+            : items.map(normalizeCoraPayment);
+          return jsonResponse({ provider, data, raw: invoices }, 200, corsHeaders);
         }
         const paymentList = await asaasJson(env, `/payments${url.search || ""}`);
         return jsonResponse(paymentList, 200, corsHeaders);
@@ -1068,9 +1082,12 @@ async function createSandboxCarnetPayments(env, payload) {
 
   const mensalidadeValue = Number(payload.mensalidadeValue || 0);
   if (mensalidadeValue > 0) {
-    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+    const endDate = payload.installmentEndDate ? new Date(`${payload.installmentEndDate}T12:00:00`) : null;
+    const maxMonths = endDate ? 36 : 12;
+    for (let monthOffset = 0; monthOffset < maxMonths; monthOffset++) {
       const dueDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, Math.min(paymentDay, 28));
       if (dueDate < today) dueDate.setDate(today.getDate());
+      if (endDate && dueDate > endDate) break;
       const monthLabel = dueDate.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
       payments.push(await createSandboxPayment(env, {
         ...payload,
@@ -1734,8 +1751,14 @@ async function createCarnetPayments(env, payload, customer) {
 
   const mensalidadeValue = Number(payload.mensalidadeValue || 0);
   if (mensalidadeValue > 0) {
-    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+    // installmentEndDate (opcional): para de gerar mensalidades apos essa data,
+    // em vez do padrao fixo de 12 meses rolantes. Usado no fechamento de temporada
+    // (ex.: matricula no meio do ano so cobra ate 10/12, sem virar o ano).
+    const endDate = payload.installmentEndDate ? new Date(`${payload.installmentEndDate}T12:00:00`) : null;
+    const maxMonths = endDate ? 36 : 12; // 36 e so um teto de seguranca quando ha data limite.
+    for (let monthOffset = 0; monthOffset < maxMonths; monthOffset++) {
       const dueDate = safeDueDate(monthOffset);
+      if (endDate && dueDate > endDate) break;
       const monthLabel = dueDate.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
       const payment = await asaasJson(env, "/payments", {
         method: "POST",
@@ -1858,9 +1881,15 @@ async function createCoraCarnetPayments(env, payload) {
 
   const mensalidadeValue = Number(payload.mensalidadeValue || 0);
   if (mensalidadeValue > 0) {
-    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+    // installmentEndDate (opcional): para de gerar mensalidades apos essa data,
+    // em vez do padrao fixo de 12 meses rolantes. Usado no fechamento de temporada
+    // (ex.: matricula no meio do ano so cobra ate 10/12, sem virar o ano).
+    const endDate = payload.installmentEndDate ? new Date(`${payload.installmentEndDate}T12:00:00`) : null;
+    const maxMonths = endDate ? 36 : 12; // 36 e so um teto de seguranca quando ha data limite.
+    for (let monthOffset = 0; monthOffset < maxMonths; monthOffset++) {
       const dueDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, Math.min(paymentDay, 28));
       if (dueDate < today) dueDate.setDate(today.getDate());
+      if (endDate && dueDate > endDate) break;
       const monthLabel = dueDate.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
       payments.push(await createCoraPayment(env, {
         ...payload,
@@ -1886,10 +1915,47 @@ async function coraListInvoices(env, params = {}) {
   if (params.start) query.set("start", params.start);
   if (params.end) query.set("end", params.end);
   if (params.state) query.set("state", params.state);
-  if (params.search) query.set("search", String(params.search).replace(/^cus_/, ""));
+  // O Deep Sync manda o id devolvido por /customers-by-cpf, que na Cora e
+  // "cora_<cpf>" (o "cus_" e do Asaas). A busca da Cora espera o documento puro:
+  // sem tirar os dois prefixos, nenhuma fatura era encontrada.
+  if (params.search) query.set("search", String(params.search).replace(/^(cus_|cora_)/, ""));
   query.set("page", params.page || "1");
   query.set("perPage", params.perPage || "50");
   return coraJson(env, `/v2/invoices/?${query.toString()}`, { method: "GET" }, environment);
+}
+
+async function mapWithConcurrency(items, limit, fn) {
+  const results = new Array(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await fn(items[index]);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
+/**
+ * A listagem /v2/invoices/ da Cora nao devolve `services` nem `code`, entao toda
+ * fatura chegava como "Cobranca Cora" e sem externalReference. O Deep Sync casa a
+ * fatura com o aluno pela descricao, e sem ela nenhum pagamento era reconhecido:
+ * o cache do aluno era limpo e o financeiro mostrava "SEM COBRANCA".
+ * Buscamos o detalhe de cada fatura para recuperar descricao e code.
+ */
+async function enrichCoraInvoices(env, items, environment) {
+  return mapWithConcurrency(items, 8, async (item) => {
+    const id = item.id || item.invoice_id || item.invoiceId;
+    if (!id) return normalizeCoraPayment(item);
+    try {
+      const full = await coraJson(env, `/v2/invoices/${encodeURIComponent(id)}`, { method: "GET" }, environment);
+      return normalizeCoraPayment({ ...item, ...full });
+    } catch (err) {
+      // Se o detalhe falhar, preservamos a fatura com os campos da listagem.
+      return normalizeCoraPayment(item);
+    }
+  });
 }
 
 async function coraCancelPayment(env, paymentId, environment = "stage") {

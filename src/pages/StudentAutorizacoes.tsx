@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
 import {
     Bus,
     Calendar,
@@ -78,13 +78,11 @@ export default function StudentAutorizacoes() {
             setResponsavelEmail(normalizedEmail);
 
             // 1. Matrículas do responsável -> ids únicos dos atletas
-            const regSnap = await getDocs(
-                query(collection(db, 'rumo_ao_esporte_2026_registrations'), where('responsavel.email', '==', normalizedEmail))
-            );
+            const registrationDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
             const meusIds = new Set<string>();
             let nomeResp = '';
-            regSnap.forEach(docSnap => {
+            registrationDocs.forEach(docSnap => {
                 const data = docSnap.data();
                 if (!nomeResp && data.responsavel?.nome) nomeResp = data.responsavel.nome;
                 meusIds.add(docSnap.id); // matrícula sem índice (registros legados)
@@ -127,8 +125,7 @@ export default function StudentAutorizacoes() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
-            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
-            const email = impersonatedEmail || user?.email;
+            const email = getSessionStudentEmail(user?.email);
             if (email) carregar(email);
             else setLoading(false);
         });

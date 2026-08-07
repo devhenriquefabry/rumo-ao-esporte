@@ -25,6 +25,10 @@ export const SyncService = {
             billingType: payment.billingType || null,
             invoiceUrl: payment.invoiceUrl || null,
             externalReference: payment.externalReference || null,
+            // Código PIX copia e cola (EMV) e imagem do QR: sem persistir aqui, a tela
+            // do responsável não teria como oferecer o pagamento direto pelo PIX.
+            pixQrCode: payment.pixQrCode || null,
+            pixQrCodeUrl: payment.pixQrCodeUrl || null,
             discount: payment.discount || null,
             fine: payment.fine || null,
             interest: payment.interest || null,

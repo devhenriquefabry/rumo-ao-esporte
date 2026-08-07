@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
+import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
 import PageContainer from '../components/PageContainer';
 import PageTitle from '../components/PageTitle';
 import StudentCard from '../components/StudentCard';
@@ -15,18 +15,16 @@ export default function StudentCarteirinha() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
-            if (impersonatedEmail || (user && user.email)) {
+            const normalizedEmail = getSessionStudentEmail(user?.email);
+            if (normalizedEmail) {
                 try {
-                    // 1. Fetch ALL Registrations for this email (normalized)
-                    const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
-                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-                    const snap = await getDocs(q);
+                    // 1. Fetch the registrations of THIS responsible only (email + identidade)
+                    const registrationDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
                     const studentsAggregated: any[] = [];
 
-                    if (!snap.empty) {
-                        snap.forEach((doc) => {
+                    if (registrationDocs.length > 0) {
+                        registrationDocs.forEach((doc) => {
                             const data = doc.data();
                             const responsavel = data.responsavel;
                             const numeroCota = data.numeroCota;
@@ -97,7 +95,7 @@ export default function StudentCarteirinha() {
     return (
         <PageContainer>
             <PageTitle
-                title="MINHA CARTEIRINHA"
+                title="CARTEIRINHA DO ATLETA"
                 subtitle="Identificação oficial do clube"
             />
 
@@ -184,7 +182,7 @@ export default function StudentCarteirinha() {
                         }}
                     >
                         <Clock size={18} color="#00a63a" />
-                        {showHistory ? 'Ocultar Histórico' : 'Ver meu histórico de acesso'}
+                        {showHistory ? 'Ocultar Histórico' : 'Ver histórico de acesso'}
                         {showHistory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>
 

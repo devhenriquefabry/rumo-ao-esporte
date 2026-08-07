@@ -264,7 +264,7 @@ export default function AdminStats() {
                             const overduePayments = payments
                                 .filter(p =>
                                     p.studentId === reg.id &&
-                                    !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'pago', 'confirmado'].includes(p.status) &&
+                                    !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH', 'pago', 'confirmado', 'DELETED', 'REFUNDED', 'REMOVED_BY_RECEIVER'].includes(p.status) &&
                                     p.dueDate && new Date(p.dueDate) < new Date()
                                 )
                                 .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());

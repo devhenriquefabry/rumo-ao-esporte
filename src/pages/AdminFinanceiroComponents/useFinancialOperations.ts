@@ -27,6 +27,8 @@ export type CarnetPricingMode = 'early' | 'standard' | 'custom';
 export interface CarnetPricingChoice {
     mode: CarnetPricingMode;
     customMonthlyValue?: number;
+    /** yyyy-mm-dd: para de gerar mensalidades apos essa data (fechamento de temporada). */
+    endDate?: string;
 }
 
 export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinancialOperationsProps) => {
@@ -544,9 +546,10 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
                 matriculaValue: plan.valores?.matricula || 0,
                 mensalidadeValue,
                 descontoAntecipado: 0,
-                paymentDay: reg.paymentDay || 10,
+                paymentDay: reg.paymentDay || plan.paymentDay || 10,
                 jurosMensais: plan.jurosMensais || 0,
-                multa: plan.multa || 0
+                multa: plan.multa || 0,
+                installmentEndDate: pricingChoice?.endDate
             };
             console.log("[DEBUG] generateBatchCarnet: Payload:", payload);
             const res = await fetch(`${workerUrl}/generate-carnet`, { method: 'POST', body: JSON.stringify(workerPayload(payload)), headers: { 'Content-Type': 'application/json' } });

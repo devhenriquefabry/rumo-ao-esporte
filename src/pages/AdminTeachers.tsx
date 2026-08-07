@@ -10,6 +10,7 @@ import TeacherCard from '../components/teachers/TeacherCard';
 import TeacherFormModal from '../components/teachers/TeacherFormModal';
 import AssignClassModal from '../components/teachers/AssignClassModal';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
+import { removeStaffAccess, syncStaffAccess } from '../utils/staffAccess';
 
 export default function AdminTeachers() {
     const { showAlert, showConfirm } = useDialog();
@@ -94,12 +95,44 @@ export default function AdminTeachers() {
         e.preventDefault();
         if (!canEdit) return;
 
+        // O login busca o professor pelo e-mail em minúsculas: gravar com
+        // espaço ou letra maiúscula cria um cadastro que nunca consegue entrar.
+        const normalizedEmail = formData.email.trim().toLowerCase();
+        const normalizedPassword = (formData.senha || '').trim() || 'rumo2026';
+
+        if (!normalizedEmail.includes('@')) {
+            showAlert('Informe um e-mail válido: é com ele que o professor faz login.', 'error');
+            return;
+        }
+
+        if (normalizedPassword.length < 6) {
+            showAlert('A senha precisa ter pelo menos 6 caracteres.', 'error');
+            return;
+        }
+
+        const payload = {
+            ...formData,
+            email: normalizedEmail,
+            senha: normalizedPassword,
+            nome: formData.nome.trim()
+        };
+
         try {
+            const duplicate = teachers.find(t => (t.email || '').trim().toLowerCase() === normalizedEmail && t.id !== editingId);
+
+            if (duplicate) {
+                showAlert(`Este e-mail já está cadastrado para ${duplicate.nome}.`, 'error');
+                return;
+            }
+
             if (editingId) {
-                await updateDoc(doc(db, 'teachers', editingId), { ...formData, updatedAt: Timestamp.now() });
+                const previousEmail = teachers.find(t => t.id === editingId)?.email;
+                await updateDoc(doc(db, 'teachers', editingId), { ...payload, updatedAt: Timestamp.now() });
+                await syncStaffAccess(payload.email, payload.active !== false, 'teacher', previousEmail);
                 showAlert('Professor atualizado com sucesso!', 'success');
             } else {
-                await addDoc(collection(db, 'teachers'), { ...formData, createdAt: Timestamp.now() });
+                await addDoc(collection(db, 'teachers'), { ...payload, createdAt: Timestamp.now() });
+                await syncStaffAccess(payload.email, payload.active !== false, 'teacher');
                 showAlert('Professor cadastrado com sucesso!', 'success');
             }
             setShowModal(false);
@@ -115,7 +148,9 @@ export default function AdminTeachers() {
         if (!canEdit) return;
         showConfirm('Tem certeza que deseja remover este professor?', async () => {
             try {
+                const email = teachers.find(t => t.id === id)?.email || '';
                 await deleteDoc(doc(db, 'teachers', id));
+                await removeStaffAccess(email);
                 showAlert('Professor removido com sucesso!', 'success');
                 fetchTeachers();
             } catch (error) {
@@ -198,6 +233,7 @@ export default function AdminTeachers() {
                         batch.update(doc(db, 'turmas', t.id), { responsavel: '', responsavelId: '' });
                     });
                     await batch.commit();
+                    await syncStaffAccess(teacher.email, false, 'teacher');
                     setTimeout(() => { fetchData(); showAlert('Professor desativado e turmas atualizadas.', 'success'); }, 3000);
                 } catch (e) {
                     console.error(e);
@@ -207,6 +243,7 @@ export default function AdminTeachers() {
         } else {
             try {
                 await updateDoc(doc(db, 'teachers', teacher.id), { active: true, updatedAt: Timestamp.now() });
+                await syncStaffAccess(teacher.email, true, 'teacher');
                 fetchTeachers();
             } catch (e) {
                 showAlert('Erro ao ativar professor.', 'error');

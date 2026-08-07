@@ -196,7 +196,15 @@ export default function ApprovalModal({
                         <label style={{ display: 'block', fontSize: '0.85rem', color: '#666', marginBottom: '8px', fontWeight: 'bold' }}>PLANO DE PAGAMENTO <span style={{ color: 'red' }}>*</span></label>
                         <select
                             value={approvalConfig.planId}
-                            onChange={(e) => setApprovalConfig({ ...approvalConfig, planId: e.target.value })}
+                            onChange={(e) => {
+                                const selectedPlan = plans.find(p => p.id === e.target.value);
+                                setApprovalConfig({
+                                    ...approvalConfig,
+                                    planId: e.target.value,
+                                    // Preenche com o dia de vencimento padrão do plano; o admin ainda pode ajustar abaixo.
+                                    paymentDay: selectedPlan?.paymentDay || approvalConfig.paymentDay
+                                });
+                            }}
                             className="native-input"
                             style={{ width: '100%', padding: '12px' }}
                         >

@@ -16,6 +16,19 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/pwa/icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/pwa/apple-touch-icon.png" />
   <title>Rumo ao Esporte</title>
+  <script>
+    // O Chrome dispara 'beforeinstallprompt' assim que a página carrega, antes do
+    // React montar. Guardamos o evento aqui para o botão "Instalar App" poder
+    // abrir a caixa nativa de instalação a qualquer momento depois.
+    window.addEventListener('beforeinstallprompt', function (event) {
+      event.preventDefault();
+      window.__raeInstallPrompt = event;
+      window.dispatchEvent(new CustomEvent('rae:install-prompt-ready'));
+    });
+    window.addEventListener('appinstalled', function () {
+      window.__raeInstallPrompt = null;
+    });
+  </script>
 </head>
 
 <body>

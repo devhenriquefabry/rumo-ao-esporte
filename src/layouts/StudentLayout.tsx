@@ -3,9 +3,14 @@ import QRCode from 'qrcode';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { isRunningAsInstalledApp, openPWAInstallPrompt } from '../utils/pwaInstall';
 import { configureAuthPersistence } from '../utils/authPersistence';
+import {
+    clearResponsavelKey,
+    fetchResponsavelRegistrations,
+    getSessionStudentEmail
+} from '../utils/responsavelIdentity';
 import '../App.css';
 import {
     Settings,
@@ -25,7 +30,8 @@ import {
     Clock,
     Store,
     Download,
-    FileSignature
+    FileSignature,
+    CreditCard
 } from 'lucide-react';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
@@ -134,17 +140,16 @@ export default function StudentLayout() {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             const impersonatedEmail = localStorage.getItem('rae_impersonated_student_email');
-            if (impersonatedEmail || (user && user.email)) {
+            const normalizedEmail = getSessionStudentEmail(user?.email);
+            if (normalizedEmail) {
                 try {
-                    const normalizedEmail = (impersonatedEmail || user!.email!).toLowerCase().trim();
-                    const q = query(collection(db, "rumo_ao_esporte_2026_registrations"), where("responsavel.email", "==", normalizedEmail));
-                    const snap = await getDocs(q);
+                    const registrationDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
                     const studentsAggregated: any[] = [];
                     let firstName = 'Aluno';
 
-                    if (!snap.empty) {
-                        snap.forEach((doc) => {
+                    if (registrationDocs.length > 0) {
+                        registrationDocs.forEach((doc) => {
                             const data = doc.data();
                             if (data.responsavel && data.responsavel.nome) {
                                 firstName = data.responsavel.nome.split(' ')[0];
@@ -205,6 +210,7 @@ export default function StudentLayout() {
         localStorage.removeItem('rae_student_auth');
         localStorage.removeItem('rae_impersonated_student_email');
         localStorage.removeItem('rae_impersonated_student_back_id');
+        clearResponsavelKey();
         navigate('/aluno/login');
     };
 
@@ -486,6 +492,7 @@ export default function StudentLayout() {
                     <button
                         onClick={async () => {
                             localStorage.removeItem('rae_impersonated_student_email');
+                            clearResponsavelKey();
                             const backId = localStorage.getItem('rae_impersonated_student_back_id');
                             if (backId) {
                                 localStorage.removeItem('rae_impersonated_student_back_id');
@@ -570,6 +577,7 @@ export default function StudentLayout() {
                         <nav style={{ flex: 1, padding: '10px 0', overflowY: 'auto' }}>
                             <NavItem to="/aluno/dashboard" label="Meu Atleta" icon={<Home size={20} />} />
                             <NavItem to="/aluno/perfil" label="Meus Dados" icon={<User size={20} />} />
+                            <NavItem to="/aluno/carteirinha" label="Carteirinha" icon={<CreditCard size={20} />} />
                             <NavItem to="/aluno/financeiro" label="Pagamentos" icon={<DollarSign size={20} />} />
                             <NavItem to="/aluno/autorizacoes" label="Autorizações" icon={<FileSignature size={20} />} />
                             {storeEnabled && <NavItem to="/aluno/loja" label="Loja do Clube" icon={<Store size={20} />} />}
@@ -737,6 +745,7 @@ export default function StudentLayout() {
                         {/* Section 1: Gestão */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                             <MenuGridItem icon={User} label="Meus Dados" link="/aluno/perfil" />
+                            <MenuGridItem icon={CreditCard} label="Carteirinha" link="/aluno/carteirinha" />
                             <MenuGridItem icon={Users} label="Dependentes" link="/aluno/dashboard" />
                             <MenuGridItem icon={History} label="Meus Acessos" link="/aluno/acessos" />
                             <MenuGridItem icon={DollarSign} label="Meus Débitos" link="/aluno/financeiro" />
@@ -744,7 +753,18 @@ export default function StudentLayout() {
                             {storeEnabled && <MenuGridItem icon={Store} label="Loja" link="/aluno/loja" />}
                             <MenuGridItem icon={Lock} label="Trocar Senha" link="/aluno/configuracoes" />
                             <MenuGridItem icon={Clock} label="Horários" link="/aluno/horarios" />
-                            {!isInstalledApp && <MenuGridItem icon={Download} label="Instalar App" onClick={openPWAInstallPrompt} />}
+                            {!isInstalledApp && (
+                                <MenuGridItem
+                                    icon={Download}
+                                    label="Instalar App"
+                                    onClick={() => {
+                                        // Fecha o menu antes: senão a caixa de instalação
+                                        // abre atrás do painel e parece que nada aconteceu.
+                                        setActiveSheet(null);
+                                        openPWAInstallPrompt();
+                                    }}
+                                />
+                            )}
                         </div>
 
                         <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)', margin: '0 10px' }} />
@@ -864,6 +884,30 @@ export default function StudentLayout() {
                                 CÓDIGO DE ACESSO INDIVIDUAL
                             </p>
                         </div>
+
+                        <button
+                            onClick={() => navigate('/aluno/carteirinha')}
+                            className="touch-feedback"
+                            style={{
+                                margin: '18px 20px 0 20px',
+                                width: 'calc(100% - 40px)',
+                                padding: '12px',
+                                background: '#fff',
+                                border: '1px solid #dce7f3',
+                                color: '#17428f',
+                                borderRadius: '10px',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <CreditCard size={18} />
+                            VER CARTEIRINHA
+                        </button>
                     </div>
                 </ResponsivePanel>
             )}
