@@ -613,6 +613,10 @@ input[type="checkbox"] {
   }
 }
 
+.spin {
+  animation: public-form-spin 0.8s linear infinite;
+}
+
 /* Photo Upload */
 .photo-upload-container {
   background: var(--light-gray);

@@ -1,5 +1,7 @@
-import { ExternalLink, Send, Trash2, Calendar, Barcode, CreditCard, Pencil, Wallet } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, Send, Trash2, Calendar, Barcode, CreditCard, Pencil, Wallet, FileText, Loader2 } from 'lucide-react';
 import { PixPaymentBox } from './PixPaymentBox';
+import { generatePaymentReceiptPDF } from '../utils/receiptGenerator';
 
 interface PaymentCardProps {
     payment: {
@@ -17,6 +19,8 @@ interface PaymentCardProps {
         pixQrCode?: string;
         pixQrCodeUrl?: string;
         externalReference?: string;
+        paymentDate?: string | null;
+        totalPaid?: number | null;
     };
     isCurrentPayment?: boolean;
     isAdmin?: boolean;
@@ -48,6 +52,7 @@ export function PaymentCard({
     hidePayButton = false
 }: PaymentCardProps) {
     const p = payment;
+    const [generatingReceipt, setGeneratingReceipt] = useState(false);
     const isPending = !['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH'].includes(p.status);
     const hasDiscount = (p.discount?.value ?? 0) > 0;
     const isManual = p.externalReference?.includes('MANUAL_');
@@ -481,29 +486,38 @@ export function PaymentCard({
                                 )}
                             </>
                         )}
-                        {p.invoiceUrl && (
-                            <a
-                                href={p.invoiceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    background: '#fff',
-                                    color: '#2e7d32',
-                                    border: '1px solid #2e7d32',
-                                    padding: '8px 12px',
-                                    borderRadius: '6px',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.7rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                <ExternalLink size={14} /> VER COMPROVANTE
-                            </a>
-                        )}
+                        <button
+                            onClick={async () => {
+                                if (generatingReceipt) return;
+                                setGeneratingReceipt(true);
+                                try {
+                                    await generatePaymentReceiptPDF(p, responsibleName);
+                                } catch (e) {
+                                    console.error('Erro ao gerar recibo:', e);
+                                    alert('Erro ao gerar o recibo. Tente novamente.');
+                                } finally {
+                                    setGeneratingReceipt(false);
+                                }
+                            }}
+                            disabled={generatingReceipt}
+                            style={{
+                                background: '#fff',
+                                color: '#2e7d32',
+                                border: '1px solid #2e7d32',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                fontWeight: 'bold',
+                                fontSize: '0.7rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: generatingReceipt ? 'default' : 'pointer',
+                                opacity: generatingReceipt ? 0.7 : 1,
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {generatingReceipt ? <Loader2 size={14} className="spin" /> : <FileText size={14} />} {generatingReceipt ? 'GERANDO...' : 'VER COMPROVANTE'}
+                        </button>
                     </div>
                 )}
             </div>

@@ -2032,6 +2032,11 @@ function normalizeCoraPayment(invoice) {
   const pix = paymentOptions.pix || invoice.pix || {};
   const bankSlip = paymentOptions.bank_slip || paymentOptions.bankSlip || invoice.bank_slip || invoice.bankSlip || {};
   const forms = invoice.payment_forms || invoice.paymentForms || [];
+  // A Cora informa a baixa em `occurrence_date` (fatura) e em `payments[].finalized_at`
+  // (histórico de transações), não em `paid_at`/`payment_date` como o Asaas.
+  const paymentEntries = Array.isArray(invoice.payments) ? invoice.payments : [];
+  const successfulPayment = paymentEntries.find(pmt => String(pmt.status || "").toUpperCase() === "SUCCESS") || paymentEntries[0];
+  const totalPaidCents = firstDefined(invoice.total_paid, invoice.totalPaid, successfulPayment?.total_paid, successfulPayment?.totalPaid, null);
 
   return {
     ...invoice,
@@ -2050,7 +2055,13 @@ function normalizeCoraPayment(invoice) {
     pixQrCodeUrl: firstDefined(pix.encoded_image, pix.encodedImage, pix.image, invoice.pixQrCodeUrl),
     externalReference: invoice.code,
     dateCreated: invoice.created_at || invoice.createdAt || new Date().toISOString(),
-    paymentDate: invoice.paid_at || invoice.paidAt || invoice.payment_date || invoice.paymentDate || null
+    paymentDate: firstDefined(
+      invoice.occurrence_date, invoice.occurrenceDate,
+      successfulPayment?.finalized_at, successfulPayment?.finalizedAt, successfulPayment?.created_at,
+      invoice.paid_at, invoice.paidAt, invoice.payment_date, invoice.paymentDate,
+      null
+    ),
+    totalPaid: totalPaidCents != null ? currencyFromCoraAmount(totalPaidCents) : null
   };
 }
 
