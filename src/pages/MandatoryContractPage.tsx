@@ -236,7 +236,15 @@ export default function MandatoryContractPage() {
                                         type="checkbox"
                                         checked={estatutoLido}
                                         onChange={(e) => setEstatutoLido(e.target.checked)}
-                                        style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0 }}
+                                        style={{
+                                            display: 'inline-block',
+                                            marginTop: '2px',
+                                            width: '18px',
+                                            height: '18px',
+                                            flexShrink: 0,
+                                            accentColor: '#2e7d32',
+                                            cursor: 'pointer'
+                                        }}
                                     />
                                     Li e concordo com o Estatuto Social da Associação Rumo ao Esporte e ao Lazer - REAL.
                                 </label>
