@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { fetchResponsavelRegistrations, getSessionStudentEmail } from '../utils/responsavelIdentity';
-import { Activity, Calendar, User, CreditCard, FileSignature, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Activity, Calendar, User, CreditCard, FileSignature, ChevronRight, Eye } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import PageContainer from '../components/PageContainer';
 import PageTitle from '../components/PageTitle';
 import { PaymentCard } from '../components/PaymentCard';
@@ -14,6 +14,7 @@ import React from 'react';
 const workerUrl = import.meta.env.VITE_WORKER_URL;
 
 export default function StudentHome() {
+    const navigate = useNavigate();
     // We now store a list of all students from ALL matching registrations
     const [allStudents, setAllStudents] = useState<any[]>([]);
     const [responsavel, setResponsavel] = useState<any>(null);
@@ -58,7 +59,7 @@ export default function StudentHome() {
 
                             // Aggregate students with DEDUPLICATION
                             if (data.alunos && Array.isArray(data.alunos)) {
-                                data.alunos.forEach((aluno: any) => {
+                                data.alunos.forEach((aluno: any, alunoIndex: number) => {
                                     // Robust normalization for deduplication
                                     const studentName = (aluno.nome || '').trim().replace(/\s+/g, ' ').toUpperCase();
                                     const birthDate = (aluno.dataNascimento || '').trim();
@@ -82,6 +83,7 @@ export default function StudentHome() {
                                             ...aluno,
                                             nome: (aluno.nome || '').trim().replace(/\s+/g, ' '),
                                             registrationIds: [doc.id],
+                                            studentIndex: alunoIndex,
                                             modalidades: rawModality ? [rawModality] : [],
                                             status: data.status,
                                             categoriaFutebol: data.categoriaFutebol,
@@ -761,9 +763,23 @@ export default function StudentHome() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {allStudents.map((aluno: any, index: number) => {
                             const turmaInfo = aluno.turmaId ? turmas[aluno.turmaId] : null;
+                            const regId = aluno.registrationIds?.[0];
+                            const hasContract = !!aluno.contractGenerated;
+                            const isSigned = hasContract && !!aluno.signatureData;
+                            const isPending = hasContract && !aluno.signatureData;
+                            const canViewContract = isSigned && !!regId;
 
                             return (
-                                <div key={index} className="student-card touch-feedback">
+                                <div
+                                    key={index}
+                                    className="student-card touch-feedback"
+                                    onClick={() => {
+                                        if (canViewContract) {
+                                            navigate(`/aluno/contrato/${regId}/${aluno.studentIndex}`);
+                                        }
+                                    }}
+                                    style={{ cursor: canViewContract ? 'pointer' : 'default' }}
+                                >
                                     <div className="student-card-content">
                                         {/* Compact Avatar */}
                                         <div className="student-avatar" style={{
@@ -806,6 +822,56 @@ export default function StudentHome() {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Contract Action Icon */}
+                                        {isSigned && regId && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/aluno/contrato/${regId}/${aluno.studentIndex}`);
+                                                }}
+                                                title="Ver contrato assinado"
+                                                style={{
+                                                    flexShrink: 0,
+                                                    width: '38px',
+                                                    height: '38px',
+                                                    borderRadius: '50%',
+                                                    border: 'none',
+                                                    background: '#eef2ff',
+                                                    color: '#17428f',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <Eye size={18} />
+                                            </button>
+                                        )}
+                                        {isPending && regId && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/aluno/contrato-obrigatorio/${regId}/${aluno.studentIndex}`);
+                                                }}
+                                                title="Assinar contrato"
+                                                style={{
+                                                    flexShrink: 0,
+                                                    width: '38px',
+                                                    height: '38px',
+                                                    borderRadius: '50%',
+                                                    border: 'none',
+                                                    background: '#fff3cd',
+                                                    color: '#856404',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <FileSignature size={18} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             );

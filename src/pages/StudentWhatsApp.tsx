@@ -11,7 +11,7 @@ export default function StudentWhatsApp() {
         }, 1000);
 
         const redirect = setTimeout(() => {
-            const phone = '553235314777';
+            const phone = '5533999786088';
             const text = 'Olá, sou aluno da Rumo ao Esporte e gostaria de tirar uma dúvida.';
             window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
         }, 3000);
@@ -44,7 +44,7 @@ export default function StudentWhatsApp() {
 
                 <h2 style={{ color: '#17428f', margin: '0 0 10px 0' }}>Fale Conosco</h2>
                 <p style={{ color: '#666', fontSize: '1.1rem', maxWidth: '400px', margin: '0 0 30px 0' }}>
-                    Você está sendo redirecionado para o WhatsApp da Secretaria...
+                    Você está sendo redirecionado para o WhatsApp do Diretor da Associação...
                 </p>
 
                 <div style={{

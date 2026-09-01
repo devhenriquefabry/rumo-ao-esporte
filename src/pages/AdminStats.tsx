@@ -29,6 +29,7 @@ import {
 import { useDialog } from '../context/CustomDialogContext';
 import { generateOverduePDF } from './AdminDashboard/utils/pdfGenerator';
 import { expenseService } from '../utils/expenseService';
+import PaymentReceiptModal from '../components/admin/PaymentReceiptModal';
 
 
 
@@ -94,6 +95,7 @@ export default function AdminStats() {
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
     const [selectedDayType, setSelectedDayType] = useState<'payment' | 'registration'>('payment');
     const [selectedDayItems, setSelectedDayItems] = useState<any[]>([]);
+    const [receiptPayment, setReceiptPayment] = useState<any | null>(null);
 
 
 
@@ -146,6 +148,7 @@ export default function AdminStats() {
                             ...p,
                             actualDate: date,
                             payerName,
+                            responsibleName: reg?.responsavel?.nome || '',
                             modalidade: reg?.modalidade || 'outros',
                             isManual: p.externalReference?.startsWith('MANUAL_') || (p.description || '').toLowerCase().includes('uniforme') || (p.description || '').toLowerCase().includes('kit'),
                             studentCount: reg?.alunos?.length || 1,
@@ -378,17 +381,19 @@ export default function AdminStats() {
         return monthlyExpenses.reduce((acc: number, exp: any) => acc + (exp.value || 0), 0);
     }, [monthlyExpenses]);
 
-    const monthlyAsaasFees = useMemo(() => {
+    // Tarifas da Cora (cobrança via API): Pix Cobrança = 1% do valor, máximo R$0,50 por cobrança;
+    // Boleto compensado = R$1,70 fixo. Fonte: cora.com.br/blog/valores-e-termos-de-cobranca-boleto-da-cora-api
+    const monthlyCoraFees = useMemo(() => {
         let pix = 0;
         let boleto = 0;
         const total = monthlyPayments.reduce((acc: number, p: any) => {
             const type = String(p.billingType || '').toUpperCase();
             if (type === 'PIX') {
                 pix++;
-                return acc + 1.99;
+                return acc + Math.min((p.value || 0) * 0.01, 0.50);
             } else if (type === 'BOLETO') {
                 boleto++;
-                return acc + 1.99;
+                return acc + 1.70;
             }
             return acc;
         }, 0);
@@ -396,7 +401,7 @@ export default function AdminStats() {
     }, [monthlyPayments]);
 
     const monthlyNetProfit = monthlyRevenue - monthlyExpenseTotal;
-    const finalNetProfit = monthlyNetProfit - monthlyAsaasFees.total;
+    const finalNetProfit = monthlyNetProfit - monthlyCoraFees.total;
 
     // Monthly revenue by modality
     const monthlyReceivedByModality = useMemo(() => {
@@ -1041,14 +1046,14 @@ export default function AdminStats() {
                                                 <div class="card-sub">Receita - Despesas do m&ecirc;s</div>
                                             </div>
                                             <div class="stat-card" style="--color: #f59e0b;">
-                                                <div class="card-title">Taxas Asaas (Est.)</div>
-                                                <div class="card-value">${formatCurrency(monthlyAsaasFees.total)}</div>
-                                                <div class="card-sub">${monthlyAsaasFees.pix} Pix / ${monthlyAsaasFees.boleto} Boleto</div>
+                                                <div class="card-title">Taxas Cora (Est.)</div>
+                                                <div class="card-value">${formatCurrency(monthlyCoraFees.total)}</div>
+                                                <div class="card-sub">${monthlyCoraFees.pix} Pix / ${monthlyCoraFees.boleto} Boleto</div>
                                             </div>
                                             <div class="stat-card green">
                                                 <div class="card-title">Lucro L&iacute;quido Real</div>
                                                 <div class="card-value">${formatCurrency(finalNetProfit)}</div>
-                                                <div class="card-sub">Descontando taxas Asaas</div>
+                                                <div class="card-sub">Descontando taxas Cora</div>
                                             </div>
                                             <div class="stat-card" style="--color: #0891b2;">
                                                 <div class="card-title">Alunos a Receber</div>
@@ -1334,11 +1339,11 @@ export default function AdminStats() {
                         trendType={monthlyNetProfit > 0 ? "up" : "down"}
                     />
 
-                    {/* 3c. TAXAS ASAAS E LUCRO REAL */}
+                    {/* 3c. TAXAS CORA E LUCRO REAL */}
                     <StatCard
-                        title="Taxas Asaas (Est.)"
-                        value={formatCurrency(monthlyAsaasFees.total)}
-                        subValue={`${monthlyAsaasFees.pix} Pix / ${monthlyAsaasFees.boleto} Boleto`}
+                        title="Taxas Cora (Est.)"
+                        value={formatCurrency(monthlyCoraFees.total)}
+                        subValue={`${monthlyCoraFees.pix} Pix / ${monthlyCoraFees.boleto} Boleto`}
                         icon={CreditCard}
                         color="#f59e0b"
                     />
@@ -1346,7 +1351,7 @@ export default function AdminStats() {
                     <StatCard
                         title="Lucro Líquido Real"
                         value={formatCurrency(finalNetProfit)}
-                        subValue="Descontando taxas Asaas"
+                        subValue="Descontando taxas Cora"
                         icon={Banknote}
                         color="#059669"
                         gradient="#10b981"
@@ -1710,11 +1715,20 @@ export default function AdminStats() {
                                             {selectedDayType === 'payment' ? (
                                                 <>
                                                     <div style={{ fontWeight: '900', color: '#059669', fontSize: '1.1rem' }}>{item.formattedValue}</div>
-                                                    {item.invoiceUrl && (
-                                                        <a href={item.invoiceUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#3b82f6', textDecoration: 'none', fontWeight: '800' }}>
-                                                            VER FATURA →
-                                                        </a>
-                                                    )}
+                                                    <button
+                                                        onClick={() => setReceiptPayment(item)}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                            fontSize: '0.7rem',
+                                                            color: '#3b82f6',
+                                                            fontWeight: '800',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        VER COMPROVANTE →
+                                                    </button>
                                                 </>
                                             ) : (
                                                 <div style={{
@@ -1750,6 +1764,14 @@ export default function AdminStats() {
                             </button>
                         </div>
                     </div>
+                )}
+
+                {/* Payment Receipt Detail */}
+                {receiptPayment && (
+                    <PaymentReceiptModal
+                        payment={receiptPayment}
+                        onClose={() => setReceiptPayment(null)}
+                    />
                 )}
 
                 {/* Main Content Grid - Responsive Breakpoints */}

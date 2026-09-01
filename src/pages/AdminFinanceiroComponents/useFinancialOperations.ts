@@ -734,6 +734,7 @@ export const useFinancialOperations = ({ workerUrl, setRegistrations }: UseFinan
         handleSmartSync,
         handleGlobalSync,
         isMigrating,
-        isCreatingCharge
+        isCreatingCharge,
+        paymentConfig
     };
 };

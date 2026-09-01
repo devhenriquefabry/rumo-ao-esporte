@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { AlertCircle, CheckCircle, ChevronRight, LogOut, FileText } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -10,6 +10,7 @@ import { signOut } from 'firebase/auth';
 
 export default function MandatoryContractPage() {
     const navigate = useNavigate();
+    const { registrationId: targetRegistrationId, studentIndex: targetStudentIndexParam } = useParams();
     const [loading, setLoading] = useState(true);
     const [studentData, setStudentData] = useState<any>(null);
     const [registrationId, setRegistrationId] = useState<string | null>(null);
@@ -33,6 +34,28 @@ export default function MandatoryContractPage() {
                 const allDocs = await fetchResponsavelRegistrations(normalizedEmail);
 
                 if (allDocs.length > 0) {
+                    // If a specific student was targeted (clicked from the dashboard card), sign that one first
+                    if (targetRegistrationId) {
+                        const targetDoc = allDocs.find(d => d.id === targetRegistrationId);
+                        const targetData = targetDoc?.data();
+                        const targetIdx = targetStudentIndexParam ? parseInt(targetStudentIndexParam) : 0;
+                        const targetStudent = targetData?.alunos?.[targetIdx];
+
+                        if (targetStudent && !targetStudent.signatureData) {
+                            setRegistrationId(targetRegistrationId);
+                            setStudentData(targetData);
+                            setCurrentIndex(targetIdx);
+                            setLoading(false);
+                            return;
+                        }
+
+                        if (targetStudent && targetStudent.signatureData) {
+                            // Already signed, nothing to do here
+                            navigate(`/aluno/contrato/${targetRegistrationId}/${targetIdx}`);
+                            return;
+                        }
+                    }
+
                     let firstPendingReg: any = null;
                     let firstPendingIdx = -1;
                     let firstRegId = "";

@@ -1,4 +1,4 @@
-import { Search, RefreshCw, Filter } from 'lucide-react';
+import { Search, RefreshCw, Filter, Zap } from 'lucide-react';
 
 interface FinanceFiltersProps {
     searchTerm: string;
@@ -14,6 +14,7 @@ interface FinanceFiltersProps {
     selectedCount?: number;
     onViewManualCharges?: () => void;
     onVerifyInvoices?: () => void;
+    onGenerateMonthlyCharges?: () => void;
     loading: boolean;
     isSyncing?: boolean;
     readOnly?: boolean;
@@ -33,6 +34,7 @@ export function FinanceFilters({
     selectedCount = 0,
     onViewManualCharges,
     onVerifyInvoices,
+    onGenerateMonthlyCharges,
     loading,
     isSyncing,
     readOnly
@@ -200,6 +202,26 @@ export function FinanceFilters({
                         </button>
                     )}
                 </div>
+
+                {onGenerateMonthlyCharges && !selectedCount && !readOnly && (
+                    <button
+                        onClick={onGenerateMonthlyCharges}
+                        disabled={loading || isSyncing}
+                        style={{
+                            padding: '0 18px', height: '46px', borderRadius: '10px', border: 'none',
+                            background: (loading || isSyncing) ? '#e2e8f0' : '#9a1a1f',
+                            color: (loading || isSyncing) ? '#94a3b8' : '#fff',
+                            cursor: (loading || isSyncing) ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            fontWeight: '800', fontSize: '0.9rem',
+                            boxShadow: (loading || isSyncing) ? 'none' : '0 4px 12px rgba(154, 26, 31, 0.25)'
+                        }}
+                        title="Abrir a mensalidade do mês para todos os alunos ativos de uma vez"
+                    >
+                        <Zap size={18} />
+                        Gerar Mensalidades do Mês
+                    </button>
+                )}
 
                 {onViewManualCharges && !selectedCount && !readOnly && (
                     <button

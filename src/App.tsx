@@ -55,7 +55,9 @@ import StudentRadio from './pages/StudentRadio';
 import StudentHorarios from './pages/StudentHorarios';
 import StudentStore from './pages/StudentStore';
 import StudentAutorizacoes from './pages/StudentAutorizacoes';
+import StudentPatrocinadores from './pages/StudentPatrocinadores';
 import MandatoryContractPage from './pages/MandatoryContractPage';
+import StudentContractView from './pages/StudentContractView';
 
 // Teacher Portal Imports
 import TeacherLayout from './layouts/TeacherLayout';
@@ -105,7 +107,8 @@ function App() {
             {/* Student Routes */}
             {/* Student Routes */}
             <Route path="/aluno/login" element={<StudentLogin />} />
-            <Route path="/aluno/contrato-obrigatorio" element={<MandatoryContractPage />} />
+            <Route path="/aluno/contrato-obrigatorio/:registrationId?/:studentIndex?" element={<MandatoryContractPage />} />
+            <Route path="/aluno/contrato/:id/:studentIndex" element={<StudentContractView />} />
             <Route path="/aluno" element={<StudentLayout />}>
               <Route path="dashboard" element={<StudentHome />} />
               <Route path="carteirinha" element={<StudentCarteirinha />} />
@@ -123,6 +126,7 @@ function App() {
               <Route path="horarios" element={<StudentHorarios />} />
               <Route path="loja" element={<StudentStore />} />
               <Route path="autorizacoes" element={<StudentAutorizacoes />} />
+              <Route path="patrocinadores" element={<StudentPatrocinadores />} />
               <Route index element={<Navigate to="dashboard" replace />} />
             </Route>
 

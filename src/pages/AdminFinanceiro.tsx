@@ -18,6 +18,7 @@ import { useFinancialOperations } from './AdminFinanceiroComponents/useFinancial
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
 import { ManualChargesModal } from './AdminFinanceiroComponents/ManualChargesModal';
 import { OverdueStudentsModal } from './AdminFinanceiroComponents/OverdueStudentsModal';
+import { MonthlyChargesModal } from './AdminFinanceiroComponents/MonthlyChargesModal';
 
 export default function AdminFinanceiro() {
     const { showAlert } = useDialog();
@@ -38,6 +39,7 @@ export default function AdminFinanceiro() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
     const [isManualChargesModalOpen, setIsManualChargesModalOpen] = useState(false);
     const [isOverdueModalOpen, setIsOverdueModalOpen] = useState(false);
+    const [isMonthlyChargesModalOpen, setIsMonthlyChargesModalOpen] = useState(false);
     const observerTarget = useRef<HTMLDivElement>(null);
     const location = useLocation();
     const navigate = useNavigate();
@@ -58,8 +60,15 @@ export default function AdminFinanceiro() {
         generateBatchCarnet,
         handleReceiveInCash,
         handleSmartSync: handleSmartSyncBase,
-        handleGlobalSync: handleGlobalSyncBase
+        handleGlobalSync: handleGlobalSyncBase,
+        paymentConfig
     } = useFinancialOperations({ workerUrl, setRegistrations });
+
+    // Atualiza a linha do aluno na lista assim que a cobranca do mes e criada,
+    // sem precisar recarregar a tela inteira.
+    const handleRegistrationStatusUpdated = (registrationId: string, status: Record<string, any>) => {
+        setRegistrations(prev => prev.map(r => (r.id === registrationId ? { ...r, ...status } as StudentData : r)));
+    };
 
     const handleGlobalSync = async () => {
         setIsSyncing(true);
@@ -433,6 +442,7 @@ export default function AdminFinanceiro() {
                 onClearAll={() => setSelectedIds([])}
                 selectedCount={selectedIds.length}
                 onViewManualCharges={() => setIsManualChargesModalOpen(true)}
+                onGenerateMonthlyCharges={() => setIsMonthlyChargesModalOpen(true)}
                 isSyncing={isSyncing}
                 loading={loading}
                 readOnly={!canEdit}
@@ -495,6 +505,17 @@ export default function AdminFinanceiro() {
                 isOpen={isManualChargesModalOpen}
                 onClose={() => setIsManualChargesModalOpen(false)}
                 registrations={registrations}
+            />
+
+            <MonthlyChargesModal
+                isOpen={isMonthlyChargesModalOpen}
+                onClose={() => setIsMonthlyChargesModalOpen(false)}
+                registrations={registrations}
+                plans={plans}
+                workerUrl={workerUrl}
+                paymentConfig={paymentConfig}
+                onFinished={fetchRegistrations}
+                onRegistrationUpdated={handleRegistrationStatusUpdated}
             />
 
             <OverdueStudentsModal
