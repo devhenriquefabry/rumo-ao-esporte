@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageContainer from '../components/PageContainer';
 import PageTitle from '../components/PageTitle';
 import { PaymentCard } from '../components/PaymentCard';
+import SponsorsCarousel from '../components/SponsorsCarousel';
 import { syncStudentFinancialData } from '../utils/financialSync';
 import { listarAutorizacoesDeConvocacoes, listarConvocacoesComAutorizacao } from '../utils/autorizacaoService';
 import React from 'react';
@@ -877,6 +878,8 @@ export default function StudentHome() {
                             );
                         })}
                     </div>
+
+                    <SponsorsCarousel variant="light" />
                 </div>
             </div>
         </PageContainer>

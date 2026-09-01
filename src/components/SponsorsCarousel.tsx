@@ -1,4 +1,5 @@
-import { sponsors } from '../data/sponsors';
+import { MessageCircle } from 'lucide-react';
+import { sponsors, sponsorWhatsappLink } from '../data/sponsors';
 
 interface SponsorsCarouselProps {
     /** 'dark' para fundos escuros (landing), 'light' para fundos claros. */
@@ -84,6 +85,17 @@ export default function SponsorsCarousel({
                         background: var(--sc-tile-bg);
                         border: 1px solid var(--sc-tile-border);
                         box-shadow: var(--sc-tile-shadow);
+                        display: block;
+                        position: relative;
+                        cursor: pointer;
+                        transition: transform 0.25s ease, box-shadow 0.25s ease;
+                    }
+
+                    .sponsors-carousel__item:hover,
+                    .sponsors-carousel__item:focus-visible {
+                        transform: translateY(-4px);
+                        box-shadow: 0 14px 30px rgba(6, 26, 64, 0.30);
+                        outline: none;
                     }
 
                     .sponsors-carousel__item img {
@@ -91,6 +103,27 @@ export default function SponsorsCarousel({
                         height: 100%;
                         object-fit: cover;
                         display: block;
+                    }
+
+                    /* Selo de WhatsApp: deixa claro que a logo abre uma conversa. */
+                    .sponsors-carousel__wa {
+                        position: absolute;
+                        right: 4px;
+                        bottom: 4px;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: #25D366;
+                        color: #fff;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+                    }
+
+                    .sponsors-carousel__wa svg {
+                        width: 12px;
+                        height: 12px;
                     }
 
                     @keyframes sponsors-scroll {
@@ -110,6 +143,12 @@ export default function SponsorsCarousel({
                         }
                         .sponsors-carousel__track {
                             gap: 14px;
+                        }
+                        .sponsors-carousel__wa {
+                            width: 18px;
+                            height: 18px;
+                            right: 3px;
+                            bottom: 3px;
                         }
                     }
 
@@ -131,20 +170,30 @@ export default function SponsorsCarousel({
                     className="sponsors-carousel__track"
                     style={{ animationDuration: `${duration}s` }}
                 >
-                    {loop.map((sponsor, index) => (
-                        <div
-                            className="sponsors-carousel__item"
-                            key={`${sponsor.name}-${index}`}
-                            title={sponsor.name}
-                        >
-                            <img
-                                src={sponsor.logo}
-                                alt={sponsor.name}
-                                loading="lazy"
-                                aria-hidden={index >= sponsors.length}
-                            />
-                        </div>
-                    ))}
+                    {loop.map((sponsor, index) => {
+                        // A segunda cópia existe só para o loop: fica fora da
+                        // navegação por teclado e do leitor de tela.
+                        const isClone = index >= sponsors.length;
+
+                        return (
+                            <a
+                                className="sponsors-carousel__item"
+                                key={`${sponsor.name}-${index}`}
+                                href={sponsorWhatsappLink(sponsor)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={`Falar com ${sponsor.name} no WhatsApp`}
+                                aria-label={`Falar com ${sponsor.name} no WhatsApp`}
+                                aria-hidden={isClone}
+                                tabIndex={isClone ? -1 : 0}
+                            >
+                                <img src={sponsor.logo} alt={sponsor.name} loading="lazy" />
+                                <span className="sponsors-carousel__wa" aria-hidden="true">
+                                    <MessageCircle strokeWidth={2.5} />
+                                </span>
+                            </a>
+                        );
+                    })}
                 </div>
             </div>
         </div>

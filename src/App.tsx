@@ -55,7 +55,6 @@ import StudentRadio from './pages/StudentRadio';
 import StudentHorarios from './pages/StudentHorarios';
 import StudentStore from './pages/StudentStore';
 import StudentAutorizacoes from './pages/StudentAutorizacoes';
-import StudentPatrocinadores from './pages/StudentPatrocinadores';
 import MandatoryContractPage from './pages/MandatoryContractPage';
 import StudentContractView from './pages/StudentContractView';
 
@@ -126,7 +125,6 @@ function App() {
               <Route path="horarios" element={<StudentHorarios />} />
               <Route path="loja" element={<StudentStore />} />
               <Route path="autorizacoes" element={<StudentAutorizacoes />} />
-              <Route path="patrocinadores" element={<StudentPatrocinadores />} />
               <Route index element={<Navigate to="dashboard" replace />} />
             </Route>
 

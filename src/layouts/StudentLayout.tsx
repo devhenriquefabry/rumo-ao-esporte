@@ -31,8 +31,7 @@ import {
     Store,
     Download,
     FileSignature,
-    CreditCard,
-    Handshake
+    CreditCard
 } from 'lucide-react';
 
 const MAIN_ADMIN_EMAIL = ((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase();
@@ -583,7 +582,6 @@ export default function StudentLayout() {
                             <NavItem to="/aluno/autorizacoes" label="Autorizações" icon={<FileSignature size={20} />} />
                             {storeEnabled && <NavItem to="/aluno/loja" label="Loja do Clube" icon={<Store size={20} />} />}
                             <NavItem to="/aluno/horarios" label="Horários" icon={<Clock size={20} />} />
-                            <NavItem to="/aluno/patrocinadores" label="Patrocinadores" icon={<Handshake size={20} />} />
                             <NavItem to="/aluno/configuracoes" label="Configurações" icon={<Settings size={20} />} />
                             <NavItem to="/aluno/whatsapp" label="Fale Conosco" icon={<MessageCircle size={20} />} />
 
@@ -782,7 +780,6 @@ export default function StudentLayout() {
                         {/* Section 3: Institucional */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                             <MenuGridItem icon={Instagram} label="Instagram" onClick={() => window.open('https://www.instagram.com/rumoaoesporte2025/', '_blank')} />
-                            <MenuGridItem icon={Handshake} label="Patrocinadores" link="/aluno/patrocinadores" />
                         </div>
 
                         <div style={{ marginTop: '10px' }}>
