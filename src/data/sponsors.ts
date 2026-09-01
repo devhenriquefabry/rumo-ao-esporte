@@ -15,6 +15,7 @@ export const sponsors: Sponsor[] = [
     { name: 'King Lanches', logo: '/patrocinadores/king-lanches.png', whatsapp: '5533984595910' },
     { name: 'Wesley Material de Construção', logo: '/patrocinadores/wesley-construcao.png', whatsapp: '5533984105250' },
     { name: 'Auto Escola Raça', logo: '/patrocinadores/autoescola-raca.png', whatsapp: '5533999601009' },
+    { name: 'Impacto Performance', logo: '/patrocinadores/impacto-performance.png', whatsapp: '5533999341626' },
     { name: 'Templone Barbearia', logo: '/patrocinadores/templone-barbearia.png', whatsapp: '5533984021271' },
     { name: 'Arena G-Bol', logo: '/patrocinadores/g-bol.png', whatsapp: '5533984052123' },
     { name: 'Rodrigues de Carvalho Advogados', logo: '/patrocinadores/rodrigues-de-carvalho-advogados.png', whatsapp: '5533999988635' },
