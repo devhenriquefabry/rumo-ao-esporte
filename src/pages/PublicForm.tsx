@@ -7,6 +7,7 @@ import { collection, addDoc, serverTimestamp, doc, getDoc, getDocs, query, where
 import { findOrCreateTurma } from '../utils/turmaService';
 import { SCHEDULE_OPTIONS } from '../utils/turmasConstants';
 import SignatureCanvas from '../components/SignatureCanvas';
+import SponsorsCarousel from '../components/SponsorsCarousel';
 import { notifyPendingApprovalRegistration } from './AdminEvolutionMessages/messagingApi';
 import { normalizeNameKey } from '../utils/nameUtils';
 import { resolveSafeResponsavelEmail } from '../utils/responsavelIdentity';
@@ -441,6 +442,8 @@ const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
         >
           Acesso do Aluno / Responsável
         </button>
+
+        <SponsorsCarousel variant="dark" />
       </div>
     </div>
   );
