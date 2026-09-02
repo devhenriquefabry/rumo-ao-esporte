@@ -20,6 +20,7 @@ export const sponsors: Sponsor[] = [
     { name: 'Arena G-Bol', logo: '/patrocinadores/g-bol.png', whatsapp: '5533984052123' },
     { name: 'Rodrigues de Carvalho Advogados', logo: '/patrocinadores/rodrigues-de-carvalho-advogados.png', whatsapp: '5533999988635' },
     { name: 'Sacolão do Valdinei', logo: '/patrocinadores/sacolao-do-valdinei.png', whatsapp: '5533999682084' },
+    { name: 'Supermercado SuperMil', logo: '/patrocinadores/supermil.png', whatsapp: '553333422383' },
 ];
 
 /** Mensagem que já vai preenchida ao abrir a conversa com o patrocinador. */
