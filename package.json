@@ -8,7 +8,8 @@
     "start": "npm run dev",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "eventos:local": "npx -y firebase-tools@15.35.0 emulators:exec --project rumo-ao-esporte --only firestore,auth \"node scripts/eventos-local/seed.mjs && vite --mode emulador\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

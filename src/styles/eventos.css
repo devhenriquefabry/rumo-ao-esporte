@@ -466,3 +466,11 @@
 @media (max-width: 560px) {
     .ev-span2 { grid-column: auto; }
 }
+
+/* App.css esconde todos os checkboxes (display:none) para usar caixas customizadas
+   no formulário de cadastro. No módulo de eventos o checkbox é o próprio controle:
+   precisa aparecer (ex.: aceite obrigatório do regulamento). */
+.ev-check input[type="checkbox"] {
+    display: inline-block;
+    appearance: auto;
+}

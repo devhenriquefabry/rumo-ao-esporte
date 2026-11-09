@@ -110,7 +110,22 @@ classificação a partir da súmula digital em tempo real, integração com cron
 (importação de planilha/chip), confirmação de PIX por webhook no Worker, e-mail/WhatsApp
 aos responsáveis quando o regulamento mudar.
 
-## 8. Como testar
+## 8. Teste local (antes de publicar)
+
+```bash
+npm run eventos:local
+```
+
+Sobe o Firestore e o Login (Firebase Auth) **simulados no próprio computador**, com as
+regras novas, cria dados de exemplo e abre o site em http://localhost:5173.
+Nada é gravado em produção; os dados são recriados a cada execução.
+
+- Admin: http://localhost:5173/admin/login — `rumoaoesporte@admin.com` / `admin123`
+- Responsável: http://localhost:5173/eventos/entrar — `responsavel@teste.com` / `teste123`
+- PIX em modo sandbox (cobranças de teste no Worker) com botão "Simular pagamento".
+- Requisitos: Node 20+, Java 21+ (para o emulador) e o arquivo `.env` do projeto.
+
+## 9. Testes automatizados
 
 Regras de negócio (classificação, desempate, todos contra todos, idade, tempos):
 
@@ -125,7 +140,7 @@ funcionário e admin principal), no emulador:
 npx firebase-tools emulators:exec --project demo-eventos --only firestore "node tests/eventos/regras-firestore.test.cjs"
 ```
 
-## 9. Publicação
+## 10. Publicação
 
 1. `npm run build` e deploy do Hosting, como já é feito hoje.
 2. **Publicar as novas regras do Firestore** (`firebase deploy --only firestore:rules`) —

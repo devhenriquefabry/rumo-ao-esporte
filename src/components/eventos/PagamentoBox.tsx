@@ -7,6 +7,9 @@ import { formatarDataHora, formatarMoeda, mensagemErro } from '../../utils/event
 import { pdfComprovantePagamento } from '../../utils/eventos/eventosPdf';
 import { useDialog } from '../../context/CustomDialogContext';
 import { Alerta } from './EventosUI';
+import { MODO_EMULADOR } from '../../firebase';
+
+const workerUrl = import.meta.env.VITE_WORKER_URL as string;
 
 interface Props {
     evento: Evento;
@@ -44,6 +47,21 @@ export default function PagamentoBox({ evento, categoria, inscricaoId, inscritoN
             showAlert(`${mensagemErro(e, 'Erro ao gerar o PIX.')} Se preferir, pague diretamente à organização e envie o comprovante abaixo.`, 'error');
         } finally {
             setOcupado('');
+        }
+    };
+
+    /** Só no modo de teste local: marca a cobrança sandbox como paga no Worker. */
+    const simularPagamento = async () => {
+        if (!pagamento.transacaoId) return;
+        try {
+            const res = await fetch(`${workerUrl}/payment-providers/cora/stage-pay`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ invoiceId: pagamento.transacaoId }),
+            });
+            if (!res.ok) throw new Error('falha');
+            showAlert('Pagamento de teste simulado. Agora clique em "Já paguei — confirmar pagamento".', 'info');
+        } catch {
+            showAlert('Não foi possível simular o pagamento de teste.', 'error');
         }
     };
 
@@ -129,6 +147,11 @@ export default function PagamentoBox({ evento, categoria, inscricaoId, inscritoN
                     <button className="ev-btn azul grande bloco" style={{ marginTop: 14 }} onClick={verificar} disabled={!!ocupado}>
                         <RefreshCw size={18} className={ocupado === 'verificar' ? 'spin' : ''} /> {ocupado === 'verificar' ? 'Verificando...' : 'Já paguei — confirmar pagamento'}
                     </button>
+                    {MODO_EMULADOR && pagamento.transacaoId.startsWith('test_inv_') && (
+                        <button className="ev-btn ouro bloco" style={{ marginTop: 8 }} onClick={simularPagamento}>
+                            Simular pagamento (somente modo teste)
+                        </button>
+                    )}
                 </>
             )}
 
