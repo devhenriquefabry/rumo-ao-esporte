@@ -188,6 +188,100 @@ service cloud.firestore {
       allow read, write: if isStaff();
     }
 
+    // ---------- Eventos (campeonatos, torneios e corridas) ----------
+    //
+    // - rae_eventos / rae_evento_jogos / rae_evento_vagas: leitura pública
+    //   (página do evento, tabela de jogos, classificação e resultados).
+    // - rae_evento_equipes / rae_evento_inscricoes: dados pessoais (atletas,
+    //   documentos, CPF) — só o dono (ownerUid) e o staff.
+    // - Depois de FINALIZADA, o responsável não altera mais a relação; só pode
+    //   registrar ciência de nova versão do regulamento (e, na corrida,
+    //   reenviar documento rejeitado). Correções excepcionais = staff.
+    // - Jogo encerrado só pode ser alterado pelo administrador principal.
+
+    function isOwnerUid(data) {
+      return signedIn() && data.ownerUid == request.auth.uid;
+    }
+
+    function ownerNaoMudouChaves() {
+      return request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.eventId == resource.data.eventId;
+    }
+
+    function soMudou(campos) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos);
+    }
+
+    match /rae_evento_contas/{uid} {
+      allow read, write: if (signedIn() && request.auth.uid == uid) || isStaff();
+    }
+
+    match /rae_eventos/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /rae_evento_jogos/{id} {
+      allow read: if true;
+      allow create, delete: if isStaff();
+      allow update: if isMainAdmin()
+        || (isStaff() && !(resource.data.status in ['encerrado', 'wo']));
+    }
+
+    match /rae_evento_vagas/{id} {
+      allow read: if true;
+      allow create: if isStaff() || isOwnerUid(request.resource.data);
+      allow update: if isStaff() || (
+        isOwnerUid(resource.data) && ownerNaoMudouChaves()
+        && soMudou(['nome', 'status', 'resultado', 'numeroPeito', 'categoriaId', 'grupo'])
+        && request.resource.data.get('resultado', null) == resource.data.get('resultado', null)
+        && request.resource.data.get('numeroPeito', null) == resource.data.get('numeroPeito', null)
+      );
+      allow delete: if isStaff();
+    }
+
+    match /rae_evento_equipes/{id} {
+      allow read: if isStaff() || isOwnerUid(resource.data);
+      allow create: if isStaff() || (
+        isOwnerUid(request.resource.data)
+        && request.resource.data.status in ['aguardando_pagamento', 'liberada']
+        && request.resource.data.atletas.size() == 0
+      );
+      allow update: if isStaff() || (
+        isOwnerUid(resource.data) && ownerNaoMudouChaves()
+        && resource.data.status != 'cancelada'
+        && request.resource.data.get('alteracoes', []) == resource.data.get('alteracoes', [])
+        && (
+          (resource.data.status != 'finalizada' && request.resource.data.status != 'cancelada')
+          || soMudou(['aceites', 'updatedAt'])
+        )
+      );
+      allow delete: if isStaff();
+    }
+
+    match /rae_evento_inscricoes/{id} {
+      allow read: if isStaff() || isOwnerUid(resource.data);
+      allow create: if isStaff() || (
+        isOwnerUid(request.resource.data)
+        && request.resource.data.status in ['aguardando_pagamento', 'finalizada']
+        && request.resource.data.numeroPeito == null
+        && request.resource.data.resultado == null
+      );
+      allow update: if isStaff() || (
+        isOwnerUid(resource.data) && ownerNaoMudouChaves()
+        && resource.data.status != 'cancelada'
+        && request.resource.data.status != 'cancelada'
+        && request.resource.data.get('numeroPeito', null) == resource.data.get('numeroPeito', null)
+        && request.resource.data.get('resultado', null) == resource.data.get('resultado', null)
+        && request.resource.data.get('alteracoes', []) == resource.data.get('alteracoes', [])
+        && (
+          resource.data.status != 'finalizada'
+          || soMudou(['aceites', 'documentoUrl', 'documentoNome', 'documentoStatus', 'motivoRejeicao', 'updatedAt'])
+        )
+      );
+      allow delete: if isStaff();
+    }
+
     // ---------- Tudo mais: negado por padrão ----------
 
     match /{document=**} {

@@ -64,6 +64,7 @@ export const ALL_SYSTEM_ROUTES: RouteCategory[] = [
             { path: '/admin/alugueis', label: 'Aluguel de Espaços' },
             { path: '/admin/midias', label: 'Mídias dos Atletas' },
             { path: '/admin/jogos/convocacao', label: 'Jogos / Convocação' },
+            { path: '/admin/eventos', label: 'Eventos, Inscrições e Súmulas (inclui súmula digital)' },
             { path: '/aluno/autorizacoes', label: 'Autorizações de Convocação (Portal do Aluno)' },
         ]
     },

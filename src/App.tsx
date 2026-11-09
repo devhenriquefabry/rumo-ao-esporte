@@ -89,6 +89,19 @@ import AdminMensagensHistorico from './pages/AdminMensagens/AdminMensagensHistor
 import AdminEvolutionMessages from './pages/AdminEvolutionMessages';
 import AdminStore from './pages/AdminStore';
 
+// Eventos (campeonatos, torneios e corridas)
+import EventosLista from './pages/Eventos/EventosLista';
+import EventoPublico from './pages/Eventos/EventoPublico';
+import EventoEntrar from './pages/Eventos/EventoEntrar';
+import EventoInscrever from './pages/Eventos/EventoInscrever';
+import MinhaArea from './pages/Eventos/MinhaArea';
+import EquipePainel from './pages/Eventos/EquipePainel';
+import InscricaoPainel from './pages/Eventos/InscricaoPainel';
+import AdminEventos from './pages/AdminEventos';
+import AdminEventoForm from './pages/AdminEventos/AdminEventoForm';
+import AdminEventoDetalhe from './pages/AdminEventos/AdminEventoDetalhe';
+import AdminSumulaDigital from './pages/AdminEventos/AdminSumulaDigital';
+
 function App() {
   return (
     <CustomDialogProvider>
@@ -102,6 +115,15 @@ function App() {
             <Route path="/solicitacoes-sistema-escola" element={<SchoolSystemRequestsView />} />
             <Route path="/chamada/:modalidadeId/:turmaId" element={<ChamadaTurma />} />
             <Route path="/chamada-v2/:id" element={<ChamadaTurma />} />
+
+            {/* Eventos — páginas públicas e área do responsável */}
+            <Route path="/eventos" element={<EventosLista />} />
+            <Route path="/eventos/entrar" element={<EventoEntrar />} />
+            <Route path="/eventos/minha-area" element={<MinhaArea />} />
+            <Route path="/eventos/minha-area/equipe/:id" element={<EquipePainel />} />
+            <Route path="/eventos/minha-area/inscricao/:id" element={<InscricaoPainel />} />
+            <Route path="/eventos/:id" element={<EventoPublico />} />
+            <Route path="/eventos/:id/inscrever" element={<EventoInscrever />} />
 
             {/* Student Routes */}
             {/* Student Routes */}
@@ -181,6 +203,11 @@ function App() {
               <Route path="documentos" element={<AdminDocumentos />} />
               <Route path="store" element={<AdminStore />} />
               <Route path="jogos/convocacao/:id" element={<AdminConvocacaoDetails />} />
+              <Route path="eventos" element={<AdminEventos />} />
+              <Route path="eventos/novo" element={<AdminEventoForm />} />
+              <Route path="eventos/jogo/:id/sumula" element={<AdminSumulaDigital />} />
+              <Route path="eventos/:id" element={<AdminEventoDetalhe />} />
+              <Route path="eventos/:id/editar" element={<AdminEventoForm />} />
               <Route path="mensagens" element={<AdminMensagens />} />
               <Route path="mensagens/cobrancas" element={<AdminMensagensCobrancas />} />
               <Route path="mensagens/fila" element={<AdminMensagensFila />} />
