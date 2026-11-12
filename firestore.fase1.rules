@@ -1,0 +1,175 @@
+rules_version = '2';
+
+// FASE 1 — protege SÓ o módulo de Eventos; o resto do banco continua aberto,
+// exatamente como está em produção hoje.
+//
+// Contexto: até esta fase, o Firestore de produção tem
+//   match /{document=**} { allow read, write: if true; }
+// (o arquivo `firestore.rules`, que fecha o banco inteiro, nunca foi publicado
+// porque trava partes do sistema — ex.: o Worker da Cloudflare acessa o banco
+// como visitante anônimo e a tela pública de chamada lê cadastros sem login).
+//
+// IMPORTANTE: no Firestore, quando mais de uma regra casa com um documento,
+// basta UMA permitir para o acesso passar. Por isso a regra "liberada" abaixo
+// EXCLUI explicitamente as coleções de eventos — se ela as incluísse, anularia
+// todas as proteções.
+//
+// O bloco de Eventos é o mesmo de `firestore.rules`; só muda a função isStaff() (veja abaixo).
+// Quando o restante do sistema estiver pronto para fechar, a fase 2 é trocar
+// este arquivo por `firestore.rules` em firebase.json.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers de identidade ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function callerEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // E-mail fixo do administrador principal (VITE_MAIN_ADMIN_EMAIL).
+    function isMainAdmin() {
+      return signedIn() && callerEmail() == 'rumoaoesporte@admin.com';
+    }
+
+    // FASE 1: "staff" aqui significa OPERADOR DE EVENTOS = administrador principal
+    // ou alguém que ele cadastrou em rae_evento_staff (só o admin principal grava lá).
+    // De propósito NÃO usa `staff_access`: essa coleção segue aberta nesta fase
+    // (o login de funcionário grava nela), então qualquer pessoa poderia se
+    // cadastrar nela e ganhar acesso aos dados dos eventos.
+    function isStaff() {
+      return isMainAdmin() || (
+        signedIn() &&
+        exists(/databases/$(database)/documents/rae_evento_staff/$(callerEmail())) &&
+        get(/databases/$(database)/documents/rae_evento_staff/$(callerEmail())).data.active == true
+      );
+    }
+
+    // Responsável dono deste cadastro específico (compara com o e-mail já
+    // gravado no documento, não com o que o cliente alega).
+    function isOwnerOf(data) {
+      return signedIn()
+        && 'responsavel' in data
+        && 'email' in data.responsavel
+        && data.responsavel.email.lower() == callerEmail();
+    }
+
+    // ---------- Eventos (campeonatos, torneios e corridas) ----------
+    //
+    // - rae_eventos / rae_evento_jogos / rae_evento_vagas: leitura pública
+    //   (página do evento, tabela de jogos, classificação e resultados).
+    // - rae_evento_equipes / rae_evento_inscricoes: dados pessoais (atletas,
+    //   documentos, CPF) — só o dono (ownerUid) e o staff.
+    // - Depois de FINALIZADA, o responsável não altera mais a relação; só pode
+    //   registrar ciência de nova versão do regulamento (e, na corrida,
+    //   reenviar documento rejeitado). Correções excepcionais = staff.
+    // - Jogo encerrado só pode ser alterado pelo administrador principal.
+
+    function isOwnerUid(data) {
+      return signedIn() && data.ownerUid == request.auth.uid;
+    }
+
+    function ownerNaoMudouChaves() {
+      return request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.eventId == resource.data.eventId;
+    }
+
+    function soMudou(campos) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos);
+    }
+
+    match /rae_evento_staff/{email} {
+      allow read, write: if isMainAdmin();
+    }
+
+    match /rae_evento_contas/{uid} {
+      allow read, write: if (signedIn() && request.auth.uid == uid) || isStaff();
+    }
+
+    match /rae_eventos/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /rae_evento_jogos/{id} {
+      allow read: if true;
+      allow create, delete: if isStaff();
+      allow update: if isMainAdmin()
+        || (isStaff() && !(resource.data.status in ['encerrado', 'wo']));
+    }
+
+    match /rae_evento_vagas/{id} {
+      allow read: if true;
+      allow create: if isStaff() || isOwnerUid(request.resource.data);
+      allow update: if isStaff() || (
+        isOwnerUid(resource.data) && ownerNaoMudouChaves()
+        && soMudou(['nome', 'status', 'resultado', 'numeroPeito', 'categoriaId', 'grupo'])
+        && request.resource.data.get('resultado', null) == resource.data.get('resultado', null)
+        && request.resource.data.get('numeroPeito', null) == resource.data.get('numeroPeito', null)
+      );
+      allow delete: if isStaff();
+    }
+
+    match /rae_evento_equipes/{id} {
+      allow read: if isStaff() || isOwnerUid(resource.data);
+      allow create: if isStaff() || (
+        isOwnerUid(request.resource.data)
+        && request.resource.data.status in ['aguardando_pagamento', 'liberada']
+        && request.resource.data.atletas.size() == 0
+      );
+      allow update: if isStaff() || (
+        isOwnerUid(resource.data) && ownerNaoMudouChaves()
+        && resource.data.status != 'cancelada'
+        && request.resource.data.get('alteracoes', []) == resource.data.get('alteracoes', [])
+        && (
+          (resource.data.status != 'finalizada' && request.resource.data.status != 'cancelada')
+          || soMudou(['aceites', 'updatedAt'])
+        )
+      );
+      allow delete: if isStaff();
+    }
+
+    match /rae_evento_inscricoes/{id} {
+      allow read: if isStaff() || isOwnerUid(resource.data);
+      allow create: if isStaff() || (
+        isOwnerUid(request.resource.data)
+        && request.resource.data.status in ['aguardando_pagamento', 'finalizada']
+        && request.resource.data.numeroPeito == null
+        && request.resource.data.resultado == null
+      );
+      allow update: if isStaff() || (
+        isOwnerUid(resource.data) && ownerNaoMudouChaves()
+        && resource.data.status != 'cancelada'
+        && request.resource.data.status != 'cancelada'
+        && request.resource.data.get('numeroPeito', null) == resource.data.get('numeroPeito', null)
+        && request.resource.data.get('resultado', null) == resource.data.get('resultado', null)
+        && request.resource.data.get('alteracoes', []) == resource.data.get('alteracoes', [])
+        && (
+          resource.data.status != 'finalizada'
+          || soMudou(['aceites', 'documentoUrl', 'documentoNome', 'documentoStatus', 'motivoRejeicao', 'updatedAt'])
+        )
+      );
+      allow delete: if isStaff();
+    }
+
+    // ---------- Todo o resto: MANTÉM o comportamento atual (aberto) ----------
+    //
+    // Não é uma proteção — é a ausência de mudança. Qualquer coleção que NÃO seja
+    // de eventos segue como está hoje, até a fase 2.
+
+    function colecaoDeEventos(col) {
+      return col in [
+        'rae_eventos', 'rae_evento_equipes', 'rae_evento_inscricoes',
+        'rae_evento_vagas', 'rae_evento_jogos', 'rae_evento_contas', 'rae_evento_staff'
+      ];
+    }
+
+    match /{colecao}/{documento=**} {
+      allow read, write: if !colecaoDeEventos(colecao);
+    }
+  }
+}

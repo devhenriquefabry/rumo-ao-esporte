@@ -133,19 +133,38 @@ Regras de negócio (classificação, desempate, todos contra todos, idade, tempo
 npx esbuild tests/eventos/regras-negocio.test.ts --bundle --platform=node --format=esm | node --input-type=module
 ```
 
-Regras de segurança do Firestore (35 cenários: dono, outro usuário, público,
-funcionário e admin principal), no emulador:
+Regras de segurança do Firestore (68 cenários: dono, outro usuário, público,
+operador, admin principal e "resto do banco continua aberto"), no emulador.
+Para testar o arquivo da fase 2: `REGRAS=firestore.rules` antes do comando.
 
 ```bash
 npx firebase-tools emulators:exec --project demo-eventos --only firestore "node tests/eventos/regras-firestore.test.cjs"
 ```
 
-## 10. Publicação
+## 10. Publicação e segurança do banco (fases)
 
-1. `npm run build` e deploy do Hosting, como já é feito hoje.
-2. **Publicar as novas regras do Firestore** (`firebase deploy --only firestore:rules`) —
-   sem isso as coleções novas ficam bloqueadas pela regra "nega tudo".
-3. Nenhuma alteração no Worker é necessária: o módulo usa os endpoints já existentes
-   (`/images/upload`, `/create-payment`, `/payment-status`, `/payments/:id`).
-4. Funcionários: liberar a rota **Eventos** (`/admin/eventos`) no perfil de quem vai
-   operar inscrições ou a súmula digital.
+**Situação encontrada:** o Firestore de produção está **totalmente aberto**
+(`allow read, write: if true`). O arquivo `firestore.rules`, que fecha o banco inteiro, nunca
+foi publicado, porque travaria partes do sistema (o Worker da Cloudflare acessa o banco como
+visitante anônimo; a tela pública de chamada lê cadastros sem login).
+
+**Fase 1 (esta entrega) — `firestore.fase1.rules`** (é a regra que o `firebase.json` publica):
+- Protege **somente** as coleções de eventos (`rae_evento*`). O resto do banco continua aberto,
+  exatamente como hoje.
+- Quem opera eventos = **administrador principal** + e-mails que ele cadastra no cartão
+  "Equipe de operação de eventos" (coleção `rae_evento_staff`, só ele grava).
+- Não usa `staff_access` (aberta nesta fase; senão qualquer pessoa se auto-promoveria a operador).
+- Funcionários só operam eventos se (a) estiverem na equipe de operação **e** (b) tiverem a rota
+  "Eventos" liberada no cadastro de funcionários.
+
+**Fase 2 (futura):** fechar o restante do banco. Antes: dar credencial de serviço ao Worker,
+decidir a tela pública de chamada e testar login de alunos/professores/funcionários. Quando
+pronto, trocar `firestore.fase1.rules` por `firestore.rules` em `firebase.json`.
+
+**Como publicar:**
+1. `npm run build`
+2. `firebase deploy --only firestore:rules` (publica a fase 1)
+3. `firebase deploy --only hosting`
+4. Entrar como administrador principal → Eventos → "Equipe de operação" e cadastrar os funcionários.
+
+O módulo não exige mudanças no Worker (usa `/images/upload`, `/create-payment`, `/payment-status`).

@@ -16,6 +16,7 @@ export const COL_EQUIPES = 'rae_evento_equipes';
 export const COL_INSCRICOES = 'rae_evento_inscricoes';
 export const COL_VAGAS = 'rae_evento_vagas';
 export const COL_JOGOS = 'rae_evento_jogos';
+export const COL_OPERADORES = 'rae_evento_staff';
 
 const workerUrl = import.meta.env.VITE_WORKER_URL as string;
 
@@ -282,3 +283,32 @@ export async function consultarPagamentoPix(transacaoId: string): Promise<boolea
 }
 
 export const pagamentoConfirmado = (p?: PagamentoInscricao) => p?.status === 'confirmado' || p?.status === 'isento';
+
+
+// ---------- Operadores de eventos (só o administrador principal gerencia) ----------
+
+export interface OperadorEvento {
+    email: string;
+    nome: string;
+    active: boolean;
+    adicionadoPor?: string;
+    adicionadoEm?: string;
+}
+
+const chaveEmail = (email: string) => email.trim().toLowerCase();
+
+export async function listarOperadores(): Promise<OperadorEvento[]> {
+    const snap = await getDocs(collection(db, COL_OPERADORES));
+    return snap.docs.map(d => ({ email: d.id, ...(d.data() as Omit<OperadorEvento, 'email'>) }))
+        .sort((a, b) => a.email.localeCompare(b.email));
+}
+
+export async function adicionarOperador(email: string, nome: string, por: string) {
+    await setDoc(doc(db, COL_OPERADORES, chaveEmail(email)), {
+        nome: nome.trim(), active: true, adicionadoPor: por, adicionadoEm: new Date().toISOString(),
+    });
+}
+
+export async function removerOperador(email: string) {
+    await deleteDoc(doc(db, COL_OPERADORES, chaveEmail(email)));
+}

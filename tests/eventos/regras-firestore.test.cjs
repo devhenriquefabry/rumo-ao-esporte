@@ -8,14 +8,20 @@ const fs = require('fs');
 (async () => {
   const env = await initializeTestEnvironment({
     projectId: 'demo-eventos',
-    firestore: { rules: fs.readFileSync(path.join(RAIZ, 'firestore.rules'), 'utf8'), host: '127.0.0.1', port: 8089 },
+    firestore: { rules: fs.readFileSync(path.join(RAIZ, process.env.REGRAS || 'firestore.fase1.rules'), 'utf8'), host: '127.0.0.1', port: 8089 },
   });
   const anon = env.unauthenticatedContext().firestore();
   const dono = env.authenticatedContext('dono', { email: 'dono@x.com' }).firestore();
   const outro = env.authenticatedContext('outro', { email: 'outro@x.com' }).firestore();
   const admin = env.authenticatedContext('adm', { email: 'rumoaoesporte@admin.com' }).firestore();
   const func = env.authenticatedContext('func', { email: 'func@x.com' }).firestore();
-  await env.withSecurityRulesDisabled(async c => { await setDoc(doc(c.firestore(), 'staff_access/func@x.com'), { active: true }); });
+  await env.withSecurityRulesDisabled(async c => {
+    await setDoc(doc(c.firestore(), 'rae_evento_staff/func@x.com'), { active: true });
+    await setDoc(doc(c.firestore(), 'rae_evento_staff/inativo@x.com'), { active: false });
+    await setDoc(doc(c.firestore(), 'employees/e1'), { email: 'func2@x.com', nome: 'Func 2' });
+  });
+  const inativo = env.authenticatedContext('inativo', { email: 'inativo@x.com' }).firestore();
+  const func2 = env.authenticatedContext('func2', { email: 'func2@x.com' }).firestore();
 
   let ok = 0;
   const t = async (nome, p) => { try { await p; ok++; console.log('✔', nome); } catch (e) { console.log('✘', nome, e.message); process.exitCode = 1; } };
@@ -63,6 +69,32 @@ const fs = require('fs');
 
   await t('conta: dono lê o próprio perfil', assertSucceeds(getDoc(doc(dono, 'rae_evento_contas/dono'))));
   await t('conta: outro não lê', assertFails(getDoc(doc(outro, 'rae_evento_contas/dono'))));
+
+
+  // ===== FASE 1: operadores de eventos =====
+  await t('operador inativo não lê equipes', assertFails(getDoc(doc(inativo, 'rae_evento_equipes/t1'))));
+  await t('funcionário NÃO listado não lê equipes', assertFails(getDoc(doc(func2, 'rae_evento_equipes/t1'))));
+  await t('só admin principal grava operadores', assertFails(setDoc(doc(func, 'rae_evento_staff/novo@x.com'), { active: true })));
+  await t('visitante não grava operadores', assertFails(setDoc(doc(anon, 'rae_evento_staff/x@x.com'), { active: true })));
+  await t('responsável não se cadastra como operador', assertFails(setDoc(doc(dono, 'rae_evento_staff/dono@x.com'), { active: true })));
+  await t('admin principal cadastra operador', assertSucceeds(setDoc(doc(admin, 'rae_evento_staff/func2@x.com'), { active: true })));
+  await t('operador recém-cadastrado lê equipes', assertSucceeds(getDoc(doc(func2, 'rae_evento_equipes/t1'))));
+  await t('operador NÃO lê a lista de operadores', assertFails(getDoc(doc(func, 'rae_evento_staff/func@x.com'))));
+
+  // Brecha de auto-promoção: staff_access segue aberta (login de funcionário grava nela),
+  // mas NÃO dá acesso a eventos
+  await t('visitante grava staff_access (comportamento atual preservado)', assertSucceeds(setDoc(doc(outro, 'staff_access/outro@x.com'), { active: true })));
+  await t('...mas isso NÃO dá acesso às equipes', assertFails(getDoc(doc(outro, 'rae_evento_equipes/t1'))));
+  await t('...nem para criar jogos', assertFails(setDoc(doc(outro, 'rae_evento_jogos/jx'), { status: 'agendado' })));
+
+  // ===== FASE 1: resto do banco continua EXATAMENTE como hoje (aberto) =====
+  for (const col of ['rumo_ao_esporte_2026_registrations', 'teachers', 'employees', 'financial_payments', 'turmas', 'system_settings',
+                     'rae_store_orders', 'whatsapp_logs', 'rumo_ao_esporte_2026_chamadas', 'qualquer_colecao_nova']) {
+    await t(`legado aberto: visitante lê ${col}`, assertSucceeds(getDoc(doc(anon, `${col}/x`))));
+    await t(`legado aberto: visitante grava ${col}`, assertSucceeds(setDoc(doc(anon, `${col}/x`), { a: 1 })));
+  }
+  await t('legado aberto: subcoleção', assertSucceeds(setDoc(doc(anon, 'turmas/x/chamadas/y'), { a: 1 })));
+  await t('eventos NÃO vazam por subcoleção', assertFails(setDoc(doc(anon, 'rae_evento_equipes/t1/lixo/y'), { a: 1 })));
 
   console.log(`\n${ok} verificações OK`);
   await env.cleanup();

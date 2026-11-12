@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { Plus, Trophy, Calendar, MapPin, ExternalLink, Users, CreditCard, FileWarning, Lock } from 'lucide-react';
-import { db } from '../../firebase';
+import { auth, db } from '../../firebase';
+import { useAdminPermissions } from '../../hooks/useAdminPermissions';
+import OperadoresEventos from '../../components/eventos/OperadoresEventos';
 import PageContainer from '../../components/PageContainer';
 import PageTitle from '../../components/PageTitle';
 import { useLoading } from '../../components/LoadingService';
@@ -18,6 +20,8 @@ export default function AdminEventos() {
     const navigate = useNavigate();
     const { setLoading } = useLoading();
     const { showAlert } = useDialog();
+    const { user } = useAdminPermissions();
+    const souAdminPrincipal = (auth.currentUser?.email || '').toLowerCase() === (((import.meta.env.VITE_MAIN_ADMIN_EMAIL as string) || 'rumoaoesporte@admin.com').trim().toLowerCase());
     const [eventos, setEventos] = useState<Evento[]>([]);
     const [equipes, setEquipes] = useState<EquipeEvento[]>([]);
     const [inscricoes, setInscricoes] = useState<InscricaoIndividual[]>([]);
@@ -36,7 +40,10 @@ export default function AdminEventos() {
                 setInscricoes(inSnap.docs.map(d => ({ id: d.id, ...d.data() } as InscricaoIndividual)));
             } catch (e) {
                 console.error(e);
-                showAlert('Erro ao carregar os eventos.', 'error');
+                const negado = (e as { code?: string })?.code === 'permission-denied';
+                showAlert(negado
+                    ? 'Seu acesso a Eventos ainda não foi liberado. Peça ao administrador principal para cadastrar o seu e-mail em "Equipe de operação de eventos".'
+                    : 'Erro ao carregar os eventos.', negado ? 'warning' : 'error');
             } finally {
                 setLoading(false);
             }
@@ -119,6 +126,8 @@ export default function AdminEventos() {
                     })}
                 </div>
             )}
+
+            {souAdminPrincipal && <div style={{ marginTop: 24 }}><OperadoresEventos adminNome={user?.nome || 'Administrador'} /></div>}
         </PageContainer>
     );
 }
